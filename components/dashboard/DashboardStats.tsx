@@ -2,10 +2,20 @@
 
 import { motion } from "framer-motion";
 import {
+  Activity,
   Car,
   CreditCard,
   DollarSign,
   Timer,
+  Search,
+  BarChart3,
+  ChevronRight,
+  Zap,
+  Database,
+  Shield,
+  Wallet,
+  CheckCircle2,
+  AlertCircle,
   type LucideIcon,
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -15,6 +25,7 @@ const iconMap: Record<string, LucideIcon> = {
   dollar: DollarSign,
   ticket: CreditCard,
   timer: Timer,
+  activity: Activity,
 };
 
 interface StatItem {
@@ -94,6 +105,81 @@ export function DashboardStats({ stats, movements }: DashboardStatsProps) {
         })}
       </section>
 
+      {/* Acciones Rápidas */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="rounded-3xl border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-8 backdrop-blur-xl shadow-xl shadow-blue-500/5"
+      >
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-yellow-400/30 bg-gradient-to-br from-yellow-500/20 to-amber-500/10 shadow-lg shadow-yellow-500/10">
+            <Zap className="h-6 w-6 text-yellow-400" />
+          </div>
+          <h2 className="font-heading text-2xl font-bold text-white">Acciones Rápidas</h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[
+            { 
+              icon: Car, 
+              title: 'Ingreso de Vehículo', 
+              subtitle: 'Registrar entrada rápida', 
+              gradient: 'from-emerald-500/20 to-green-600/10', 
+              border: 'border-emerald-400/30', 
+              iconColor: 'text-emerald-400', 
+              shadow: 'shadow-emerald-500/10' 
+            },
+            { 
+              icon: CreditCard, 
+              title: 'Procesar Pago', 
+              subtitle: 'Cobro y salida de vehículo', 
+              gradient: 'from-amber-500/20 to-yellow-600/10', 
+              border: 'border-amber-400/30', 
+              iconColor: 'text-amber-400', 
+              shadow: 'shadow-amber-500/10' 
+            },
+            { 
+              icon: Search, 
+              title: 'Consultas Rápidas', 
+              subtitle: 'Buscar vehículo por placa', 
+              gradient: 'from-purple-500/20 to-pink-600/10', 
+              border: 'border-purple-400/30', 
+              iconColor: 'text-purple-400', 
+              shadow: 'shadow-purple-500/10' 
+            },
+            { 
+              icon: BarChart3, 
+              title: 'Generar Reporte', 
+              subtitle: 'Reportes e informes', 
+              gradient: 'from-cyan-500/20 to-blue-600/10', 
+              border: 'border-cyan-400/30', 
+              iconColor: 'text-cyan-400', 
+              shadow: 'shadow-cyan-500/10' 
+            },
+          ].map((action, index) => (
+            <motion.button
+              key={action.title}
+              whileHover={{ scale: 1.05, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * index }}
+              className={`group flex flex-col items-start gap-3 rounded-2xl border ${action.border} bg-gradient-to-br ${action.gradient} p-6 text-left backdrop-blur-sm ${action.shadow} shadow-lg transition hover:shadow-xl`}
+            >
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl border ${action.border} bg-[#0f172a]/60 ${action.shadow} shadow-md backdrop-blur-sm transition group-hover:scale-110`}>
+                <action.icon className={`h-6 w-6 ${action.iconColor}`} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-white">{action.title}</h3>
+                <p className="text-xs text-blue-200/60">{action.subtitle}</p>
+              </div>
+              <ChevronRight className="ml-auto h-5 w-5 text-blue-300/60 transition group-hover:translate-x-1 group-hover:text-white" />
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+
       <section className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -153,11 +239,11 @@ export function DashboardStats({ stats, movements }: DashboardStatsProps) {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-300/70">
-                Operación en vivo
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-300/70">
+                Monitoreo en tiempo real
               </p>
               <h3 className="font-heading text-xl text-white">
-                Estado del turno
+                Estado del Sistema
               </h3>
             </div>
             <motion.div
@@ -167,23 +253,55 @@ export function DashboardStats({ stats, movements }: DashboardStatsProps) {
             />
           </div>
           <div className="mt-6 space-y-3">
+            {/* Base de Datos */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-2xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/25 to-green-600/15 px-4 py-3 text-sm font-medium text-emerald-200 backdrop-blur-sm shadow-lg shadow-emerald-500/15"
+              className="flex items-center justify-between rounded-2xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/25 to-green-600/15 px-4 py-3 backdrop-blur-sm shadow-lg shadow-emerald-500/15"
             >
-              Turno activo · 08:00 AM - 06:00 PM
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-400/30 bg-emerald-500/20">
+                  <Database className="h-4 w-4 text-emerald-400" />
+                </div>
+                <span className="text-sm font-medium text-emerald-200">Base de Datos</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <span className="text-xs font-medium text-emerald-300">Conectada</span>
+              </div>
             </motion.div>
+
+            {/* Sistema de Pago */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-500/20 to-cyan-600/10 px-4 py-3 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/10"
+              className="flex items-center justify-between rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-500/20 to-cyan-600/10 px-4 py-3 backdrop-blur-sm transition hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/10"
             >
-              Personal asignado: 3 operadores
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-400/30 bg-blue-500/20">
+                  <Wallet className="h-4 w-4 text-cyan-400" />
+                </div>
+                <span className="text-sm font-medium text-blue-200">Sistema de Pago</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-cyan-400" />
+                <span className="text-xs font-medium text-cyan-300">Operativo</span>
+              </div>
             </motion.div>
+
+            {/* Seguridad */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-2xl border border-amber-400/30 bg-gradient-to-r from-amber-500/20 to-yellow-600/10 px-4 py-3 text-sm font-medium text-amber-200 backdrop-blur-sm transition hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/10"
+              className="flex items-center justify-between rounded-2xl border border-purple-400/30 bg-gradient-to-r from-purple-500/20 to-pink-600/10 px-4 py-3 backdrop-blur-sm transition hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/10"
             >
-              Alertas pendientes: 1 revisión
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-purple-400/30 bg-purple-500/20">
+                  <Shield className="h-4 w-4 text-purple-400" />
+                </div>
+                <span className="text-sm font-medium text-purple-200">Seguridad</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-purple-400" />
+                <span className="text-xs font-medium text-purple-300">Activa</span>
+              </div>
             </motion.div>
           </div>
         </motion.div>

@@ -47,33 +47,32 @@ export default async function DashboardPage() {
 
   const stats = [
     {
-      title: "Vehículos activos",
+      title: "Vehículos Activos",
       value: "0",
-      description: "Entradas registradas en el turno actual",
+      description: "+3 hoy",
       icon: "car",
-      gradient:
-        "from-emerald-500/20 to-emerald-600/10 border-emerald-500/20",
+      gradient: "from-emerald-500/20 to-green-600/10",
     },
     {
-      title: "Cobros del día",
+      title: "Ingresos Hoy",
       value: currencyFormatter.format(0),
-      description: "Recaudación actual con pagos en efectivo y tarjeta",
+      description: "+12.5% vs ayer",
       icon: "dollar",
-      gradient: "from-amber-500/20 to-amber-600/10 border-amber-500/20",
+      gradient: "from-amber-500/20 to-yellow-600/10",
     },
     {
-      title: "Tickets emitidos",
-      value: "0",
-      description: "Códigos generados durante el día",
-      icon: "ticket",
-      gradient: "from-purple-500/20 to-purple-600/10 border-purple-500/20",
-    },
-    {
-      title: "Tiempo promedio",
-      value: "0m",
-      description: "Promedio de permanencia por vehículo",
+      title: "Tiempo Promedio",
+      value: "0h 0min",
+      description: "Última semana",
       icon: "timer",
-      gradient: "from-blue-500/20 to-blue-600/10 border-blue-500/20",
+      gradient: "from-cyan-500/20 to-blue-600/10",
+    },
+    {
+      title: "Ocupación",
+      value: "0%",
+      description: "Capacidad máxima",
+      icon: "activity",
+      gradient: "from-purple-500/20 to-pink-600/10",
     },
   ];
 
@@ -107,6 +106,15 @@ export default async function DashboardPage() {
         .eq("negocio_id", negocioId)
         .gte("hora_entrada", startIso);
 
+      // Obtener capacidad máxima del negocio
+      const { data: negocioConfig } = await supabase
+        .from("negocios")
+        .select("capacidad_maxima")
+        .eq("id", negocioId)
+        .single();
+
+      const capacidadMaxima = negocioConfig?.capacidad_maxima ?? 100;
+
       const { data: movimientos } = await supabase
         .from("codigos")
         .select("id, codigo, placa, hora_entrada, hora_salida, total")
@@ -139,10 +147,16 @@ export default async function DashboardPage() {
             duraciones.length
           : 0;
 
+      const ocupacion = capacidadMaxima > 0 
+        ? Math.round((Number(activosCount ?? 0) / capacidadMaxima) * 100)
+        : 0;
+
       stats[0].value = String(activosCount ?? 0);
+      stats[0].description = `+${ticketsCount ?? 0} hoy`;
       stats[1].value = currencyFormatter.format(totalCobros);
-      stats[2].value = String(ticketsCount ?? 0);
-      stats[3].value = formatDuration(promedio);
+      stats[2].value = formatDuration(promedio);
+      stats[3].value = `${ocupacion}%`;
+      stats[3].description = `Capacidad máxima: ${capacidadMaxima}`;
     } catch (error) {
       warningMessage = "No se pudieron cargar los datos en tiempo real.";
     }
