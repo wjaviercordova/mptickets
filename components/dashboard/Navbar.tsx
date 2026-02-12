@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Menu, ParkingCircle, Search } from "lucide-react";
+import { Menu, ParkingCircle, Search, Star } from "lucide-react";
 
 interface NavbarProps {
   onToggleSidebar: () => void;
@@ -29,11 +29,19 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
             >
               <ParkingCircle className="h-5 w-5 text-blue-300" />
             </motion.div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/60">
-                MP Tickets
-              </p>
-              <h1 className="font-heading text-white">Dashboard</h1>
+            <div className="flex items-center gap-3">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/60">
+                  MP Tickets
+                </p>
+                <h1 className="font-heading text-white">Dashboard</h1>
+              </div>
+              <div className="flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-950/40 px-2 py-1 backdrop-blur-sm shadow-lg shadow-emerald-500/20">
+                <Star className="h-3 w-3 text-emerald-400" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">
+                  DEMO
+                </span>
+              </div>
             </div>
           </div>
         </div>

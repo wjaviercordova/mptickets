@@ -33,8 +33,10 @@ const formatRelative = (dateValue?: string | null) => {
 export default async function DashboardPage() {
   const cookieStore = await cookies();
   const negocioId = cookieStore.get("mp_negocio_id")?.value;
+  const usuarioId = cookieStore.get("mp_user_id")?.value;
 
   let negocioNombre = "";
+  let usuarioNombre = "Administrador";
   let recentMovements: Array<{
     id: string;
     codigo: string | null;
@@ -92,6 +94,17 @@ export default async function DashboardPage() {
         .single();
 
       negocioNombre = negocioData?.nombre ?? "";
+
+      // Obtener nombre del usuario
+      if (usuarioId) {
+        const { data: usuarioData } = await supabase
+          .from("usuarios")
+          .select("nombre")
+          .eq("id", usuarioId)
+          .single();
+
+        usuarioNombre = usuarioData?.nombre ?? "Administrador";
+      }
 
       const { count: activosCount } = await supabase
         .from("codigos")
@@ -168,6 +181,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <DashboardHeader
         negocioNombre={negocioNombre}
+        usuarioNombre={usuarioNombre}
         warningMessage={warningMessage}
       />
 
