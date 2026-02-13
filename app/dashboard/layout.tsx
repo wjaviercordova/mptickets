@@ -1,26 +1,31 @@
-"use client";
+import { cookies } from "next/headers";
+import { createServerClient } from "@/lib/supabase/server";
+import { DashboardLayoutClient } from "@/components/dashboard/DashboardLayoutClient";
 
-import { useState } from "react";
-import { Navbar } from "@/components/dashboard/Navbar";
-import { Sidebar } from "@/components/dashboard/Sidebar";
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const cookieStore = await cookies();
+  const negocioId = cookieStore.get("mp_negocio_id")?.value;
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#16213e] to-[#0f1729] text-white">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
-      <div className="min-h-screen lg:pl-72">
-        <Navbar onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />
-        <div className="px-6 py-8">{children}</div>
-      </div>
-    </div>
-  );
+  let negocioNombre = "Parking Premium";
+
+  if (negocioId) {
+    try {
+      const supabase = createServerClient();
+      const { data: negocioData } = await supabase
+        .from("negocios")
+        .select("nombre")
+        .eq("id", negocioId)
+        .single();
+
+      negocioNombre = negocioData?.nombre ?? "Parking Premium";
+    } catch (error) {
+      console.error("Error obteniendo nombre del negocio:", error);
+    }
+  }
+
+  return <DashboardLayoutClient negocioNombre={negocioNombre}>{children}</DashboardLayoutClient>;
 }

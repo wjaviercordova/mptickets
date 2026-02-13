@@ -28,9 +28,10 @@ const navItems = [
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  negocioNombre: string;
 }
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, negocioNombre }: SidebarProps) {
   return (
     <>
       <div
@@ -56,7 +57,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/60">
               Negocio
             </p>
-            <h2 className="font-heading text-white">Parking Premium</h2>
+            <h2 className="font-heading text-white">{negocioNombre}</h2>
           </div>
         </motion.div>
 
