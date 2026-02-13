@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     response.cookies.set("mp_user_id", usuarioData.id, {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 12,
       path: "/",
     });
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     response.cookies.set("mp_negocio_id", negocio.id, {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 12,
       path: "/",
     });
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
     response.cookies.set("mp_usuario", usuarioData.usuario, {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 12,
       path: "/",
     });

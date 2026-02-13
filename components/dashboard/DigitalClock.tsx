@@ -5,8 +5,10 @@ import { useEffect, useState } from "react";
 
 export function DigitalClock() {
   const [time, setTime] = useState(new Date());
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
@@ -48,6 +50,39 @@ export function DigitalClock() {
   ];
 
   const dateString = `${dayNames[currentDay]}, ${time.getDate()} de ${monthNames[time.getMonth()]} de ${time.getFullYear()}`;
+
+  // Evitar hydration mismatch mostrando placeholder inicial
+  if (!isMounted) {
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex gap-2">
+          {days.map((day, index) => (
+            <div
+              key={index}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold border border-blue-500/30 bg-blue-950/30 text-blue-300/60"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <Clock className="h-5 w-5 text-cyan-400" />
+          <span className="font-sans text-3xl font-bold text-white">
+            --:--
+          </span>
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-semibold text-cyan-300">--</span>
+            <span className="text-[10px] font-medium text-blue-300/60">
+              --
+            </span>
+          </div>
+        </div>
+        <div className="text-center text-sm font-medium text-blue-200/80">
+          Cargando...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center gap-3">

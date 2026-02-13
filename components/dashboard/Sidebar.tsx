@@ -34,17 +34,11 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose, negocioNombre }: SidebarProps) {
   return (
     <>
-      <div
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity lg:hidden ${
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
-        onClick={onClose}
-      />
       <motion.aside
         initial={false}
-        animate={{ x: isOpen ? 0 : -280 }}
-        transition={{ type: "spring", stiffness: 220, damping: 26 }}
-        className="fixed left-0 top-0 z-50 h-full w-72 border-r border-blue-500/20 bg-[#0f172a]/90 p-6 backdrop-blur-xl shadow-2xl shadow-blue-500/10 lg:translate-x-0"
+        animate={{ x: isOpen ? 0 : -288 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="fixed left-0 top-0 z-50 h-full w-72 border-r border-blue-500/20 bg-[#0f172a]/90 p-6 backdrop-blur-xl shadow-2xl shadow-blue-500/10"
       >
         <motion.div
           whileHover={{ scale: 1.02 }}

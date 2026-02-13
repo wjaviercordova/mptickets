@@ -22,7 +22,12 @@ export function DashboardLayoutClient({
         onClose={() => setIsSidebarOpen(false)}
         negocioNombre={negocioNombre}
       />
-      <div className="min-h-screen lg:pl-72">
+      <div 
+        className="min-h-screen transition-all duration-300 ease-in-out"
+        style={{
+          marginLeft: isSidebarOpen ? '288px' : '0px'
+        }}
+      >
         <Navbar onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />
         <div className="px-6 py-8">{children}</div>
       </div>
