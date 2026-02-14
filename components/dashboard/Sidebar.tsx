@@ -1,28 +1,62 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
   BarChart3,
   Building2,
   Car,
+  ChevronDown,
   CreditCard,
+  DollarSign,
   Home,
+  LogIn,
   LogOut,
+  Receipt,
+  Search,
+  Server,
   Settings,
-  Shield,
+  Ticket,
   Users,
 } from "lucide-react";
 
-const navItems = [
+interface SubMenuItem {
+  label: string;
+  icon: any;
+}
+
+interface NavItem {
+  label: string;
+  icon: any;
+  subItems?: SubMenuItem[];
+}
+
+const navItems: NavItem[] = [
   { label: "Inicio", icon: Home },
-  { label: "Tickets", icon: CreditCard },
-  { label: "Vehículos", icon: Car },
-  { label: "Clientes", icon: Users },
+  { label: "Ingreso Vehicular", icon: LogIn },
+  { label: "Pago y Salida", icon: CreditCard },
+  {
+    label: "Consultas",
+    icon: Search,
+    subItems: [
+      { label: "Tarjetas Emitidas", icon: Ticket },
+      { label: "Costos Registrados", icon: DollarSign },
+      { label: "Vehículos", icon: Car },
+      { label: "Actividad", icon: Activity },
+    ],
+  },
   { label: "Reportes", icon: BarChart3 },
-  { label: "Seguridad", icon: Shield },
-  { label: "Actividad", icon: Activity },
-  { label: "Configuración", icon: Settings },
+  {
+    label: "Configuración",
+    icon: Settings,
+    subItems: [
+      { label: "Tarjetas", icon: Receipt },
+      { label: "Usuarios", icon: Users },
+      { label: "Negocio", icon: Building2 },
+      { label: "Sistema", icon: Server },
+    ],
+  },
 ];
 
 interface SidebarProps {
@@ -32,6 +66,11 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose, negocioNombre }: SidebarProps) {
+  const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+
+  const toggleSubMenu = (label: string) => {
+    setExpandedMenu(expandedMenu === label ? null : label);
+  };
   return (
     <>
       <motion.aside
@@ -55,27 +94,98 @@ export function Sidebar({ isOpen, onClose, negocioNombre }: SidebarProps) {
           </div>
         </motion.div>
 
-        <nav className="mt-8 space-y-2">
+        <nav className="mt-8 space-y-2 overflow-y-auto overflow-x-hidden pr-2 sidebar-scroll" style={{ maxHeight: "calc(100vh - 240px)" }}>
           {navItems.map((item, index) => {
             const Icon = item.icon;
+            const isExpanded = expandedMenu === item.label;
+            const hasSubItems = item.subItems && item.subItems.length > 0;
+
             return (
-              <motion.button
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ scale: 1.02, y: -2, x: 4 }}
-                whileTap={{ scale: 0.98 }}
-                key={item.label}
-                className="group flex w-full items-center gap-3 rounded-2xl border border-blue-500/20 bg-[#1e293b]/40 px-4 py-3 text-sm font-medium text-blue-100/80 backdrop-blur-sm transition hover:border-cyan-400/50 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-cyan-500/20 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/20 bg-blue-950/30 transition group-hover:border-cyan-400/40 group-hover:bg-cyan-500/20 group-hover:shadow-lg group-hover:shadow-cyan-400/30">
-                  <Icon className="h-4 w-4 text-cyan-400 transition group-hover:text-cyan-300" />
-                </div>
-                {item.label}
-              </motion.button>
+              <div key={item.label}>
+                {/* Opción principal */}
+                <motion.button
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ scale: 1.02, y: -2, x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => hasSubItems ? toggleSubMenu(item.label) : null}
+                  className="group flex w-full items-center gap-3 rounded-2xl border border-blue-500/20 bg-[#1e293b]/40 px-4 py-3 text-sm font-medium text-blue-100/80 backdrop-blur-sm transition hover:border-cyan-400/50 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-cyan-500/20 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/20 bg-blue-950/30 transition group-hover:border-cyan-400/40 group-hover:bg-cyan-500/20 group-hover:shadow-lg group-hover:shadow-cyan-400/30">
+                    <Icon className="h-4 w-4 text-cyan-400 transition group-hover:text-cyan-300" />
+                  </div>
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {hasSubItems && (
+                    <motion.div
+                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronDown className="h-4 w-4 text-cyan-400" />
+                    </motion.div>
+                  )}
+                </motion.button>
+
+                {/* Submenú */}
+                <AnimatePresence>
+                  {hasSubItems && isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-2 space-y-1">
+                        {item.subItems?.map((subItem) => {
+                          const SubIcon = subItem.icon;
+                          return (
+                            <motion.button
+                              key={subItem.label}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              whileHover={{ scale: 1.02, y: -2, x: 4 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="group flex w-full items-center gap-3 rounded-2xl border border-blue-500/10 bg-[#0a0e27]/60 px-4 py-3 text-sm font-medium text-blue-200/70 backdrop-blur-sm transition hover:border-cyan-400/30 hover:bg-gradient-to-r hover:from-blue-500/20 hover:to-cyan-500/10 hover:text-cyan-200 hover:shadow-md hover:shadow-cyan-500/10"
+                            >
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/10 bg-blue-950/20 transition group-hover:border-cyan-400/30 group-hover:bg-cyan-500/10 group-hover:shadow-lg group-hover:shadow-cyan-400/20">
+                                <SubIcon className="h-4 w-4 text-cyan-400/80 transition group-hover:text-cyan-300" />
+                              </div>
+                              {subItem.label}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             );
           })}
         </nav>
+
+        <style jsx global>{`
+          .sidebar-scroll::-webkit-scrollbar {
+            width: 6px;
+          }
+          
+          .sidebar-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+          }
+          
+          .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(6, 182, 212, 0.4), rgba(34, 211, 238, 0.3));
+            border-radius: 10px;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+          }
+          
+          .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(6, 182, 212, 0.6), rgba(34, 211, 238, 0.5));
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+          }
+        `}</style>
 
         <div className="absolute bottom-6 left-6 right-6">
           <motion.button

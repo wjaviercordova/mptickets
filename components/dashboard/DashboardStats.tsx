@@ -54,62 +54,11 @@ interface DashboardStatsProps {
 export function DashboardStats({ stats, movements }: DashboardStatsProps) {
   return (
     <>
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat, index) => {
-          // Definir colores personalizados según el índice
-          const colors = [
-            {
-              borderColor: 'border-emerald-400/30',
-              iconColor: 'text-emerald-400',
-              shadowColor: 'shadow-emerald-500/10',
-              gradient: 'from-emerald-500/20 to-green-600/10'
-            },
-            {
-              borderColor: 'border-amber-400/30',
-              iconColor: 'text-amber-400',
-              shadowColor: 'shadow-amber-500/10',
-              gradient: 'from-amber-500/20 to-yellow-600/10'
-            },
-            {
-              borderColor: 'border-cyan-400/30',
-              iconColor: 'text-cyan-400',
-              shadowColor: 'shadow-cyan-500/10',
-              gradient: 'from-cyan-500/20 to-blue-600/10'
-            },
-            {
-              borderColor: 'border-purple-400/30',
-              iconColor: 'text-purple-400',
-              shadowColor: 'shadow-purple-500/10',
-              gradient: 'from-purple-500/20 to-pink-600/10'
-            },
-          ];
-          
-          return (
-            <motion.div
-              key={stat.title}
-              whileHover={{ scale: 1.02, y: -4 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <StatCard
-                title={stat.title}
-                value={stat.value}
-                description={stat.description}
-                icon={iconMap[stat.icon]}
-                gradient={colors[index]?.gradient || stat.gradient}
-                borderColor={colors[index]?.borderColor}
-                iconColor={colors[index]?.iconColor}
-                shadowColor={colors[index]?.shadowColor}
-              />
-            </motion.div>
-          );
-        })}
-      </section>
-
       {/* Acciones Rápidas */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.1 }}
         className="rounded-3xl border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-8 backdrop-blur-xl shadow-xl shadow-blue-500/5"
       >
         <div className="mb-6 flex items-center gap-3">
@@ -164,7 +113,7 @@ export function DashboardStats({ stats, movements }: DashboardStatsProps) {
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
+              transition={{ delay: 0.15 + (0.1 * index) }}
               className={`group flex flex-col items-start gap-3 rounded-2xl border ${action.border} bg-gradient-to-br ${action.gradient} p-6 text-left backdrop-blur-sm ${action.shadow} shadow-lg transition hover:shadow-xl`}
             >
               <div className={`flex h-12 w-12 items-center justify-center rounded-xl border ${action.border} bg-[#0f172a]/60 ${action.shadow} shadow-md backdrop-blur-sm transition group-hover:scale-110`}>
@@ -179,6 +128,60 @@ export function DashboardStats({ stats, movements }: DashboardStatsProps) {
           ))}
         </div>
       </motion.div>
+
+      {/* Stats Cards */}
+      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat, index) => {
+          // Definir colores personalizados según el índice
+          const colors = [
+            {
+              borderColor: 'border-emerald-400/30',
+              iconColor: 'text-emerald-400',
+              shadowColor: 'shadow-emerald-500/10',
+              gradient: 'from-emerald-500/20 to-green-600/10'
+            },
+            {
+              borderColor: 'border-amber-400/30',
+              iconColor: 'text-amber-400',
+              shadowColor: 'shadow-amber-500/10',
+              gradient: 'from-amber-500/20 to-yellow-600/10'
+            },
+            {
+              borderColor: 'border-cyan-400/30',
+              iconColor: 'text-cyan-400',
+              shadowColor: 'shadow-cyan-500/10',
+              gradient: 'from-cyan-500/20 to-blue-600/10'
+            },
+            {
+              borderColor: 'border-purple-400/30',
+              iconColor: 'text-purple-400',
+              shadowColor: 'shadow-purple-500/10',
+              gradient: 'from-purple-500/20 to-pink-600/10'
+            },
+          ];
+          
+          return (
+            <motion.div
+              key={stat.title}
+              whileHover={{ scale: 1.02, y: -4 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + (index * 0.1) }}
+            >
+              <StatCard
+                title={stat.title}
+                value={stat.value}
+                description={stat.description}
+                icon={iconMap[stat.icon]}
+                gradient={colors[index]?.gradient || stat.gradient}
+                borderColor={colors[index]?.borderColor}
+                iconColor={colors[index]?.iconColor}
+                shadowColor={colors[index]?.shadowColor}
+              />
+            </motion.div>
+          );
+        })}
+      </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <motion.div
