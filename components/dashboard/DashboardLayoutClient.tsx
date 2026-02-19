@@ -16,7 +16,13 @@ export function DashboardLayoutClient({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#16213e] to-[#0f1729] text-white">
+    <div 
+      className="min-h-screen transition-colors duration-theme"
+      style={{ 
+        background: "var(--bg-gradient)",
+        color: "var(--text-primary)"
+      }}
+    >
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}

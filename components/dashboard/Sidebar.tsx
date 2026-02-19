@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Activity,
   BarChart3,
@@ -19,42 +21,46 @@ import {
   Settings,
   Ticket,
   Users,
+  type LucideIcon,
 } from "lucide-react";
 
 interface SubMenuItem {
   label: string;
-  icon: any;
+  icon: LucideIcon;
+  href?: string;
 }
 
 interface NavItem {
   label: string;
-  icon: any;
+  icon: LucideIcon;
+  href?: string;
   subItems?: SubMenuItem[];
 }
 
+// Mapeo de rutas
 const navItems: NavItem[] = [
-  { label: "Inicio", icon: Home },
-  { label: "Ingreso Vehicular", icon: LogIn },
-  { label: "Pago y Salida", icon: CreditCard },
+  { label: "Inicio", icon: Home, href: "/dashboard" },
+  { label: "Ingreso Vehicular", icon: LogIn, href: "/dashboard/ingreso" },
+  { label: "Pago y Salida", icon: CreditCard, href: "/dashboard/pago" },
   {
     label: "Consultas",
     icon: Search,
     subItems: [
-      { label: "Tarjetas Emitidas", icon: Ticket },
-      { label: "Costos Registrados", icon: DollarSign },
-      { label: "Vehículos", icon: Car },
-      { label: "Actividad", icon: Activity },
+      { label: "Tarjetas Emitidas", icon: Ticket, href: "/dashboard/consultas/tarjetas" },
+      { label: "Costos Registrados", icon: DollarSign, href: "/dashboard/consultas/costos" },
+      { label: "Vehículos", icon: Car, href: "/dashboard/consultas/vehiculos" },
+      { label: "Actividad", icon: Activity, href: "/dashboard/consultas/actividad" },
     ],
   },
-  { label: "Reportes", icon: BarChart3 },
+  { label: "Reportes", icon: BarChart3, href: "/dashboard/reportes" },
   {
     label: "Configuración",
     icon: Settings,
     subItems: [
-      { label: "Tarjetas", icon: Receipt },
-      { label: "Usuarios", icon: Users },
-      { label: "Negocio", icon: Building2 },
-      { label: "Sistema", icon: Server },
+      { label: "Tarjetas", icon: Receipt, href: "/dashboard/configuracion/tarjetas" },
+      { label: "Usuarios", icon: Users, href: "/dashboard/configuracion/usuarios" },
+      { label: "Negocio", icon: Building2, href: "/dashboard/configuracion/negocio" },
+      { label: "Sistema", icon: Server, href: "/dashboard/configuracion/sistema" },
     ],
   },
 ];
@@ -65,11 +71,17 @@ interface SidebarProps {
   negocioNombre: string;
 }
 
-export function Sidebar({ isOpen, onClose, negocioNombre }: SidebarProps) {
+export function Sidebar({ isOpen, negocioNombre }: SidebarProps) {
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+  const pathname = usePathname();
 
   const toggleSubMenu = (label: string) => {
     setExpandedMenu(expandedMenu === label ? null : label);
+  };
+
+  const isActive = (href?: string) => {
+    if (!href) return false;
+    return pathname === href;
   };
   return (
     <>
@@ -103,28 +115,54 @@ export function Sidebar({ isOpen, onClose, negocioNombre }: SidebarProps) {
             return (
               <div key={item.label}>
                 {/* Opción principal */}
-                <motion.button
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ scale: 1.02, y: -2, x: 4 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => hasSubItems ? toggleSubMenu(item.label) : null}
-                  className="group flex w-full items-center gap-3 rounded-2xl border border-blue-500/20 bg-[#1e293b]/40 px-4 py-3 text-sm font-medium text-blue-100/80 backdrop-blur-sm transition hover:border-cyan-400/50 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-cyan-500/20 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/20 bg-blue-950/30 transition group-hover:border-cyan-400/40 group-hover:bg-cyan-500/20 group-hover:shadow-lg group-hover:shadow-cyan-400/30">
-                    <Icon className="h-4 w-4 text-cyan-400 transition group-hover:text-cyan-300" />
-                  </div>
-                  <span className="flex-1 text-left">{item.label}</span>
-                  {hasSubItems && (
+                {item.href && !hasSubItems ? (
+                  <Link href={item.href} prefetch={true}>
                     <motion.div
-                      animate={{ rotate: isExpanded ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ scale: 1.02, y: -2, x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`group flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium backdrop-blur-sm transition ${
+                        isActive(item.href)
+                          ? "border-cyan-400/50 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 text-white shadow-lg shadow-cyan-500/20"
+                          : "border-blue-500/20 bg-[#1e293b]/40 text-blue-100/80 hover:border-cyan-400/50 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-cyan-500/20 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20"
+                      }`}
                     >
-                      <ChevronDown className="h-4 w-4 text-cyan-400" />
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-lg border transition ${
+                        isActive(item.href)
+                          ? "border-cyan-400/40 bg-cyan-500/20 shadow-lg shadow-cyan-400/30"
+                          : "border-blue-500/20 bg-blue-950/30 group-hover:border-cyan-400/40 group-hover:bg-cyan-500/20 group-hover:shadow-lg group-hover:shadow-cyan-400/30"
+                      }`}>
+                        <Icon className="h-4 w-4 text-cyan-400 transition group-hover:text-cyan-300" />
+                      </div>
+                      <span className="flex-1 text-left">{item.label}</span>
                     </motion.div>
-                  )}
-                </motion.button>
+                  </Link>
+                ) : (
+                  <motion.button
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.02, y: -2, x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => hasSubItems ? toggleSubMenu(item.label) : null}
+                    className="group flex w-full items-center gap-3 rounded-2xl border border-blue-500/20 bg-[#1e293b]/40 px-4 py-3 text-sm font-medium text-blue-100/80 backdrop-blur-sm transition hover:border-cyan-400/50 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-cyan-500/20 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/20 bg-blue-950/30 transition group-hover:border-cyan-400/40 group-hover:bg-cyan-500/20 group-hover:shadow-lg group-hover:shadow-cyan-400/30">
+                      <Icon className="h-4 w-4 text-cyan-400 transition group-hover:text-cyan-300" />
+                    </div>
+                    <span className="flex-1 text-left">{item.label}</span>
+                    {hasSubItems && (
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 180 : 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ChevronDown className="h-4 w-4 text-cyan-400" />
+                      </motion.div>
+                    )}
+                  </motion.button>
+                )}
 
                 {/* Submenú */}
                 <AnimatePresence>
@@ -140,19 +178,28 @@ export function Sidebar({ isOpen, onClose, negocioNombre }: SidebarProps) {
                         {item.subItems?.map((subItem) => {
                           const SubIcon = subItem.icon;
                           return (
-                            <motion.button
-                              key={subItem.label}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              whileHover={{ scale: 1.02, y: -2, x: 4 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="group flex w-full items-center gap-3 rounded-2xl border border-blue-500/10 bg-[#0a0e27]/60 px-4 py-3 text-sm font-medium text-blue-200/70 backdrop-blur-sm transition hover:border-cyan-400/30 hover:bg-gradient-to-r hover:from-blue-500/20 hover:to-cyan-500/10 hover:text-cyan-200 hover:shadow-md hover:shadow-cyan-500/10"
-                            >
-                              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/10 bg-blue-950/20 transition group-hover:border-cyan-400/30 group-hover:bg-cyan-500/10 group-hover:shadow-lg group-hover:shadow-cyan-400/20">
-                                <SubIcon className="h-4 w-4 text-cyan-400/80 transition group-hover:text-cyan-300" />
-                              </div>
-                              {subItem.label}
-                            </motion.button>
+                            <Link key={subItem.label} href={subItem.href || "#"} prefetch={true}>
+                              <motion.div
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                whileHover={{ scale: 1.02, y: -2, x: 4 }}
+                                whileTap={{ scale: 0.98 }}
+                                className={`group flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium backdrop-blur-sm transition ${
+                                  isActive(subItem.href)
+                                    ? "border-cyan-400/40 bg-gradient-to-r from-cyan-500/25 to-blue-600/20 text-cyan-200 shadow-md shadow-cyan-500/20"
+                                    : "border-blue-500/10 bg-[#0a0e27]/60 text-blue-200/70 hover:border-cyan-400/30 hover:bg-gradient-to-r hover:from-blue-500/20 hover:to-cyan-500/10 hover:text-cyan-200 hover:shadow-md hover:shadow-cyan-500/10"
+                                }`}
+                              >
+                                <div className={`flex h-8 w-8 items-center justify-center rounded-lg border transition ${
+                                  isActive(subItem.href)
+                                    ? "border-cyan-400/40 bg-cyan-500/20 shadow-lg shadow-cyan-400/20"
+                                    : "border-blue-500/10 bg-blue-950/20 group-hover:border-cyan-400/30 group-hover:bg-cyan-500/10 group-hover:shadow-lg group-hover:shadow-cyan-400/20"
+                                }`}>
+                                  <SubIcon className="h-4 w-4 text-cyan-400/80 transition group-hover:text-cyan-300" />
+                                </div>
+                                {subItem.label}
+                              </motion.div>
+                            </Link>
                           );
                         })}
                       </div>

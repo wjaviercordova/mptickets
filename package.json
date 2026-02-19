@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:create-indexes": "./scripts/create-indexes.sh",
+    "db:indexes-info": "echo 'Abre Supabase Dashboard → SQL Editor y ejecuta el archivo database/create_indexes_simple.sql'"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",

@@ -3,6 +3,46 @@
 :root {
   --background: #0a0e27;
   --foreground: #e5e7eb;
+  
+  /* Theme Variables - Glassmorphism Dark (Default) */
+  /* Backgrounds */
+  --bg-primary: #0a0e27;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #0f172a;
+  --bg-gradient: linear-gradient(to bottom right, #0a0e27, #16213e, #0f1729);
+  
+  /* Glass */
+  --glass-base: rgba(30, 41, 59, 0.6);
+  --glass-overlay: rgba(15, 23, 42, 0.8);
+  
+  /* Borders */
+  --border-primary: rgba(59, 130, 246, 0.2);
+  --border-secondary: rgba(34, 211, 238, 0.3);
+  
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(191, 219, 254, 0.8);
+  --text-tertiary: rgba(191, 219, 254, 0.6);
+  
+  /* Accents */
+  --accent-cyan: #22d3ee;
+  --accent-purple: #a855f7;
+  --accent-emerald: #10b981;
+  --accent-red: #ef4444;
+  --accent-yellow: #f59e0b;
+  
+  /* Shadows */
+  --shadow-color: rgba(34, 211, 238, 0.2);
+  
+  /* Effects */
+  --blur-intensity: 16px;
+  --glass-opacity: 0.6;
+  --border-radius: 1rem;
+  --shadow-intensity: 0.5;
+  --animation-speed: 0.3s;
+  
+  /* UI Density */
+  --spacing-unit: 1rem;
 }
 
 @theme inline {
@@ -13,21 +53,81 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--animation-speed) ease, color var(--animation-speed) ease;
 }
 
 @layer utilities {
   .glass-card {
-    @apply rounded-2xl border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/50 to-[#0f172a]/70 shadow-xl shadow-blue-500/5 backdrop-blur-xl;
+    border-radius: calc(var(--border-radius) * 1.5);
+    border-width: 1px;
+    border-color: var(--border-primary);
+    background: linear-gradient(to bottom right, var(--glass-base), var(--glass-overlay));
+    backdrop-filter: blur(var(--blur-intensity));
+    -webkit-backdrop-filter: blur(var(--blur-intensity));
+    box-shadow: 0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
   }
 
   .glass-input {
-    @apply w-full rounded-xl border border-blue-500/20 bg-[#0f172a]/50 px-4 py-3 text-white placeholder:text-blue-200/40 outline-none transition focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-500/30 hover:border-blue-400/40;
+    width: 100%;
+    border-radius: var(--border-radius);
+    border-width: 1px;
+    border-color: var(--border-primary);
+    background-color: var(--glass-base);
+    backdrop-filter: blur(var(--blur-intensity));
+    -webkit-backdrop-filter: blur(var(--blur-intensity));
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: all var(--animation-speed) ease;
+  }
+  
+  .glass-input::placeholder {
+    color: var(--text-tertiary);
+  }
+  
+  .glass-input:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.3);
+  }
+  
+  .glass-input:hover {
+    border-color: var(--border-secondary);
   }
 
   .glass-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-400/30 bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:border-cyan-400/50 hover:from-blue-600 hover:to-cyan-600 hover:shadow-xl hover:shadow-cyan-500/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 disabled:cursor-not-allowed disabled:opacity-70;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--border-radius);
+    border-width: 1px;
+    border-color: var(--accent-cyan);
+    background: linear-gradient(to right, #3b82f6, var(--accent-cyan));
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+    transition: all var(--animation-speed) ease;
+    cursor: pointer;
+  }
+  
+  .glass-button:hover {
+    background: linear-gradient(to right, #2563eb, #06b6d4);
+    box-shadow: 0 20px 25px -5px rgba(6, 182, 212, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  .glass-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.5);
+  }
+  
+  .glass-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 
   .font-display {

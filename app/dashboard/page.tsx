@@ -3,6 +3,9 @@ import { createServerClient } from "@/lib/supabase/server";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
+// Revalidar cada 30 segundos - dashboard necesita datos más frescos
+export const revalidate = 30;
+
 const currencyFormatter = new Intl.NumberFormat("es-EC", {
   style: "currency",
   currency: "USD",
