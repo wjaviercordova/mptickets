@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Save, RefreshCw, Eye, Palette, Sparkles, Monitor, Moon, Sun } from "lucide-react";
+import { Save, RefreshCw, Eye, Palette, Sparkles, Monitor, Moon, Sun, Image as ImageIcon } from "lucide-react";
 import {
   type ThemeConfig,
   type ThemePreset,
@@ -159,132 +159,56 @@ export function AparienciaTab({
         </div>
       </div>
 
-      {/* Opciones Avanzadas */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Intensidad de Blur */}
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-blue-200">
-            Intensidad de Desenfoque
-          </label>
-          <div className="flex gap-2">
-            {(["low", "medium", "high"] as const).map((intensity) => (
-              <button
-                key={intensity}
-                onClick={() => setConfig({ ...config, blurIntensity: intensity })}
-                className={`flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition ${
-                  config.blurIntensity === intensity
-                    ? "border-cyan-400/50 bg-cyan-500/20 text-cyan-200"
-                    : "border-blue-500/20 bg-[#1e293b]/40 text-blue-200/70 hover:border-cyan-400/30 hover:bg-cyan-500/10"
-                }`}
-              >
-                {intensity === "low" ? "Bajo" : intensity === "medium" ? "Medio" : "Alto"}
-              </button>
-            ))}
-          </div>
+      {/* Fondo Personalizado Dashboard */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 mb-2">
+          <ImageIcon className="h-5 w-5 text-pink-400" />
+          <h4 className="font-heading text-lg text-white">Fondo del Dashboard</h4>
         </div>
 
-        {/* Opacidad de Vidrio */}
-        <div className="space-y-3">
+        <div className="glass-card border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-5 shadow-xl backdrop-blur-xl">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-blue-200">Opacidad del Vidrio</label>
-            <span className="text-sm font-semibold text-cyan-400">{config.glassOpacity}%</span>
-          </div>
-          <input
-            type="range"
-            min="20"
-            max="100"
-            value={config.glassOpacity}
-            onChange={(e) => setConfig({ ...config, glassOpacity: parseInt(e.target.value) })}
-            className="w-full accent-cyan-400"
-          />
-        </div>
-
-        {/* Radio de Bordes */}
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-blue-200">
-            Redondeo de Esquinas
-          </label>
-          <div className="flex gap-2">
-            {(["small", "medium", "large"] as const).map((radius) => (
-              <button
-                key={radius}
-                onClick={() => setConfig({ ...config, borderRadius: radius })}
-                className={`flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition ${
-                  config.borderRadius === radius
-                    ? "border-cyan-400/50 bg-cyan-500/20 text-cyan-200"
-                    : "border-blue-500/20 bg-[#1e293b]/40 text-blue-200/70 hover:border-cyan-400/30 hover:bg-cyan-500/10"
+            <div className="flex-1">
+              <p className="text-sm font-medium text-white mb-1">
+                Fondo Personalizado
+              </p>
+              <p className="text-xs text-blue-200/70">
+                Usa una imagen de fondo en el encabezado del dashboard
+              </p>
+            </div>
+            
+            {/* Toggle Switch Estilo iOS */}
+            <button
+              onClick={() => setConfig({ ...config, useDashboardBackground: !config.useDashboardBackground })}
+              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-[#0a0e27] ${
+                config.useDashboardBackground 
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-600" 
+                  : "bg-gray-600/50"
+              }`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${
+                  config.useDashboardBackground ? "translate-x-7" : "translate-x-1"
                 }`}
-              >
-                {radius === "small" ? "Pequeño" : radius === "medium" ? "Medio" : "Grande"}
-              </button>
-            ))}
+              />
+            </button>
           </div>
-        </div>
 
-        {/* Intensidad de Sombras */}
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-blue-200">
-            Intensidad de Sombras
-          </label>
-          <div className="flex gap-2">
-            {(["none", "low", "medium", "high"] as const).map((shadow) => (
-              <button
-                key={shadow}
-                onClick={() => setConfig({ ...config, shadowIntensity: shadow })}
-                className={`flex-1 rounded-xl border px-4 py-2 text-xs font-medium transition ${
-                  config.shadowIntensity === shadow
-                    ? "border-cyan-400/50 bg-cyan-500/20 text-cyan-200"
-                    : "border-blue-500/20 bg-[#1e293b]/40 text-blue-200/70 hover:border-cyan-400/30 hover:bg-cyan-500/10"
-                }`}
-              >
-                {shadow === "none" ? "Sin" : shadow === "low" ? "Baja" : shadow === "medium" ? "Media" : "Alta"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Velocidad de Animaciones */}
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-blue-200">
-            Velocidad de Animaciones
-          </label>
-          <div className="flex gap-2">
-            {(["none", "slow", "normal", "fast"] as const).map((speed) => (
-              <button
-                key={speed}
-                onClick={() => setConfig({ ...config, animationSpeed: speed })}
-                className={`flex-1 rounded-xl border px-4 py-2 text-xs font-medium transition ${
-                  config.animationSpeed === speed
-                    ? "border-cyan-400/50 bg-cyan-500/20 text-cyan-200"
-                    : "border-blue-500/20 bg-[#1e293b]/40 text-blue-200/70 hover:border-cyan-400/30 hover:bg-cyan-500/10"
-                }`}
-              >
-                {speed === "none" ? "Sin" : speed === "slow" ? "Lenta" : speed === "normal" ? "Normal" : "Rápida"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Densidad de UI */}
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-blue-200">
-            Densidad de Interfaz
-          </label>
-          <div className="flex gap-2">
-            {(["compact", "normal", "comfortable"] as const).map((density) => (
-              <button
-                key={density}
-                onClick={() => setConfig({ ...config, uiDensity: density })}
-                className={`flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition ${
-                  config.uiDensity === density
-                    ? "border-cyan-400/50 bg-cyan-500/20 text-cyan-200"
-                    : "border-blue-500/20 bg-[#1e293b]/40 text-blue-200/70 hover:border-cyan-400/30 hover:bg-cyan-500/10"
-                }`}
-              >
-                {density === "compact" ? "Compacta" : density === "normal" ? "Normal" : "Cómoda"}
-              </button>
-            ))}
-          </div>
+          {config.useDashboardBackground && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-4 pt-4 border-t border-blue-500/20"
+            >
+              <div className="flex items-center gap-2 text-xs text-emerald-300">
+                <Sparkles className="h-4 w-4" />
+                <span>
+                  Se usará: <code className="px-1.5 py-0.5 bg-emerald-950/40 rounded border border-emerald-500/30">/images/backgrounds/bg_dashboard.jpg</code>
+                </span>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 

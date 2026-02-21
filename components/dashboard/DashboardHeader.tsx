@@ -3,18 +3,38 @@
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { DigitalClock } from "./DigitalClock";
+import type { ThemeConfig } from "@/lib/theme-config";
 
 interface DashboardHeaderProps {
   negocioNombre: string;
   usuarioNombre: string;
   warningMessage: string | null;
+  themeConfig: ThemeConfig;
 }
 
 export function DashboardHeader({
   negocioNombre,
   usuarioNombre,
   warningMessage,
+  themeConfig,
 }: DashboardHeaderProps) {
+  const useCustomBackground = themeConfig.useDashboardBackground;
+  
+  // Estilo base del contenedor
+  const containerBaseClasses = "glass-card border border-blue-500/20 p-6 shadow-xl shadow-blue-500/5 backdrop-blur-xl";
+  
+  // Estilo condicional: imagen de fondo o gradiente del tema
+  const containerStyle = useCustomBackground
+    ? {
+        backgroundImage: "url('/images/backgrounds/bg_dashboard.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }
+    : {
+        background: "linear-gradient(to bottom right, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8))",
+      };
+
   return (
     <>
       {warningMessage && (
@@ -27,7 +47,10 @@ export function DashboardHeader({
         </motion.div>
       )}
 
-      <div className="glass-card border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-6 shadow-xl shadow-blue-500/5 backdrop-blur-xl">
+      <div 
+        className={containerBaseClasses}
+        style={containerStyle}
+      >
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-950/40 px-2 py-1 backdrop-blur-sm shadow-lg shadow-emerald-500/20 w-fit">
@@ -46,7 +69,7 @@ export function DashboardHeader({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-blue-500/30 bg-blue-950/30 p-4 backdrop-blur-sm">
+          <div className="p-4">
             <DigitalClock />
           </div>
         </div>

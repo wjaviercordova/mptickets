@@ -54,6 +54,7 @@ export interface ThemeConfig {
   // UI Preferences
   sidebarCollapsed: boolean;
   uiDensity: "compact" | "normal" | "comfortable";
+  useDashboardBackground: boolean; // Usar imagen de fondo personalizada en dashboard
   
   // Branding
   logoUrl?: string;
@@ -251,6 +252,7 @@ export const defaultThemeConfig: ThemeConfig = {
   animationSpeed: "normal",
   sidebarCollapsed: false,
   uiDensity: "normal",
+  useDashboardBackground: false,
 };
 
 // =====================================================

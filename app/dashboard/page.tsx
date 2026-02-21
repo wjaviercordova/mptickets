@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@/lib/supabase/server";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { defaultThemeConfig, type ThemeConfig } from "@/lib/theme-config";
 
 // Revalidar cada 30 segundos - dashboard necesita datos más frescos
 export const revalidate = 30;
@@ -40,6 +41,7 @@ export default async function DashboardPage() {
 
   let negocioNombre = "";
   let usuarioNombre = "Administrador";
+  let themeConfig: ThemeConfig = defaultThemeConfig;
   let recentMovements: Array<{
     id: string;
     codigo: string | null;
@@ -97,6 +99,25 @@ export default async function DashboardPage() {
         .single();
 
       negocioNombre = negocioData?.nombre ?? "";
+
+      // Obtener configuración del tema
+      const { data: temaData } = await supabase
+        .from("configuracion_sistema")
+        .select("valor")
+        .eq("negocio_id", negocioId)
+        .eq("categoria", "apariencia")
+        .eq("clave", "tema_config")
+        .single();
+
+      // Parsear configuración del tema si existe
+      if (temaData?.valor) {
+        try {
+          const parsedTheme = JSON.parse(temaData.valor);
+          themeConfig = parsedTheme;
+        } catch {
+          // Usar tema por defecto si hay error
+        }
+      }
 
       // Obtener nombre del usuario
       if (usuarioId) {
@@ -186,6 +207,7 @@ export default async function DashboardPage() {
         negocioNombre={negocioNombre}
         usuarioNombre={usuarioNombre}
         warningMessage={warningMessage}
+        themeConfig={themeConfig}
       />
 
       <DashboardStats stats={stats} movements={recentMovements} />
