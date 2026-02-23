@@ -118,45 +118,6 @@ export function IngresoResumen({ ultimoIngreso }: IngresoResumenProps) {
           </div>
           <span className="font-semibold text-white">{ultimoIngreso.tipoVehiculo}</span>
         </div>
-
-        {/* Placa */}
-        <div className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-950/20 p-3">
-          <span className="text-sm text-blue-200/80">Placa</span>
-          <span className="font-mono text-white">
-            {ultimoIngreso.placa || <span className="text-blue-400/50">---</span>}
-          </span>
-        </div>
-
-        {/* Color */}
-        <div className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-950/20 p-3">
-          <span className="text-sm text-blue-200/80">Color</span>
-          <span className="text-white">
-            {ultimoIngreso.color || <span className="text-blue-400/50">---</span>}
-          </span>
-        </div>
-
-        {/* Marca */}
-        <div className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-950/20 p-3">
-          <span className="text-sm text-blue-200/80">Marca</span>
-          <span className="text-white">
-            {ultimoIngreso.marca || <span className="text-blue-400/50">---</span>}
-          </span>
-        </div>
-
-        {/* Modelo */}
-        <div className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-950/20 p-3">
-          <span className="text-sm text-blue-200/80">Modelo</span>
-          <span className="text-white">
-            {ultimoIngreso.modelo || <span className="text-blue-400/50">---</span>}
-          </span>
-        </div>
-      </div>
-
-      {/* Nota */}
-      <div className="rounded-xl border border-blue-500/20 bg-blue-950/20 p-3">
-        <p className="text-xs text-blue-200/60">
-          ℹ️ Los datos de placa, color, marca y modelo se pueden agregar posteriormente en el proceso de pago
-        </p>
       </div>
     </motion.div>
   );

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { CreditCard, Car, PlusCircle, Scan, CheckCircle2, AlertCircle } from "lucide-react";
 import type { Parametro, UltimoIngreso } from "@/types/ingreso";
+import { motionButtonProps } from "@/lib/button-styles";
 import { TarjetaSelector } from "./TarjetaSelector";
 import { TipoVehiculoCards } from "./TipoVehiculoCards";
 import { IngresoResumen } from "./IngresoResumen";
@@ -145,70 +146,65 @@ export function IngresoVehiculo({
         </motion.div>
       )}
 
+      {/* Fila 1: Código de Tarjeta + Último Ingreso */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Panel Principal */}
-        <div className="space-y-6">
-          {/* Campo Código de Tarjeta */}
-          <div className="glass-card space-y-4 border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-6 shadow-xl backdrop-blur-xl">
-            <div className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-purple-400" />
-              <h3 className="font-heading text-lg text-white">Código de Tarjeta</h3>
-            </div>
-
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={codigoTarjeta}
-                    onChange={(e) => setCodigoTarjeta(e.target.value)}
-                    placeholder="Escanea o ingresa el código..."
-                    className="glass-input w-full rounded-xl border border-blue-500/30 bg-[#0f172a]/40 px-4 py-3 pr-12 font-mono text-white placeholder-blue-200/40 transition focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
-                    autoFocus
-                  />
-                  <Scan className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-400/60" />
-                </div>
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setMostrarSelectorTarjetas(true)}
-                className="flex items-center gap-2 rounded-xl border border-cyan-400/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 px-5 py-3 font-semibold text-cyan-300 backdrop-blur-xl transition hover:from-cyan-500/30 hover:to-blue-600/30"
-              >
-                <CreditCard className="h-5 w-5" />
-                Seleccionar
-              </motion.button>
-            </div>
-
-            <p className="text-xs text-blue-200/60">
-              💡 Escanea el código QR/Barras, ingrésalo manualmente o selecciona una tarjeta disponible
-            </p>
+        {/* Card 1: Campo Código de Tarjeta */}
+        <div className="glass-card space-y-4 border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-6 shadow-xl backdrop-blur-xl">
+          <div className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-purple-400" />
+            <h3 className="font-heading text-lg text-white">Código de Tarjeta</h3>
           </div>
 
-          {/* Selector de Tipo de Vehículo */}
-          <TipoVehiculoCards
-            parametros={parametros}
-            seleccionado={parametroSeleccionado}
-            onSeleccionar={setParametroSeleccionado}
-          />
+          <div className="flex gap-3">
+            <div className="relative max-w-[240px] flex-1">
+              <input
+                type="text"
+                value={codigoTarjeta}
+                onChange={(e) => setCodigoTarjeta(e.target.value)}
+                placeholder="Código..."
+                maxLength={12}
+                className="glass-input w-full rounded-xl border border-blue-500/30 bg-[#0f172a]/40 px-4 py-3 pr-12 font-mono text-lg text-white placeholder-blue-200/40 transition focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                autoFocus
+              />
+              <Scan className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-400/60" />
+            </div>
 
-          {/* Botón Registrar */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleRegistrarIngreso}
-            disabled={loading || !codigoTarjeta || !parametroSeleccionado || !tarjetaId}
-            className="glass-card flex w-full items-center justify-center gap-3 border border-emerald-400/40 bg-gradient-to-r from-emerald-500/30 to-green-600/30 py-4 font-heading text-lg font-bold text-white shadow-xl shadow-emerald-500/20 backdrop-blur-xl transition hover:from-emerald-500/50 hover:to-green-600/50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <PlusCircle className="h-6 w-6" />
-            {loading ? "Registrando..." : "Registrar Ingreso"}
-          </motion.button>
+            <motion.button
+              {...motionButtonProps}
+              onClick={() => setMostrarSelectorTarjetas(true)}
+              className="flex items-center gap-2 rounded-xl border border-cyan-400/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 px-5 py-3 font-semibold text-cyan-300 backdrop-blur-xl transition hover:from-cyan-500/30 hover:to-blue-600/30 whitespace-nowrap"
+            >
+              <CreditCard className="h-5 w-5" />
+              Seleccionar
+            </motion.button>
+          </div>
+
+          <p className="text-xs text-blue-200/60">
+            💡 Escanea el código QR/Barras, ingrésalo manualmente o selecciona una tarjeta disponible
+          </p>
         </div>
 
-        {/* Panel Resumen */}
+        {/* Card 2: Último Ingreso */}
         <IngresoResumen ultimoIngreso={ultimoIngreso} />
       </div>
+
+      {/* Fila 2: Tipo de Vehículo - Ocupa todo el ancho */}
+      <TipoVehiculoCards
+        parametros={parametros}
+        seleccionado={parametroSeleccionado}
+        onSeleccionar={setParametroSeleccionado}
+      />
+
+      {/* Botón Registrar Ingreso */}
+      <motion.button
+        {...motionButtonProps}
+        onClick={handleRegistrarIngreso}
+        disabled={loading || !codigoTarjeta || !parametroSeleccionado || !tarjetaId}
+        className="glass-button flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-400/40 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 px-6 py-3 font-semibold text-white backdrop-blur-xl transition hover:from-cyan-500/50 hover:to-blue-600/50 hover:shadow-xl hover:shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <PlusCircle className="h-5 w-5" />
+        {loading ? "Registrando..." : "Registrar Ingreso"}
+      </motion.button>
 
       {/* Modal Selector de Tarjetas */}
       {mostrarSelectorTarjetas && (
