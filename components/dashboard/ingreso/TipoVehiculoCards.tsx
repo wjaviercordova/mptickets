@@ -52,7 +52,14 @@ export function TipoVehiculoCards({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {/* Contenedor con scroll horizontal personalizado */}
+      <div 
+        className="scrollbar-thin scrollbar-thumb-cyan scrollbar-track-slate flex gap-3 overflow-x-auto px-2 pt-2 pb-3"
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(6, 182, 212, 0.3) rgba(15, 23, 42, 0.2)',
+        }}
+      >
         {parametros.map((parametro) => {
           const Icono = getIcono(parametro.tipo_vehiculo);
           const isSeleccionado = seleccionado?.id === parametro.id;
@@ -64,7 +71,7 @@ export function TipoVehiculoCards({
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onSeleccionar(parametro)}
-              className={`group relative overflow-hidden rounded-2xl border p-4 text-center transition ${
+              className={`group relative min-w-[180px] flex-shrink-0 overflow-hidden rounded-2xl border p-4 text-center transition ${
                 isSeleccionado
                   ? "border-cyan-400/60 bg-gradient-to-br from-cyan-500/30 to-blue-600/30 shadow-lg shadow-cyan-500/30"
                   : "border-blue-500/30 bg-gradient-to-br from-[#1e293b]/40 to-[#0f172a]/60 hover:border-cyan-400/40 hover:shadow-lg hover:shadow-cyan-500/10"
@@ -136,12 +143,6 @@ export function TipoVehiculoCards({
           );
         })}
       </div>
-
-      {parametros.length === 0 && (
-        <p className="py-8 text-center text-sm text-blue-200/60">
-          No hay tipos de vehículo disponibles
-        </p>
-      )}
     </div>
   );
 }

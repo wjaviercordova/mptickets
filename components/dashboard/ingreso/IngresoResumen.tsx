@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, CreditCard, Car, CheckCircle2, AlertCircle } from "lucide-react";
+import { Clock, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
 import type { UltimoIngreso } from "@/types/ingreso";
 
 interface IngresoResumenProps {
@@ -46,7 +46,7 @@ export function IngresoResumen({ ultimoIngreso }: IngresoResumenProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card space-y-6 border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-6 shadow-xl backdrop-blur-xl"
+      className="glass-card space-y-4 border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-5 shadow-xl backdrop-blur-xl"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -75,7 +75,7 @@ export function IngresoResumen({ ultimoIngreso }: IngresoResumenProps) {
 
       {/* Tarjeta Visual */}
       <div
-        className="relative overflow-hidden rounded-2xl border border-cyan-400/30 p-6 shadow-lg"
+        className="relative overflow-hidden rounded-2xl border border-cyan-400/30 p-5 shadow-lg"
         style={{
           background: "linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)",
         }}
@@ -84,13 +84,13 @@ export function IngresoResumen({ ultimoIngreso }: IngresoResumenProps) {
           <CreditCard className="h-full w-full rotate-12" />
         </div>
 
-        <div className="relative space-y-4">
+        <div className="relative space-y-3">
           {/* Número de Tarjeta */}
           <div>
             <p className="mb-1 text-xs uppercase tracking-wider text-cyan-300/70">
               Número de Tarjeta
             </p>
-            <p className="font-mono text-3xl font-bold tracking-wider text-white">
+            <p className="font-mono text-2xl font-bold tracking-wider text-white">
               {ultimoIngreso.numeroTarjeta}
             </p>
           </div>
@@ -105,18 +105,6 @@ export function IngresoResumen({ ultimoIngreso }: IngresoResumenProps) {
               </p>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Detalles */}
-      <div className="space-y-3">
-        {/* Tipo de Vehículo */}
-        <div className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-950/20 p-3">
-          <div className="flex items-center gap-2">
-            <Car className="h-4 w-4 text-purple-400" />
-            <span className="text-sm text-blue-200/80">Tipo de Vehículo</span>
-          </div>
-          <span className="font-semibold text-white">{ultimoIngreso.tipoVehiculo}</span>
         </div>
       </div>
     </motion.div>

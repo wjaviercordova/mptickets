@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CreditCard, Car, PlusCircle, Scan, CheckCircle2, AlertCircle } from "lucide-react";
 import type { Parametro, UltimoIngreso } from "@/types/ingreso";
 import { motionButtonProps } from "@/lib/button-styles";
+import { usePageHeader } from "@/contexts/PageHeaderContext";
 import { TarjetaSelector } from "./TarjetaSelector";
 import { TipoVehiculoCards } from "./TipoVehiculoCards";
 import { IngresoResumen } from "./IngresoResumen";
@@ -36,6 +37,19 @@ export function IngresoVehiculo({
     ultimoIngresoInicial
   );
   const [mostrarSelectorTarjetas, setMostrarSelectorTarjetas] = useState(false);
+  const { setHeaderInfo } = usePageHeader();
+
+  // Setear información del header al montar el componente
+  useEffect(() => {
+    setHeaderInfo({
+      icon: Car,
+      title: "Ingreso de Vehículo",
+      subtitle: "Registra nuevos ingresos al parqueadero",
+    });
+    
+    // Limpiar al desmontar
+    return () => setHeaderInfo(null);
+  }, [setHeaderInfo]);
 
   const handleRegistrarIngreso = async () => {
     if (!codigoTarjeta || !parametroSeleccionado || !tarjetaId) {
@@ -110,21 +124,6 @@ export function IngresoVehiculo({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="glass-card border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-6 shadow-xl backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <div className="rounded-2xl border border-cyan-400/40 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 p-3">
-            <Car className="h-7 w-7 text-cyan-400" />
-          </div>
-          <div>
-            <h1 className="font-heading text-2xl text-white">Ingreso de Vehículo</h1>
-            <p className="text-sm text-blue-200/70">
-              Registra nuevos ingresos al parqueadero
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Mensaje de estado */}
       {message && (
         <motion.div
@@ -156,14 +155,14 @@ export function IngresoVehiculo({
           </div>
 
           <div className="flex gap-3">
-            <div className="relative max-w-[240px] flex-1">
+            <div className="relative flex-1">
               <input
                 type="text"
                 value={codigoTarjeta}
                 onChange={(e) => setCodigoTarjeta(e.target.value)}
-                placeholder="Código..."
+                placeholder="Escanea o ingresa el código..."
                 maxLength={12}
-                className="glass-input w-full rounded-xl border border-blue-500/30 bg-[#0f172a]/40 px-4 py-3 pr-12 font-mono text-lg text-white placeholder-blue-200/40 transition focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                className="glass-input w-full rounded-xl border border-blue-500/30 bg-[#0f172a]/40 px-4 py-3 pr-12 font-mono text-white placeholder-blue-200/40 transition focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
                 autoFocus
               />
               <Scan className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-400/60" />
@@ -200,7 +199,8 @@ export function IngresoVehiculo({
         {...motionButtonProps}
         onClick={handleRegistrarIngreso}
         disabled={loading || !codigoTarjeta || !parametroSeleccionado || !tarjetaId}
-        className="glass-button flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-400/40 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 px-6 py-3 font-semibold text-white backdrop-blur-xl transition hover:from-cyan-500/50 hover:to-blue-600/50 hover:shadow-xl hover:shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="glass-button flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-400/40 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 px-6 py-4 font-semibold backdrop-blur-xl transition hover:from-cyan-500/50 hover:to-blue-600/50 hover:shadow-xl hover:shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ color: '#ffffff' }}
       >
         <PlusCircle className="h-5 w-5" />
         {loading ? "Registrando..." : "Registrar Ingreso"}

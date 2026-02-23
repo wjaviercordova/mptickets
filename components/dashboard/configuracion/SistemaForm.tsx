@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Save,
@@ -15,6 +15,7 @@ import {
 import { TarifasTab } from "./TarifasTab";
 import { AparienciaTab } from "./AparienciaTab";
 import { type ThemeConfig, defaultThemeConfig } from "@/lib/theme-config";
+import { usePageHeader } from "@/contexts/PageHeaderContext";
 
 interface ParametroCompleto {
   id: string;
@@ -62,6 +63,19 @@ export function SistemaForm({
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const { setHeaderInfo } = usePageHeader();
+
+  // Setear información del header al montar el componente
+  useEffect(() => {
+    setHeaderInfo({
+      icon: Settings,
+      title: "Configuración",
+      subtitle: "Parámetros del Sistema",
+    });
+    
+    // Limpiar al desmontar
+    return () => setHeaderInfo(null);
+  }, [setHeaderInfo]);
 
   // Estados para Configuración General
   const [configGeneral, setConfigGeneral] = useState({
