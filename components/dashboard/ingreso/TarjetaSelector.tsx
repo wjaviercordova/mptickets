@@ -7,7 +7,7 @@ import type { Tarjeta } from "@/types/ingreso";
 
 interface TarjetaSelectorProps {
   negocioId: string;
-  onSeleccionar: (codigo: string, id: string) => void;
+  onSeleccionar: (codigoBarras: string, id: string) => void;
   onCerrar: () => void;
 }
 
@@ -22,11 +22,13 @@ export function TarjetaSelector({
   useEffect(() => {
     const fetchTarjetas = async () => {
       try {
+        console.log("🔍 [SELECTOR INGRESO] Cargando tarjetas disponibles...");
         const response = await fetch(`/api/tarjetas/disponibles?negocio_id=${negocioId}`);
         const data = await response.json();
+        console.log("✅ [SELECTOR INGRESO] Tarjetas recibidas:", data.tarjetas?.length || 0);
         setTarjetas(data.tarjetas || []);
       } catch (error) {
-        console.error("Error al cargar tarjetas:", error);
+        console.error("❌ [SELECTOR INGRESO] Error al cargar tarjetas:", error);
       } finally {
         setLoading(false);
       }
@@ -94,7 +96,14 @@ export function TarjetaSelector({
                     key={tarjeta.id}
                     whileHover={{ scale: 1.05, y: -4 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => onSeleccionar(tarjeta.codigo, tarjeta.id)}
+                    onClick={() => {
+                      console.log("🎯 [SELECTOR INGRESO] Tarjeta seleccionada:", {
+                        codigo: tarjeta.codigo,
+                        codigo_barras: tarjeta.codigo_barras,
+                        id: tarjeta.id
+                      });
+                      onSeleccionar(tarjeta.codigo_barras || tarjeta.codigo, tarjeta.id);
+                    }}
                     className="group relative overflow-hidden rounded-2xl border border-blue-500/30 p-6 shadow-lg transition"
                     style={{
                       backgroundImage: "url('/images/backgrounds/bg_cardavailable.jpg')",
@@ -117,6 +126,11 @@ export function TarjetaSelector({
                         <p className="font-heading text-2xl font-bold text-white drop-shadow-md">
                           {tarjeta.codigo}
                         </p>
+                        {tarjeta.codigo_barras && (
+                          <p className="mt-1 font-mono text-xs text-white/70">
+                            {tarjeta.codigo_barras}
+                          </p>
+                        )}
                       </div>
                     </div>
 

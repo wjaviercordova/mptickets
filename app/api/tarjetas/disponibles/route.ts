@@ -9,7 +9,10 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const negocioId = searchParams.get("negocio_id");
 
+    console.log("🔍 [API DISPONIBLES] Consultando tarjetas:", { negocioId });
+
     if (!negocioId) {
+      console.error("❌ [API DISPONIBLES] negocio_id no proporcionado");
       return NextResponse.json(
         { error: "negocio_id es requerido" },
         { status: 400 }
@@ -28,16 +31,21 @@ export async function GET(request: NextRequest) {
       .order("codigo");
 
     if (error) {
-      console.error("Error al obtener tarjetas:", error);
+      console.error("❌ [API DISPONIBLES] Error en query:", error);
       return NextResponse.json(
         { error: "Error al obtener tarjetas disponibles" },
         { status: 500 }
       );
     }
 
+    console.log("✅ [API DISPONIBLES] Tarjetas encontradas:", tarjetas?.length || 0);
+    if (tarjetas && tarjetas.length > 0) {
+      console.log("📋 [API DISPONIBLES] Primeras 3 tarjetas:", tarjetas.slice(0, 3));
+    }
+
     return NextResponse.json({ tarjetas: tarjetas || [] });
   } catch (error) {
-    console.error("Error en API tarjetas disponibles:", error);
+    console.error("❌❌❌ [API DISPONIBLES] ERROR FATAL:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }
