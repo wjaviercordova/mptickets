@@ -85,12 +85,13 @@ function generarTicketEntrada(datos) {
   // ==================== ENCABEZADO ====================
   ticket += CMD.ALIGN_CENTER;
   
-  // Línea separadora
-  ticket += '='.repeat(ancho) + CMD.LF;
-  
   // NOMBRE DEL NEGOCIO - Texto normal centrado (sin comandos especiales)
-  ticket += (datos.nombre_negocio || 'PARQUEADERO').toUpperCase();
+  ticket += CMD.SIZE_TALL + CMD.BOLD_ON;
+  ticket += (datos.nombre_negocio || 'PARQUEADERO');
   ticket += CMD.LF;
+  ticket += CMD.SIZE_NORMAL + CMD.BOLD_OFF;
+
+  
   
   // Dirección - texto normal
   ticket += datos.direccion || '';
@@ -112,22 +113,23 @@ function generarTicketEntrada(datos) {
   const hora = datos.hora || '';
   const espacios = Math.max(1, ancho - 7 - fecha.length - 6 - hora.length);
   ticket += `Fecha: ${fecha}${' '.repeat(espacios)}Hora: ${hora}`;
-  ticket += CMD.LF + CMD.LF;
+  ticket += CMD.LF;
+  
+  // Tipo de vehículo - texto normal
+  if (datos.tipo_vehiculo) {
+    ticket += `Tipo:    ${datos.tipo_vehiculo}` + CMD.LF;
+  }
   
   // TARJETA - Tamaño alto (estrecho pero alto) + negrita
   ticket += CMD.SIZE_TALL + CMD.BOLD_ON;
   ticket += 'Tarjeta: ' + (datos.numero || 'N/A');
   ticket += CMD.LF;  // Salto de línea PRIMERO
   ticket += CMD.SIZE_NORMAL + CMD.BOLD_OFF;  // Luego resetear
-  
-  // Tipo de vehículo - texto normal
-  if (datos.tipo_vehiculo) {
-    ticket += `Tipo:    ${datos.tipo_vehiculo}` + CMD.LF;
-  }
   ticket += CMD.LF;
   
   // ==================== INFORMACIÓN ====================
   ticket += '-'.repeat(ancho) + CMD.LF;
+  
   ticket += `Horario ${datos.horario || '24 Horas'}` + CMD.LF;
   ticket += `Tarifa:  ${datos.tarifa || 'Ver tabla'}` + CMD.LF;
   ticket += '-'.repeat(ancho) + CMD.LF;
@@ -152,11 +154,8 @@ function generarTicketPago(datos) {
   // ==================== ENCABEZADO ====================
   ticket += CMD.ALIGN_CENTER;
   
-  // Línea separadora
-  ticket += '='.repeat(ancho) + CMD.LF;
-  
   // NOMBRE DEL NEGOCIO - Texto normal centrado (sin comandos especiales)
-  ticket += (datos.nombre_negocio || 'PARQUEADERO').toUpperCase();
+  ticket += (datos.nombre_negocio || 'PARQUEADERO');
   ticket += CMD.LF;
   
   // Dirección - texto normal
