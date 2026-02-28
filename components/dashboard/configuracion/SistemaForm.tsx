@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Save,
@@ -11,9 +12,12 @@ import {
   CheckCircle2,
   AlertCircle,
   Palette,
+  Printer,
 } from "lucide-react";
 import { TarifasTab } from "./TarifasTab";
 import { AparienciaTab } from "./AparienciaTab";
+import { ImpresionTab } from "./ImpresionTab";
+import { HorariosTab } from "./HorariosTab";
 import { type ThemeConfig, defaultThemeConfig } from "@/lib/theme-config";
 import { usePageHeader } from "@/contexts/PageHeaderContext";
 
@@ -50,13 +54,14 @@ interface SistemaFormProps {
   parametros: ParametroCompleto[];
 }
 
-type TabType = "general" | "tarifas" | "capacidad" | "horarios" | "apariencia";
+type TabType = "general" | "tarifas" | "capacidad" | "horarios" | "impresion" | "apariencia";
 
 export function SistemaForm({
   negocioId,
   configActual,
   parametros,
 }: SistemaFormProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{
@@ -168,6 +173,7 @@ export function SistemaForm({
     { id: "tarifas" as TabType, label: "Tarifas", icon: DollarSign },
     { id: "capacidad" as TabType, label: "Capacidad", icon: Building2 },
     { id: "horarios" as TabType, label: "Horarios", icon: Clock },
+    { id: "impresion" as TabType, label: "Impresión", icon: Printer },
     { id: "apariencia" as TabType, label: "Apariencia", icon: Palette },
   ];
 
@@ -590,14 +596,111 @@ export function SistemaForm({
         )}
 
         {activeTab === "horarios" && (
-          <div className="space-y-6">
-            <h3 className="font-heading text-xl text-white">
-              Horarios de Operación
-            </h3>
-            <p className="text-sm text-blue-200/70">
-              Próximamente: Configuración de horarios especiales.
-            </p>
-          </div>
+          <HorariosTab
+            horariosActuales={(configActual.horarios_atencion as string) ?? ""}
+            onSave={async (horarios) => {
+              setLoading(true);
+              setMessage(null);
+
+              try {
+                const response = await fetch("/api/configuracion/sistema", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    tipo: "horarios",
+                    negocioId,
+                    data: {
+                      horarios_atencion: JSON.stringify(horarios),
+                    },
+                  }),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                  throw new Error(result.message || "Error al guardar");
+                }
+
+                setMessage({
+                  type: "success",
+                  text: "Horarios actualizados exitosamente",
+                });
+                
+                // Refrescar para obtener datos actualizados del servidor
+                setTimeout(() => {
+                  router.refresh();
+                }, 500);
+              } catch (error) {
+                setMessage({
+                  type: "error",
+                  text: error instanceof Error ? error.message : "Error de conexión",
+                });
+                throw error;
+              } finally {
+                setLoading(false);
+              }
+            }}
+          />
+        )}
+
+        {activeTab === "impresion" && (
+          <ImpresionTab
+            configActual={{
+              habilitada: (configActual.impresion_habilitada as boolean) ?? true,
+              cola_impresion: (configActual.impresion_cola as string) ?? "",
+              nombre_impresora: (configActual.impresion_nombre as string) ?? "",
+              ancho_papel: (configActual.impresion_ancho_papel as number) ?? 80,
+              tipo_formato: (configActual.impresion_formato as "basico" | "detallado") ?? "basico",
+              imprimir_logo: (configActual.impresion_logo as boolean) ?? true,
+              imprimir_en_ingreso: (configActual.impresion_en_ingreso as boolean) ?? true,
+              imprimir_en_pago: (configActual.impresion_en_pago as boolean) ?? true,
+              copias_por_ticket: (configActual.impresion_copias as number) ?? 1,
+            }}
+            onSave={async (configImpresion) => {
+              setLoading(true);
+              setMessage(null);
+
+              try {
+                const response = await fetch("/api/configuracion/sistema", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    tipo: "impresion",
+                    negocioId,
+                    data: {
+                      impresion_habilitada: configImpresion.habilitada,
+                      impresion_cola: configImpresion.cola_impresion,
+                      impresion_nombre: configImpresion.nombre_impresora,
+                      impresion_ancho_papel: configImpresion.ancho_papel,
+                      impresion_formato: configImpresion.tipo_formato,
+                      impresion_logo: configImpresion.imprimir_logo,
+                      impresion_en_ingreso: configImpresion.imprimir_en_ingreso,
+                      impresion_en_pago: configImpresion.imprimir_en_pago,
+                      impresion_copias: configImpresion.copias_por_ticket,
+                    },
+                  }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                  setMessage({
+                    type: "success",
+                    text: "Configuración de impresión actualizada exitosamente",
+                  });
+                } else {
+                  setMessage({
+                    type: "error",
+                    text: result.message || "Error al guardar",
+                  });
+                }
+              } catch {
+                setMessage({ type: "error", text: "Error de conexión" });
+              } finally {
+                setLoading(false);
+              }
+            }}
+          />
         )}
 
         {activeTab === "apariencia" && (

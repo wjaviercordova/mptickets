@@ -171,6 +171,110 @@ export async function POST(request: Request) {
       });
     }
 
+    if (tipo === "impresion") {
+      // Actualizar configuración de impresión en configuracion_sistema
+      const configEntries = Object.entries(data).map(([clave, valor]) => {
+        let tipo_dato = "string";
+        let valorFinal: string | number | boolean = valor as string | number | boolean;
+
+        if (typeof valor === "number") {
+          tipo_dato = "number";
+        } else if (typeof valor === "boolean") {
+          tipo_dato = "boolean";
+          valorFinal = valor.toString();
+        }
+
+        return {
+          negocio_id: negocioId,
+          clave,
+          valor: valorFinal.toString(),
+          tipo: tipo_dato,
+          categoria: "impresion",
+        };
+      });
+
+      // Eliminar configuraciones anteriores de impresión
+      await supabase
+        .from("configuracion_sistema")
+        .delete()
+        .eq("negocio_id", negocioId)
+        .eq("categoria", "impresion");
+
+      // Insertar las nuevas
+      const { error: configError } = await supabase
+        .from("configuracion_sistema")
+        .insert(configEntries);
+
+      if (configError) {
+        console.error("Error al actualizar impresión:", configError);
+        return NextResponse.json(
+          { message: "Error al actualizar configuración de impresión" },
+          { status: 500 }
+        );
+      }
+
+      // Registrar en auditoría
+      await supabase.from("auditoria").insert({
+        negocio_id: negocioId,
+        usuario_id: userId,
+        accion: "UPDATE",
+        tabla_afectada: "configuracion_sistema",
+        descripcion: "Actualización de configuración de impresión",
+        datos_nuevos: data,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Configuración de impresión actualizada exitosamente",
+      });
+    }
+
+    if (tipo === "horarios") {
+      // Actualizar configuración de horarios de atención
+      const configEntries = Object.entries(data).map(([clave, valor]) => ({
+        negocio_id: negocioId,
+        clave,
+        valor: typeof valor === "object" ? JSON.stringify(valor) : String(valor),
+        tipo: "json",
+        categoria: "horarios",
+      }));
+
+      // Eliminar configuraciones anteriores de horarios
+      await supabase
+        .from("configuracion_sistema")
+        .delete()
+        .eq("negocio_id", negocioId)
+        .eq("categoria", "horarios");
+
+      // Insertar las nuevas
+      const { error: configError } = await supabase
+        .from("configuracion_sistema")
+        .insert(configEntries);
+
+      if (configError) {
+        console.error("Error al actualizar horarios:", configError);
+        return NextResponse.json(
+          { message: "Error al actualizar horarios de atención" },
+          { status: 500 }
+        );
+      }
+
+      // Registrar en auditoría
+      await supabase.from("auditoria").insert({
+        negocio_id: negocioId,
+        usuario_id: userId,
+        accion: "UPDATE",
+        tabla_afectada: "configuracion_sistema",
+        descripcion: "Actualización de horarios de atención",
+        datos_nuevos: data,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Horarios de atención actualizados exitosamente",
+      });
+    }
+
     return NextResponse.json(
       { message: "Tipo de configuración no válido" },
       { status: 400 }

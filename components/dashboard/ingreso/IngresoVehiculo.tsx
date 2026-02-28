@@ -6,9 +6,15 @@ import { CreditCard, Car, PlusCircle, Scan, CheckCircle2, AlertCircle } from "lu
 import type { Parametro, UltimoIngreso } from "@/types/ingreso";
 import { motionButtonProps } from "@/lib/button-styles";
 import { usePageHeader } from "@/contexts/PageHeaderContext";
+import { useImpresionConfig } from "@/contexts/ImpresionConfigContext";
 import { TarjetaSelector } from "./TarjetaSelector";
 import { TipoVehiculoCards } from "./TipoVehiculoCards";
 import { IngresoResumen } from "./IngresoResumen";
+import {
+  imprimirTicketEntrada,
+  formatearFechaHora,
+  type DatosTicketEntrada,
+} from "@/lib/impresion";
 
 interface IngresoVehiculoProps {
   parametros: Parametro[];
@@ -38,6 +44,7 @@ export function IngresoVehiculo({
   );
   const [mostrarSelectorTarjetas, setMostrarSelectorTarjetas] = useState(false);
   const { setHeaderInfo } = usePageHeader();
+  const { negocio, configImpresion, horariosAtencion } = useImpresionConfig();
   const inputCodigoRef = useRef<HTMLInputElement>(null);
 
   // Setear información del header al montar el componente
@@ -62,6 +69,108 @@ export function IngresoVehiculo({
       audio.play().catch(err => console.warn("No se pudo reproducir el sonido:", err));
     } catch (error) {
       console.warn("Error al reproducir sonido:", error);
+    }
+  };
+
+  // Función para imprimir ticket si está habilitado (OPTIMIZADA - usa Context, sin queries)
+  const imprimirTicketSiEstaHabilitado = async (ingreso: UltimoIngreso) => {
+    try {
+      console.log("🖨️ [IMPRESION] Verificando configuración de impresión...");
+      
+      // 1. Validar que tenemos configuración de impresión (desde Context, no DB)
+      if (!configImpresion) {
+        console.log("⚠️ [IMPRESION] No hay configuración de impresión");
+        return;
+      }
+      
+      console.log("📋 [IMPRESION] Configuración obtenida (desde caché):", {
+        habilitada: configImpresion.habilitada,
+        imprimir_en_ingreso: configImpresion.imprimir_en_ingreso,
+        cola_impresion: configImpresion.cola_impresion,
+      });
+      
+      // 2. Validar que ambos toggles estén activos
+      if (!configImpresion.habilitada) {
+        console.log("ℹ️ [IMPRESION] Impresión deshabilitada (toggle principal)");
+        return;
+      }
+      
+      if (!configImpresion.imprimir_en_ingreso) {
+        console.log("ℹ️ [IMPRESION] Impresión en ingreso deshabilitada");
+        return;
+      }
+      
+      // 3. Validar que tenemos datos del negocio (desde Context, no DB)
+      if (!negocio) {
+        console.error("❌ [IMPRESION] No hay datos del negocio en caché");
+        return;
+      }
+      
+      console.log("✅ [IMPRESION] Impresión habilitada, usando datos en caché...");
+      console.log("✅ [IMPRESION] Datos del negocio:", negocio.nombre);
+      
+      // 4. Formatear fecha y hora
+      const { fecha, hora, dia } = formatearFechaHora(ingreso.horaEntrada);
+      
+      // 5. Obtener horario del día actual
+      let horarioAtencion = "24 Horas";
+      
+      if (horariosAtencion) {
+        // Mapear el día de la semana al nombre en español
+        const diasSemana = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+        const diasSemanaCapitalizados = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+        const diaActual = new Date().getDay(); // 0 = domingo, 1 = lunes, etc.
+        const nombreDia = diasSemana[diaActual] as keyof typeof horariosAtencion;
+        const nombreDiaCapitalizado = diasSemanaCapitalizados[diaActual];
+        
+        const horarioDia = horariosAtencion[nombreDia];
+        
+        if (horarioDia) {
+          if (!horarioDia.open) {
+            horarioAtencion = `${nombreDiaCapitalizado}: Cerrado`;
+          } else if (horarioDia["24h"]) {
+            horarioAtencion = `${nombreDiaCapitalizado}: Abierto 24 horas`;
+          } else {
+            horarioAtencion = `${nombreDiaCapitalizado}: ${horarioDia.from}-${horarioDia.to}`;
+          }
+        }
+      }
+      
+      console.log("📅 [IMPRESION] Fecha y hora formateadas:", { fecha, hora, dia });
+      console.log("🕐 [IMPRESION] Horario del día:", horarioAtencion);
+      console.log("🏢 [IMPRESION] Datos del negocio desde caché:", {
+        nombre: negocio.nombre,
+        direccion: negocio.direccion,
+        telefono: negocio.telefono
+      });
+      
+      // 6. Preparar datos del ticket (TODO desde caché, 0 queries)
+      const datosTicket: DatosTicketEntrada = {
+        nombre_negocio: negocio.nombre,
+        direccion: negocio.direccion || "N/A",
+        telefono: negocio.telefono || "N/A",
+        fecha_ingreso: fecha,
+        hora_ingreso: hora,
+        numero_tarjeta: ingreso.numeroTarjeta,
+        tipo_vehiculo: parametroSeleccionado?.tipo_vehiculo || "N/A",
+        horario: horarioAtencion,
+        tarifa_vehiculo: `$${parametroSeleccionado?.tarifa_2_valor || 0}`,
+      };
+      
+      console.log("📝 [IMPRESION] Datos del ticket preparados:", datosTicket);
+      console.log("📝 [IMPRESION] JSON completo:", JSON.stringify(datosTicket, null, 2));
+      
+      // 7. Imprimir
+      const resultado = await imprimirTicketEntrada(datosTicket, configImpresion);
+      
+      if (resultado) {
+        console.log("✅ [IMPRESION] Ticket impreso correctamente");
+      } else {
+        console.warn("⚠️ [IMPRESION] No se pudo imprimir el ticket");
+      }
+    } catch (error) {
+      console.error("❌ [IMPRESION] Error al imprimir ticket:", error);
+      // No lanzar error para no interrumpir el flujo principal
     }
   };
 
@@ -142,6 +251,13 @@ export function IngresoVehiculo({
         setCodigoBarras("");
         setTarjetaId("");
         setParametroSeleccionado(parametros.find((p) => p.prioridad === 1) || parametros[0] || null);
+        
+        // === IMPRESIÓN AUTOMÁTICA ===
+        imprimirTicketSiEstaHabilitado(data.ingreso).catch((error) => {
+          console.error("❌ [IMPRESION] Error al imprimir ticket:", error);
+          // No interrumpir el flujo, solo loggear el error
+        });
+        // === FIN IMPRESIÓN ===
         
         // Mostrar mensaje de éxito
         setMessage({

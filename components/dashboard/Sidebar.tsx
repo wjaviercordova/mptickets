@@ -73,6 +73,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, negocioNombre }: SidebarProps) {
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const pathname = usePathname();
 
   const toggleSubMenu = (label: string) => {
@@ -82,6 +83,41 @@ export function Sidebar({ isOpen, negocioNombre }: SidebarProps) {
   const isActive = (href?: string) => {
     if (!href) return false;
     return pathname === href;
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+
+      // 1. Llamar al endpoint de logout para eliminar cookies del servidor
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        // 2. Limpiar localStorage del navegador
+        if (typeof window !== "undefined") {
+          localStorage.clear();
+          sessionStorage.clear();
+        }
+
+        // 3. Forzar recarga completa para limpiar el Context y estado de React
+        // Usamos window.location.href en lugar de router.push para:
+        // - Limpiar completamente el estado de React
+        // - Eliminar datos en memoria del Context
+        // - Recargar la aplicación desde cero
+        window.location.href = "/";
+      } else {
+        console.error("Error al cerrar sesión");
+        setIsLoggingOut(false);
+      }
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      setIsLoggingOut(false);
+    }
   };
   return (
     <>
@@ -238,14 +274,16 @@ export function Sidebar({ isOpen, negocioNombre }: SidebarProps) {
           <motion.button
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
-            className="flex w-full items-center justify-between rounded-2xl border border-red-400/40 bg-gradient-to-r from-red-500/25 to-pink-600/15 px-4 py-3 text-sm font-medium text-red-200 backdrop-blur-sm shadow-lg shadow-red-500/15 transition hover:border-red-400/60 hover:from-red-500/35 hover:to-pink-600/25 hover:text-red-100 hover:shadow-red-500/25"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="flex w-full items-center justify-between rounded-2xl border border-red-400/40 bg-gradient-to-r from-red-500/25 to-pink-600/15 px-4 py-3 text-sm font-medium text-red-200 backdrop-blur-sm shadow-lg shadow-red-500/15 transition hover:border-red-400/60 hover:from-red-500/35 hover:to-pink-600/25 hover:text-red-100 hover:shadow-red-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
             type="button"
           >
             <span className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/40 bg-red-500/25 shadow-inner shadow-red-500/20">
-                <LogOut className="h-4 w-4" />
+                <LogOut className={isLoggingOut ? "h-4 w-4 animate-pulse" : "h-4 w-4"} />
               </div>
-              Cerrar sesión
+              {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
             </span>
           </motion.button>
         </div>

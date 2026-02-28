@@ -1,0 +1,20 @@
+{
+  "name": "mptickets-print-service",
+  "version": "1.0.0",
+  "description": "Servicio local de impresión térmica para MPTickets",
+  "main": "servidor-impresion.js",
+  "scripts": {
+    "start": "node servidor-impresion.js",
+    "dev": "nodemon servidor-impresion.js"
+  },
+  "keywords": ["impresion", "termica", "pos", "cups"],
+  "author": "MPTickets",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

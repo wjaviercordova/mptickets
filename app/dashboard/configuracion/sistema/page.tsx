@@ -42,10 +42,16 @@ export default async function SistemaConfigPage() {
     } else if (config.tipo === "boolean") {
       valor = config.valor === "true";
     } else if (config.tipo === "json" && config.valor) {
-      try {
-        valor = JSON.parse(config.valor);
-      } catch {
+      // Para horarios_atencion, mantener como string (HorariosTab lo parseará)
+      if (config.clave === "horarios_atencion") {
         valor = config.valor;
+      } else {
+        // Para otros JSON, parsear normalmente
+        try {
+          valor = JSON.parse(config.valor);
+        } catch {
+          valor = config.valor;
+        }
       }
     }
     
