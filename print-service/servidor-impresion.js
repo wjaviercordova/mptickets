@@ -33,6 +33,40 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 
+// ============================================================
+// COMANDOS ESC/POS PARA IMPRESORA TÉRMICA 3nStar POS-80
+// ============================================================
+const ESC = '\x1B';  // Escape
+const GS = '\x1D';   // Group Separator
+
+const CMD = {
+  // Inicialización
+  INIT: ESC + '@',
+  
+  // Alineación
+  ALIGN_LEFT: ESC + 'a' + '0',
+  ALIGN_CENTER: ESC + 'a' + '1',
+  ALIGN_RIGHT: ESC + 'a' + '2',
+  
+  // Énfasis (Negrita)
+  BOLD_ON: ESC + 'E' + '1',
+  BOLD_OFF: ESC + 'E' + '0',
+  
+  // Tamaños de texto (GS ! n)
+  SIZE_NORMAL: GS + '!' + '\x00',      // Normal
+  SIZE_TALL: GS + '!' + '\x01',        // Solo alto (doble altura)
+  SIZE_WIDE: GS + '!' + '\x10',        // Solo ancho (doble ancho)
+  SIZE_DOUBLE: GS + '!' + '\x11',      // Doble alto y ancho
+  SIZE_TRIPLE: GS + '!' + '\x21',      // Triple alto, doble ancho
+  
+  // Corte de papel
+  CUT_FULL: GS + 'V' + '\x00',         // Corte completo
+  CUT_PARTIAL: GS + 'V' + '\x01',      // Corte parcial
+  
+  // Saltos de línea
+  LF: '\n'
+};
+
 // Función para centrar texto
 function centrar(texto, ancho) {
   if (texto.length >= ancho) return texto.substring(0, ancho);
@@ -40,76 +74,147 @@ function centrar(texto, ancho) {
   return ' '.repeat(espacios) + texto;
 }
 
-// Función para generar ticket de entrada
+// Función para generar ticket de entrada con comandos ESC/POS
 function generarTicketEntrada(datos) {
   const ancho = 42; // Caracteres para 80mm
-  const lineas = [];
+  let ticket = '';
   
-  lineas.push('='.repeat(ancho));
-  lineas.push(centrar(datos.nombre_negocio || 'PARQUEADERO', ancho));
-  lineas.push(centrar(datos.direccion || '', ancho));
-  lineas.push(centrar(`Tel: ${datos.telefono || 'N/A'}`, ancho));
-  lineas.push('='.repeat(ancho));
-  lineas.push('');
-  lineas.push(centrar('*** TICKET DE ENTRADA ***', ancho));
-  lineas.push('');
-  lineas.push(`Fecha: ${datos.fecha || ''}`);
-  lineas.push(`Hora:  ${datos.hora || ''}`);
-  lineas.push(`Dia:   ${datos.dia || ''}`);
-  lineas.push('');
-  lineas.push(`Tarjeta: ${datos.numero || 'N/A'}`);
+  // Inicializar impresora
+  ticket += CMD.INIT;
+  
+  // ==================== ENCABEZADO ====================
+  ticket += CMD.ALIGN_CENTER;
+  
+  // Línea separadora
+  ticket += '='.repeat(ancho) + CMD.LF;
+  
+  // NOMBRE DEL NEGOCIO - Texto normal centrado (sin comandos especiales)
+  ticket += (datos.nombre_negocio || 'PARQUEADERO').toUpperCase();
+  ticket += CMD.LF;
+  
+  // Dirección - texto normal
+  ticket += datos.direccion || '';
+  ticket += CMD.LF;
+  
+  // Teléfono - texto normal
+  ticket += 'Tel: ' + (datos.telefono || 'N/A');
+  ticket += CMD.LF;
+  
+  // Línea separadora
+  ticket += '='.repeat(ancho) + CMD.LF;
+  ticket += CMD.LF;
+  
+  // ==================== CONTENIDO ====================
+  ticket += CMD.ALIGN_LEFT;
+  
+  // Fecha y Hora en una sola línea
+  const fecha = datos.fecha || '';
+  const hora = datos.hora || '';
+  const espacios = Math.max(1, ancho - 7 - fecha.length - 6 - hora.length);
+  ticket += `Fecha: ${fecha}${' '.repeat(espacios)}Hora: ${hora}`;
+  ticket += CMD.LF + CMD.LF;
+  
+  // TARJETA - Tamaño alto (estrecho pero alto) + negrita
+  ticket += CMD.SIZE_TALL + CMD.BOLD_ON;
+  ticket += 'Tarjeta: ' + (datos.numero || 'N/A');
+  ticket += CMD.LF;  // Salto de línea PRIMERO
+  ticket += CMD.SIZE_NORMAL + CMD.BOLD_OFF;  // Luego resetear
+  
+  // Tipo de vehículo - texto normal
   if (datos.tipo_vehiculo) {
-    lineas.push(`Tipo:    ${datos.tipo_vehiculo}`);
+    ticket += `Tipo:    ${datos.tipo_vehiculo}` + CMD.LF;
   }
-  lineas.push('');
-  lineas.push('-'.repeat(ancho));
-  lineas.push(`Horario: ${datos.horario || '24 Horas'}`);
-  lineas.push(`Tarifa:  ${datos.tarifa || 'Ver tabla'}`);
-  lineas.push('-'.repeat(ancho));
-  lineas.push('');
-  lineas.push(centrar('Conserve este ticket', ancho));
-  lineas.push(centrar('Gracias por su preferencia', ancho));
-  lineas.push('');
-  lineas.push('');
-  lineas.push('');
-  lineas.push('');
+  ticket += CMD.LF;
   
-  return lineas.join('\n');
+  // ==================== INFORMACIÓN ====================
+  ticket += '-'.repeat(ancho) + CMD.LF;
+  ticket += `Horario ${datos.horario || '24 Horas'}` + CMD.LF;
+  ticket += `Tarifa:  ${datos.tarifa || 'Ver tabla'}` + CMD.LF;
+  ticket += '-'.repeat(ancho) + CMD.LF;
+  
+  // Alimentar papel antes del corte
+  ticket += CMD.LF + CMD.LF + CMD.LF + CMD.LF;
+  
+  // Corte de papel
+  ticket += CMD.CUT_PARTIAL;
+  
+  return ticket;
 }
 
-// Función para generar ticket de pago
+// Función para generar ticket de pago con comandos ESC/POS
 function generarTicketPago(datos) {
   const ancho = 42;
-  const lineas = [];
+  let ticket = '';
   
-  lineas.push('='.repeat(ancho));
-  lineas.push(centrar(datos.nombre_negocio || 'PARQUEADERO', ancho));
-  lineas.push(centrar(datos.direccion || '', ancho));
-  lineas.push(centrar(`Tel: ${datos.telefono || 'N/A'}`, ancho));
-  lineas.push('='.repeat(ancho));
-  lineas.push('');
-  lineas.push(centrar('*** COMPROBANTE DE PAGO ***', ancho));
-  lineas.push('');
-  lineas.push(`Tarjeta:      ${datos.numero || 'N/A'}`);
-  lineas.push(`Ingreso:      ${datos.fecha_ingreso || ''} ${datos.hora_ingreso || ''}`);
-  lineas.push(`Salida:       ${datos.hora_salida || ''}`);
-  lineas.push(`Tiempo:       ${datos.tiempo_total || ''}`);
-  lineas.push('');
-  lineas.push('-'.repeat(ancho));
-  lineas.push(`Total:        $${parseFloat(datos.total || 0).toFixed(2)}`);
+  // Inicializar impresora
+  ticket += CMD.INIT;
+  
+  // ==================== ENCABEZADO ====================
+  ticket += CMD.ALIGN_CENTER;
+  
+  // Línea separadora
+  ticket += '='.repeat(ancho) + CMD.LF;
+  
+  // NOMBRE DEL NEGOCIO - Texto normal centrado (sin comandos especiales)
+  ticket += (datos.nombre_negocio || 'PARQUEADERO').toUpperCase();
+  ticket += CMD.LF;
+  
+  // Dirección - texto normal
+  ticket += datos.direccion || '';
+  ticket += CMD.LF;
+  
+  // Teléfono - texto normal
+  ticket += 'Tel: ' + (datos.telefono || 'N/A');
+  ticket += CMD.LF;
+  
+  // Línea separadora
+  ticket += '='.repeat(ancho) + CMD.LF;
+  ticket += CMD.LF;
+  
+  // Título
+  ticket += CMD.BOLD_ON;
+  ticket += '*** COMPROBANTE DE PAGO ***';
+  ticket += CMD.LF;  // Salto de línea PRIMERO
+  ticket += CMD.BOLD_OFF;  // Luego resetear
+  ticket += CMD.LF;
+  
+  // ==================== CONTENIDO ====================
+  ticket += CMD.ALIGN_LEFT;
+  
+  // TARJETA - Tamaño alto + negrita
+  ticket += CMD.SIZE_TALL + CMD.BOLD_ON;
+  ticket += 'Tarjeta: ' + (datos.numero || 'N/A');
+  ticket += CMD.LF;  // Salto de línea PRIMERO
+  ticket += CMD.SIZE_NORMAL + CMD.BOLD_OFF;  // Luego resetear
+  
+  // Información del servicio
+  ticket += `Ingreso:      ${datos.fecha_ingreso || ''} ${datos.hora_ingreso || ''}` + CMD.LF;
+  ticket += `Salida:       ${datos.hora_salida || ''}` + CMD.LF;
+  ticket += `Tiempo:       ${datos.tiempo_total || ''}` + CMD.LF;
+  ticket += CMD.LF;
+  
+  // ==================== TOTALES ====================
+  ticket += '-'.repeat(ancho) + CMD.LF;
+  
+  // TOTAL - Tamaño doble + negrita
+  ticket += CMD.SIZE_DOUBLE + CMD.BOLD_ON;
+  ticket += 'TOTAL: $' + parseFloat(datos.total || 0).toFixed(2);
+  ticket += CMD.LF;  // Salto de línea PRIMERO
+  ticket += CMD.SIZE_NORMAL + CMD.BOLD_OFF;  // Luego resetear
+  
   if (datos.descuento && parseFloat(datos.descuento) > 0) {
-    lineas.push(`Descuento:    $${parseFloat(datos.descuento).toFixed(2)}`);
+    ticket += `Descuento:    $${parseFloat(datos.descuento).toFixed(2)}` + CMD.LF;
   }
-  lineas.push(`Metodo Pago:  ${datos.metodo_pago || 'EFECTIVO'}`);
-  lineas.push('-'.repeat(ancho));
-  lineas.push('');
-  lineas.push(centrar('Gracias por su visita', ancho));
-  lineas.push('');
-  lineas.push('');
-  lineas.push('');
-  lineas.push('');
+  ticket += `Metodo Pago:  ${datos.metodo_pago || 'EFECTIVO'}` + CMD.LF;
+  ticket += '-'.repeat(ancho) + CMD.LF;
   
-  return lineas.join('\n');
+  // Alimentar papel antes del corte
+  ticket += CMD.LF + CMD.LF + CMD.LF + CMD.LF;
+  
+  // Corte de papel
+  ticket += CMD.CUT_PARTIAL;
+  
+  return ticket;
 }
 
 // Función para imprimir usando CUPS (macOS/Linux) o lpr (Windows)
@@ -118,7 +223,8 @@ function imprimirConCUPS(contenido, impresora, copias = 1) {
     // Crear archivo temporal
     const tempFile = path.join(TEMP_DIR, `ticket_${Date.now()}.txt`);
     
-    fs.writeFile(tempFile, contenido, 'utf8', (err) => {
+    // Escribir con encoding latin1 para comandos ESC/POS
+    fs.writeFile(tempFile, contenido, 'latin1', (err) => {
       if (err) {
         reject(new Error(`Error al crear archivo temporal: ${err.message}`));
         return;
@@ -132,8 +238,8 @@ function imprimirConCUPS(contenido, impresora, copias = 1) {
         // Windows: usar type + PRINT command
         comando = `type "${tempFile}" | PRINT /D:"${impresora}"`;
       } else {
-        // macOS/Linux: usar lp
-        comando = `lp -d "${impresora}" -n ${copias} "${tempFile}"`;
+        // macOS/Linux: usar lp con opción raw para ESC/POS
+        comando = `lp -d "${impresora}" -n ${copias} -o raw "${tempFile}"`;
       }
       
       console.log(`🖨️  Ejecutando: ${comando}`);
