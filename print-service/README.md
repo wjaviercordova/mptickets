@@ -9,7 +9,7 @@ Este servicio permite imprimir tickets térmicos desde la aplicación web MPTick
 Cuando la aplicación MPTickets está en la nube (AWS, Vercel, etc.), **no tiene acceso directo a la impresora USB** conectada a tu computadora local. Este pequeño servidor soluciona ese problema:
 
 1. Se ejecuta **en tu computadora local** (donde está la impresora)
-2. Escucha en el puerto **3003**
+2. Escucha en el puerto **3002**
 3. La aplicación web (desde la nube) envía los datos del ticket
 4. Este servidor recibe los datos e imprime en la impresora local
 
@@ -117,15 +117,15 @@ Deberías ver:
 ║                                                        ║
 ╚════════════════════════════════════════════════════════╝
 
-✅ Servidor ejecutándose en: http://localhost:3003
+✅ Servidor ejecutándose en: http://localhost:3002
 🖥️  Sistema operativo: darwin
 💻 Hostname: COMPUTADORMAC-2
 
 📡 Endpoints disponibles:
-   POST http://localhost:3003/imprimir     - Imprimir ticket
-   GET  http://localhost:3003/test         - Probar conexión
-   GET  http://localhost:3003/status       - Estado de impresora
-   GET  http://localhost:3003/impresoras   - Listar impresoras
+   POST http://localhost:3002/imprimir     - Imprimir ticket
+   GET  http://localhost:3002/test         - Probar conexión
+   GET  http://localhost:3002/status       - Estado de impresora
+   GET  http://localhost:3002/impresoras   - Listar impresoras
 
 ⏳ Esperando solicitudes de impresión...
 ```
@@ -273,7 +273,7 @@ Completa los siguientes campos:
 #### Desde el navegador:
 Abre la consola de desarrollo (F12) y ejecuta:
 ```javascript
-fetch('http://localhost:3003/test')
+fetch('http://localhost:3002/test')
   .then(r => r.json())
   .then(console.log)
 ```
@@ -291,25 +291,25 @@ Respuesta esperada:
 
 #### Desde la terminal:
 ```bash
-curl http://localhost:3003/test
+curl http://localhost:3002/test
 ```
 
 ### Ver Estado de la Impresora
 
 ```bash
-curl "http://localhost:3003/status?impresora=_3nStar"
+curl "http://localhost:3002/status?impresora=_3nStar"
 ```
 
 ### Listar Todas las Impresoras
 
 ```bash
-curl http://localhost:3003/impresoras
+curl http://localhost:3002/impresoras
 ```
 
 ### Prueba de Impresión Manual
 
 ```bash
-curl -X POST http://localhost:3003/imprimir \
+curl -X POST http://localhost:3002/imprimir \
   -H "Content-Type: application/json" \
   -d '{
     "tipo": "ENTRADA",
@@ -335,17 +335,17 @@ curl -X POST http://localhost:3003/imprimir \
 
 ## ❗ SOLUCIÓN DE PROBLEMAS
 
-### Error: "Puerto 3003 ya está en uso"
+### Error: "Puerto 3002 ya está en uso"
 
 ```bash
 # macOS/Linux: Encontrar el proceso
-lsof -i :3003
+lsof -i :3002
 
 # Matar el proceso
 kill -9 PID_DEL_PROCESO
 
 # Windows: Encontrar el proceso
-netstat -ano | findstr :3003
+netstat -ano | findstr :3002
 
 # Matar el proceso
 taskkill /PID PID_DEL_PROCESO /F
@@ -384,7 +384,7 @@ lpstat -p -d
 Si la aplicación web está en HTTPS y el servidor local en HTTP, el navegador puede bloquear la conexión por seguridad.
 
 **Solución:**
-- Accede a `http://localhost:3003/test` directamente en el navegador
+- Accede a `http://localhost:3002/test` directamente en el navegador
 - Acepta la excepción de seguridad
 - Recarga la aplicación web
 
@@ -431,7 +431,7 @@ mptickets-print-service/
 
 ### ⚠️ Consideraciones Importantes
 
-1. **Puerto abierto solo localmente**: El servidor escucha en `localhost:3003`, no es accesible desde Internet
+1. **Puerto abierto solo localmente**: El servidor escucha en `localhost:3002`, no es accesible desde Internet
 
 2. **CORS habilitado**: Permite conexiones desde cualquier dominio para que funcione con tu app en la nube
 
@@ -441,7 +441,7 @@ mptickets-print-service/
 
 ### 🛡️ Recomendaciones
 
-- **Firewall**: No abras el puerto 3003 en tu router/firewall
+- **Firewall**: No abras el puerto 3002 en tu router/firewall
 - **Actualizaciones**: Mantén Node.js actualizado
 - **Logs**: Revisa los logs periódicamente para detectar problemas
 

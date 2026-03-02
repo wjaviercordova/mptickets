@@ -133,6 +133,12 @@ function generarTicketEntrada(datos) {
   ticket += `Horario ${datos.horario || '24 Horas'}` + CMD.LF;
   ticket += `Tarifa:  ${datos.tarifa || 'Ver tabla'}` + CMD.LF;
   ticket += '-'.repeat(ancho) + CMD.LF;
+  ticket += CMD.LF;
+  
+  // ==================== PIE DE PÁGINA ====================
+  ticket += CMD.ALIGN_CENTER;
+  ticket += 'Conserve este ticket' + CMD.LF;
+  ticket += 'Gracias por su preferencia' + CMD.LF;
   
   // Alimentar papel antes del corte
   ticket += CMD.LF + CMD.LF + CMD.LF + CMD.LF;
@@ -206,6 +212,12 @@ function generarTicketPago(datos) {
   }
   ticket += `Metodo Pago:  ${datos.metodo_pago || 'EFECTIVO'}` + CMD.LF;
   ticket += '-'.repeat(ancho) + CMD.LF;
+  ticket += CMD.LF;
+  
+  // ==================== PIE DE PÁGINA ====================
+  ticket += CMD.ALIGN_CENTER;
+  ticket += 'Conserve este ticket' + CMD.LF;
+  ticket += 'Gracias por su preferencia' + CMD.LF;
   
   // Alimentar papel antes del corte
   ticket += CMD.LF + CMD.LF + CMD.LF + CMD.LF;

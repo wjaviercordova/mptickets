@@ -67,4 +67,7 @@ export interface DatosRecibo {
   costoTotal: number;
   metodoPago: string;
   descuento: number;
+  nombreNegocio: string;
+  direccion: string;
+  telefono: string;
 }

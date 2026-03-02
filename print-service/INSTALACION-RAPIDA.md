@@ -49,7 +49,7 @@ sudo systemctl start mptickets-print.service
 
 ## ✅ Verificación
 
-Abre en el navegador: http://localhost:3003/test
+Abre en el navegador: http://localhost:3002/test
 
 Deberías ver:
 ```json
@@ -64,14 +64,14 @@ Deberías ver:
 ## 🆘 Problemas Comunes
 
 ### No imprime
-- Verifica que el servidor esté corriendo: http://localhost:3003/test
+- Verifica que el servidor esté corriendo: http://localhost:3002/test
 - Revisa el nombre de la impresora: `lpstat -p` (macOS/Linux)
-- Verifica CORS: abre http://localhost:3003/test en el navegador primero
+- Verifica CORS: abre http://localhost:3002/test en el navegador primero
 
 ### Puerto ocupado
 ```bash
-# Matar proceso en puerto 3003
-lsof -i :3003
+# Matar proceso en puerto 3002
+lsof -i :3002
 kill -9 PID
 ```
 

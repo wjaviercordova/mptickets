@@ -13,6 +13,7 @@ import { InformacionVehicularCard } from "./InformacionVehicularCard";
 import { TotalAPagarCard } from "./TotalAPagarCard";
 import { ReciboModal } from "./ReciboModal";
 import { calcularTarifa, formatearTiempoTranscurrido } from "@/lib/calcular-tarifa";
+import { supabaseClient } from "@/lib/supabase/client";
 
 interface PagoSalidaProps {
   parametros: Parametro[];
@@ -44,6 +45,11 @@ export function PagoSalida({
     text: string;
   } | null>(null);
   const [mostrarSelectorTarjetas, setMostrarSelectorTarjetas] = useState(false);
+  const [infoNegocio, setInfoNegocio] = useState<{
+    nombre: string;
+    direccion: string;
+    telefono: string;
+  } | null>(null);
   const { setHeaderInfo } = usePageHeader();
   const inputCodigoRef = useRef<HTMLInputElement>(null);
 
@@ -61,6 +67,37 @@ export function PagoSalida({
     // Limpiar al desmontar
     return () => setHeaderInfo(null);
   }, [setHeaderInfo]);
+
+  // Consultar información del negocio
+  useEffect(() => {
+    const consultarInfoNegocio = async () => {
+      try {
+        const { data, error } = await supabaseClient
+          .from("negocios")
+          .select("nombre, direccion, telefono")
+          .eq("id", negocioId)
+          .single();
+
+        if (error) throw error;
+        if (data) {
+          setInfoNegocio({
+            nombre: data.nombre || "PARQUEADERO",
+            direccion: data.direccion || "",
+            telefono: data.telefono || "N/A",
+          });
+        }
+      } catch (error) {
+        console.error("Error al consultar info del negocio:", error);
+        setInfoNegocio({
+          nombre: "PARQUEADERO",
+          direccion: "",
+          telefono: "N/A",
+        });
+      }
+    };
+
+    consultarInfoNegocio();
+  }, [negocioId]);
 
   // Función para reproducir sonido de error
   const reproducirSonidoError = () => {
@@ -270,9 +307,9 @@ export function PagoSalida({
         setDatosRecibo({
           fecha: new Intl.DateTimeFormat("es-EC", {
             day: "2-digit",
-            month: "short",
+            month: "2-digit",
             year: "numeric",
-          }).format(fechaActual),
+          }).format(fechaActual).replace(/\//g, "."),
           horaEntrada: informacionVehicular?.horaEntrada || "",
           horaSalida: new Intl.DateTimeFormat("es-EC", {
             hour: "2-digit",
@@ -283,6 +320,9 @@ export function PagoSalida({
           costoTotal: totalFinal,
           metodoPago,
           descuento,
+          nombreNegocio: infoNegocio?.nombre || "PARQUEADERO",
+          direccion: infoNegocio?.direccion || "",
+          telefono: infoNegocio?.telefono || "N/A",
         });
         
         // Mostrar mensaje de éxito
@@ -326,15 +366,43 @@ export function PagoSalida({
   };
 
   const handleVerDetalle = () => {
-    if (!datosRecibo) {
+    if (!tarjetaConsultada || !tarjetaSeleccionada || !informacionVehicular) {
       reproducirSonidoError();
       setMessage({
         type: "error",
-        text: "No hay datos de pago para mostrar",
+        text: "Por favor consulta una tarjeta primero",
       });
       setTimeout(() => setMessage(null), 5000);
       return;
     }
+
+    // Si ya se procesó el pago y hay datos guardados, usar esos
+    // Sino, generar vista previa con los datos actuales
+    if (!datosRecibo) {
+      const fechaActual = new Date();
+      const datosReciboTemp: DatosRecibo = {
+        fecha: new Intl.DateTimeFormat("es-EC", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }).format(fechaActual).replace(/\//g, "."),
+        horaEntrada: informacionVehicular.horaEntrada,
+        horaSalida: new Intl.DateTimeFormat("es-EC", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(fechaActual),
+        numeroTarjeta: tarjetaSeleccionada.codigo,
+        tiempoTotal: tiempoTranscurrido,
+        costoTotal: totalAPagar - descuento,
+        metodoPago,
+        descuento,
+        nombreNegocio: infoNegocio?.nombre || "PARQUEADERO",
+        direccion: infoNegocio?.direccion || "",
+        telefono: infoNegocio?.telefono || "N/A",
+      };
+      setDatosRecibo(datosReciboTemp);
+    }
+
     setMostrarRecibo(true);
   };
 
@@ -512,7 +580,7 @@ export function PagoSalida({
         <motion.button
           {...motionButtonProps}
           onClick={handleVerDetalle}
-          disabled={!pagoProcesado}
+          disabled={!tarjetaConsultada}
           className="glass-button flex items-center justify-center gap-2 rounded-2xl border border-violet-400/40 bg-gradient-to-r from-violet-500/30 to-purple-600/30 px-6 py-4 font-semibold backdrop-blur-xl transition hover:from-violet-500/50 hover:to-purple-600/50 hover:shadow-xl hover:shadow-violet-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ color: '#ffffff' }}
         >

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Printer } from "lucide-react";
+import { X, Printer, Receipt } from "lucide-react";
 import type { DatosRecibo } from "@/types/pago";
 
 interface ReciboModalProps {
@@ -29,7 +29,9 @@ export function ReciboModal({ datos, onCerrar }: ReciboModalProps) {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-blue-500/20 p-4">
             <div className="flex items-center gap-3">
-              <Printer className="h-5 w-5 text-blue-400" />
+              <div className="rounded-xl border border-blue-400/40 bg-gradient-to-br from-blue-500/20 to-cyan-600/20 p-2.5">
+                <Receipt className="h-5 w-5 text-blue-400" />
+              </div>
               <h2 className="font-heading text-lg text-white">Recibo de Pago</h2>
             </div>
             <button
@@ -44,75 +46,59 @@ export function ReciboModal({ datos, onCerrar }: ReciboModalProps) {
           <div className="p-6">
             <div
               id="ticket-recibo"
-              className="mx-auto w-full max-w-[300px] rounded-lg border border-gray-600/30 bg-white p-6 font-mono text-sm text-gray-900"
-              style={{ fontFamily: "'Courier New', monospace" }}
+              className="mx-auto w-full max-w-[320px] rounded-lg border border-gray-600/30 bg-white p-6 font-mono text-sm text-gray-900"
+              style={{ fontFamily: "'Courier New', Courier, monospace" }}
             >
-              {/* Header del Ticket */}
-              <div className="border-b-2 border-dashed border-gray-400 pb-3 text-center">
-                <h3 className="text-lg font-bold uppercase">MP Tickets</h3>
-                <p className="text-xs">TICKET ESTACIONAMIENTO</p>
+              {/* ==================== ENCABEZADO ==================== */}
+              <div className="pb-3 text-center">
+                <p className="text-base font-bold">{datos.nombreNegocio}</p>
+                <p className="text-xs">{datos.direccion}</p>
+                <p className="text-xs">Tel: {datos.telefono}</p>
               </div>
 
-              {/* Contenido del Ticket */}
-              <div className="space-y-2 py-4 text-xs">
+              {/* Línea separadora */}
+              <div className="border-t-2 border-dashed border-gray-400 my-2"></div>
+
+              {/* ==================== TÍTULO ==================== */}
+              <div className="py-2 text-center">
+                <p className="text-sm font-bold">RECIBO DE PAGO</p>
+              </div>
+
+              {/* ==================== CONTENIDO ==================== */}
+              <div className="space-y-1 py-2 text-xs">
                 <div className="flex justify-between">
-                  <span className="font-semibold">FECHA:</span>
+                  <span>Fecha:</span>
                   <span>{datos.fecha}</span>
                 </div>
 
-                <div className="border-t border-dashed border-gray-300 pt-2">
-                  <div className="flex justify-between">
-                    <span className="font-semibold">HORA ENTRADA:</span>
-                    <span>{datos.horaEntrada}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-semibold">HORA SALIDA:</span>
-                    <span>{datos.horaSalida}</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span>Entrada:</span>
+                  <span>{datos.horaEntrada}</span>
                 </div>
 
-                <div className="border-t border-dashed border-gray-300 pt-2">
-                  <div className="flex justify-between">
-                    <span className="font-semibold">TARJETA:</span>
-                    <span className="text-base font-bold">{datos.numeroTarjeta}</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span>Salida:</span>
+                  <span>{datos.horaSalida}</span>
                 </div>
 
-                <div className="border-t border-dashed border-gray-300 pt-2">
-                  <div className="flex justify-between">
-                    <span className="font-semibold">TIEMPO TOTAL:</span>
-                    <span>{datos.tiempoTotal}</span>
-                  </div>
+                <div className="flex justify-between pt-1">
+                  <span>Tarjeta:</span>
+                  <span className="font-bold">{datos.numeroTarjeta}</span>
                 </div>
 
-                {datos.descuento > 0 && (
-                  <div className="flex justify-between text-red-600">
-                    <span className="font-semibold">DESCUENTO:</span>
-                    <span>-${datos.descuento.toFixed(2)}</span>
-                  </div>
-                )}
-
-                <div className="border-t border-dashed border-gray-300 pt-2">
-                  <div className="flex justify-between">
-                    <span className="font-semibold">MÉTODO PAGO:</span>
-                    <span>{datos.metodoPago}</span>
-                  </div>
-                </div>
-
-                <div className="border-t-2 border-gray-400 pt-2">
-                  <div className="flex justify-between text-base font-bold">
-                    <span>COSTO TOTAL:</span>
-                    <span>${datos.costoTotal.toFixed(2)}</span>
-                  </div>
+                <div className="flex justify-between items-baseline pt-2 text-sm font-bold">
+                  <span>Total:</span>
+                  <span className="text-right">${datos.costoTotal.toFixed(2)}</span>
                 </div>
               </div>
 
-              {/* Footer del Ticket */}
-              <div className="border-t-2 border-dashed border-gray-400 pt-3 text-center text-xs">
-                <p>¡Gracias por su visita!</p>
-                <p className="mt-1 text-[10px] text-gray-600">
-                  {new Date().toLocaleString("es-EC")}
-                </p>
+              {/* Línea separadora */}
+              <div className="border-t-2 border-gray-400 my-2"></div>
+
+              {/* ==================== PIE DE PÁGINA ==================== */}
+              <div className="pt-2 text-center text-xs space-y-1">
+                <p>Recibo No valido como factura</p>
+                <p>Gracias su preferencia</p>
               </div>
             </div>
 
