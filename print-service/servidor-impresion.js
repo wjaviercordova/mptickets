@@ -123,6 +123,11 @@ function generarTicketPago(datos) {
       console.log(`   nombre_negocio: "${datos.nombre_negocio}"`);
       console.log(`   direccion: "${datos.direccion}"`);
       console.log(`   telefono: "${datos.telefono}"`);
+      console.log(`   fecha: "${datos.fecha}"`);
+      console.log(`   hora_entrada: "${datos.hora_entrada}"`);
+      console.log(`   hora_salida: "${datos.hora_salida}"`);
+      console.log(`   numero_tarjeta: "${datos.numero_tarjeta}"`);
+      console.log(`   total: "${datos.total}"`);
 
       const buffer = Buffer.concat([
         // INICIALIZAR Y CONFIGURAR
