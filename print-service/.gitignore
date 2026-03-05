@@ -22,3 +22,9 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Test files
+test-*.js
+
+# Backups
+*-backup-*.js
