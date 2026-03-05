@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Save, Printer, RefreshCw, FileText, Settings2, CheckCircle2 } from "lucide-react";
+import { Save, Printer, RefreshCw, FileText, Settings2 } from "lucide-react";
 import { motionButtonProps } from "@/lib/button-styles";
 import { useImpresionConfig } from "@/contexts/ImpresionConfigContext";
 
@@ -39,29 +39,19 @@ export function ImpresionTab({ configActual, onSave }: ImpresionTabProps) {
   const [config, setConfig] = useState<ConfigImpresion>(configActual || configImpresionDefault);
   const [loading, setLoading] = useState(false);
   const [imprimiendo, setImprimiendo] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const { refrescar } = useImpresionConfig();
 
   const handleSave = async () => {
     setLoading(true);
-    setMessage(null);
     try {
       await onSave(config);
       
       // Refrescar el Context para que todos los componentes tengan la config actualizada
       await refrescar();
-      
-      setMessage({
-        type: "success",
-        text: "✅ Configuración de impresión guardada exitosamente",
-      });
-      setTimeout(() => setMessage(null), 5000);
     } catch {
-      setMessage({
-        type: "error",
-        text: "Error al guardar la configuración",
-      });
-      setTimeout(() => setMessage(null), 5000);
+      // El componente padre maneja los mensajes
     } finally {
       setLoading(false);
     }
@@ -151,26 +141,6 @@ export function ImpresionTab({ configActual, onSave }: ImpresionTabProps) {
           Configura la impresora térmica para tickets de entrada y salida
         </p>
       </div>
-
-      {/* Mensaje de estado */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-3 rounded-2xl border p-4 backdrop-blur-xl ${
-            message.type === "success"
-              ? "border-emerald-400/40 bg-emerald-500/20 text-emerald-200"
-              : "border-red-400/40 bg-red-500/20 text-red-200"
-          }`}
-        >
-          {message.type === "success" ? (
-            <CheckCircle2 className="h-5 w-5" />
-          ) : (
-            <FileText className="h-5 w-5" />
-          )}
-          <span className="font-medium">{message.text}</span>
-        </motion.div>
-      )}
 
       {/* Toggle Principal - Habilitar Impresión */}
       <div className="glass-card border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/60 to-[#0f172a]/80 p-6 shadow-xl backdrop-blur-xl">

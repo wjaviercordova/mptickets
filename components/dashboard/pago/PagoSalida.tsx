@@ -8,12 +8,17 @@ import type { Parametro } from "@/types/ingreso";
 import type { TarjetaPendiente, InformacionVehicular, DatosRecibo } from "@/types/pago";
 import { motionButtonProps } from "@/lib/button-styles";
 import { usePageHeader } from "@/contexts/PageHeaderContext";
+import { useImpresionConfig } from "@/contexts/ImpresionConfigContext";
 import { TarjetaPendienteSelector } from "./TarjetaPendienteSelector";
 import { InformacionVehicularCard } from "./InformacionVehicularCard";
 import { TotalAPagarCard } from "./TotalAPagarCard";
 import { ReciboModal } from "./ReciboModal";
 import { calcularTarifa, formatearTiempoTranscurrido } from "@/lib/calcular-tarifa";
 import { supabaseClient } from "@/lib/supabase/client";
+import {
+  imprimirTicketPago,
+  type DatosTicketPago,
+} from "@/lib/impresion";
 
 interface PagoSalidaProps {
   parametros: Parametro[];
@@ -51,6 +56,7 @@ export function PagoSalida({
     telefono: string;
   } | null>(null);
   const { setHeaderInfo } = usePageHeader();
+  const { negocio, configImpresion } = useImpresionConfig();
   const inputCodigoRef = useRef<HTMLInputElement>(null);
 
   // Setear información del header al montar el componente
@@ -106,6 +112,74 @@ export function PagoSalida({
       audio.play().catch(err => console.warn("No se pudo reproducir el sonido:", err));
     } catch (error) {
       console.warn("Error al reproducir sonido:", error);
+    }
+  };
+
+  // Función para imprimir ticket de pago si está habilitado (usa Context, sin queries adicionales)
+  const imprimirTicketPagoSiHabilitado = async (datosReciboImpresion: DatosRecibo) => {
+    try {
+      console.log("🖨️ [IMPRESION PAGO] Verificando configuración de impresión...");
+      
+      // 1. Validar que tenemos configuración de impresión (desde Context)
+      if (!configImpresion) {
+        console.log("⚠️ [IMPRESION PAGO] No hay configuración de impresión");
+        return;
+      }
+      
+      console.log("📋 [IMPRESION PAGO] Configuración obtenida (desde caché):", {
+        habilitada: configImpresion.habilitada,
+        imprimir_en_pago: configImpresion.imprimir_en_pago,
+        cola_impresion: configImpresion.cola_impresion,
+      });
+      
+      // 2. Validar que ambos toggles estén activos
+      if (!configImpresion.habilitada) {
+        console.log("ℹ️ [IMPRESION PAGO] Impresión deshabilitada (toggle principal)");
+        return;
+      }
+      
+      if (!configImpresion.imprimir_en_pago) {
+        console.log("ℹ️ [IMPRESION PAGO] Impresión automática en pago deshabilitada");
+        return;
+      }
+      
+      // 3. Validar que tenemos datos del negocio (desde Context)
+      if (!negocio) {
+        console.error("❌ [IMPRESION PAGO] No hay datos del negocio en caché");
+        return;
+      }
+      
+      console.log("✅ [IMPRESION PAGO] Impresión habilitada, preparando ticket...");
+      console.log("✅ [IMPRESION PAGO] Datos del negocio:", negocio.nombre);
+      
+      // 4. Preparar datos del ticket de pago
+      const datosTicket: DatosTicketPago = {
+        nombre_negocio: negocio.nombre,
+        direccion: negocio.direccion || "N/A",
+        telefono: negocio.telefono || "N/A",
+        fecha_ingreso: datosReciboImpresion.fecha,
+        hora_ingreso: datosReciboImpresion.horaEntrada,
+        hora_salida: datosReciboImpresion.horaSalida,
+        numero_tarjeta: datosReciboImpresion.numeroTarjeta,
+        tiempo_total: datosReciboImpresion.tiempoTotal,
+        total: datosReciboImpresion.costoTotal,
+        metodo_pago: datosReciboImpresion.metodoPago,
+        descuento: datosReciboImpresion.descuento,
+      };
+      
+      console.log("📝 [IMPRESION PAGO] Datos del ticket preparados:", datosTicket);
+      
+      // 5. Imprimir
+      const resultado = await imprimirTicketPago(datosTicket, configImpresion);
+      
+      if (resultado) {
+        console.log("✅ [IMPRESION PAGO] Ticket de pago impreso automáticamente");
+      } else {
+        console.warn("⚠️ [IMPRESION PAGO] No se pudo imprimir el ticket");
+      }
+    } catch (error) {
+      console.error("❌ [IMPRESION PAGO] Error al imprimir ticket:", error);
+      // No lanzar error para no interrumpir el flujo principal
     }
   };
 
@@ -231,6 +305,7 @@ export function PagoSalida({
       horaEntrada: new Intl.DateTimeFormat("es-EC", {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
       }).format(fechaEntrada),
       fechaEntrada: new Intl.DateTimeFormat("es-EC", {
         day: "2-digit",
@@ -304,7 +379,7 @@ export function PagoSalida({
         
         // Preparar datos del recibo
         const fechaActual = new Date();
-        setDatosRecibo({
+        const datosReciboPreparados = {
           fecha: new Intl.DateTimeFormat("es-EC", {
             day: "2-digit",
             month: "2-digit",
@@ -314,6 +389,7 @@ export function PagoSalida({
           horaSalida: new Intl.DateTimeFormat("es-EC", {
             hour: "2-digit",
             minute: "2-digit",
+            hour12: false,
           }).format(fechaActual),
           numeroTarjeta: tarjetaSeleccionada.codigo,
           tiempoTotal: tiempoTranscurrido,
@@ -323,7 +399,12 @@ export function PagoSalida({
           nombreNegocio: infoNegocio?.nombre || "PARQUEADERO",
           direccion: infoNegocio?.direccion || "",
           telefono: infoNegocio?.telefono || "N/A",
-        });
+        };
+        
+        setDatosRecibo(datosReciboPreparados);
+        
+        // ✨ IMPRESIÓN AUTOMÁTICA: Imprimir ticket si está habilitado (misma lógica que ingreso)
+        await imprimirTicketPagoSiHabilitado(datosReciboPreparados);
         
         // Mostrar mensaje de éxito
         setMessage({
@@ -390,6 +471,7 @@ export function PagoSalida({
         horaSalida: new Intl.DateTimeFormat("es-EC", {
           hour: "2-digit",
           minute: "2-digit",
+          hour12: false,
         }).format(fechaActual),
         numeroTarjeta: tarjetaSeleccionada.codigo,
         tiempoTotal: tiempoTranscurrido,

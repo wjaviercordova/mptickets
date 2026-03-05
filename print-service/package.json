@@ -7,12 +7,18 @@
     "start": "node servidor-impresion.js",
     "dev": "nodemon servidor-impresion.js"
   },
-  "keywords": ["impresion", "termica", "pos", "cups"],
+  "keywords": [
+    "impresion",
+    "termica",
+    "pos",
+    "cups"
+  ],
   "author": "MPTickets",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "axios": "^1.13.6",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

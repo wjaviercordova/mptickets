@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Printer, Receipt } from "lucide-react";
+import { X, Printer, Receipt, Loader2 } from "lucide-react";
 import type { DatosRecibo } from "@/types/pago";
+import { useImpresionConfig } from "@/contexts/ImpresionConfigContext";
 
 interface ReciboModalProps {
   datos: DatosRecibo;
@@ -10,6 +12,69 @@ interface ReciboModalProps {
 }
 
 export function ReciboModal({ datos, onCerrar }: ReciboModalProps) {
+  const [imprimiendo, setImprimiendo] = useState(false);
+  const [mensaje, setMensaje] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const { configImpresion } = useImpresionConfig();
+
+  const handleImprimir = async () => {
+    setImprimiendo(true);
+    setMensaje(null);
+
+    try {
+      if (!configImpresion) {
+        throw new Error("No se pudo obtener la configuración de impresión");
+      }
+
+      // Preparar datos para el servidor de impresión
+      const datosImpresion = {
+        tipo: "PAGO",
+        datos: {
+          nombre_negocio: datos.nombreNegocio,
+          direccion: datos.direccion,
+          telefono: datos.telefono,
+          fecha: datos.fecha,
+          hora_entrada: datos.horaEntrada,
+          hora_salida: datos.horaSalida,
+          numero_tarjeta: datos.numeroTarjeta,
+          total: datos.costoTotal,
+        },
+        config: {
+          cola_impresion: configImpresion.cola_impresion || "_3nStar",
+          copias_por_ticket: configImpresion.copias_por_ticket || 1,
+        },
+      };
+
+      console.log("🖨️ [RECIBO] Enviando datos a imprimir:", datosImpresion);
+
+      // Enviar a imprimir
+      const response = await fetch("http://localhost:3003/imprimir", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datosImpresion),
+      });
+
+      if (response.ok) {
+        setMensaje({
+          type: "success",
+          text: "✅ Recibo enviado a imprimir",
+        });
+        setTimeout(() => setMensaje(null), 3000);
+      } else {
+        const data = await response.json();
+        throw new Error(data.error || "Error al imprimir");
+      }
+    } catch (error) {
+      console.error("Error al imprimir:", error);
+      setMensaje({
+        type: "error",
+        text: `❌ Error: ${error instanceof Error ? error.message : "No se pudo imprimir"}`,
+      });
+      setTimeout(() => setMensaje(null), 5000);
+    } finally {
+      setImprimiendo(false);
+    }
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -102,14 +167,35 @@ export function ReciboModal({ datos, onCerrar }: ReciboModalProps) {
               </div>
             </div>
 
+            {/* Mensaje de estado */}
+            {mensaje && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className={`mt-4 rounded-lg p-3 text-sm text-center ${
+                  mensaje.type === "success"
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                    : "bg-red-500/20 text-red-300 border border-red-500/30"
+                }`}
+              >
+                {mensaje.text}
+              </motion.div>
+            )}
+
             {/* Botones */}
             <div className="mt-6 flex gap-3">
               <button
-                onClick={() => window.print()}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/20 to-cyan-600/20 px-4 py-3 font-semibold text-blue-300 backdrop-blur-xl transition hover:from-blue-500/30 hover:to-cyan-600/30"
+                onClick={handleImprimir}
+                disabled={imprimiendo}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/20 to-cyan-600/20 px-4 py-3 font-semibold text-blue-300 backdrop-blur-xl transition hover:from-blue-500/30 hover:to-cyan-600/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Printer className="h-5 w-5" />
-                Imprimir
+                {imprimiendo ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Printer className="h-5 w-5" />
+                )}
+                {imprimiendo ? "Imprimiendo..." : "Imprimir"}
               </button>
               <button
                 onClick={onCerrar}

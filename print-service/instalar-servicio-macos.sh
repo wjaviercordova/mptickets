@@ -24,7 +24,7 @@ cat > "$PLIST_FILE" << EOF
     
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/node</string>
+        <string>/opt/homebrew/bin/node</string>
         <string>$SCRIPT_DIR/servidor-impresion.js</string>
     </array>
     

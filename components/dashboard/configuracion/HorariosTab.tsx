@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Save, Clock, Copy, CheckCircle2, AlertCircle } from "lucide-react";
+import { Save, Clock, Copy } from "lucide-react";
 import { motionButtonProps } from "@/lib/button-styles";
 
 interface HorarioDia {
@@ -70,7 +70,8 @@ export function HorariosTab({ horariosActuales, onSave }: HorariosTabProps) {
   });
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [diaParaCopiar, setDiaParaCopiar] = useState<string | null>(null);
 
   // Actualizar horarios cuando cambien las props (al volver al tab después de guardar)
@@ -148,21 +149,11 @@ export function HorariosTab({ horariosActuales, onSave }: HorariosTabProps) {
 
   const handleSave = async () => {
     setLoading(true);
-    setMessage(null);
 
     try {
       await onSave(horarios);
-      setMessage({
-        type: "success",
-        text: "✅ Horarios guardados exitosamente",
-      });
-      setTimeout(() => setMessage(null), 5000);
     } catch {
-      setMessage({
-        type: "error",
-        text: "❌ Error al guardar horarios",
-      });
-      setTimeout(() => setMessage(null), 5000);
+      // El componente padre maneja los mensajes
     } finally {
       setLoading(false);
     }
@@ -179,26 +170,6 @@ export function HorariosTab({ horariosActuales, onSave }: HorariosTabProps) {
           </p>
         </div>
       </div>
-
-      {/* Mensaje de estado */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-3 rounded-2xl border p-4 backdrop-blur-sm ${
-            message.type === "success"
-              ? "border-emerald-400/40 bg-emerald-500/20 text-emerald-200"
-              : "border-red-400/40 bg-red-500/20 text-red-200"
-          }`}
-        >
-          {message.type === "success" ? (
-            <CheckCircle2 className="h-5 w-5" />
-          ) : (
-            <AlertCircle className="h-5 w-5" />
-          )}
-          <span className="text-sm font-medium">{message.text}</span>
-        </motion.div>
-      )}
 
       {/* Lista de días */}
       <div className="space-y-3">

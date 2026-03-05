@@ -129,11 +129,14 @@ export function SistemaForm({
 
       if (response.ok) {
         setMessage({ type: "success", text: "Configuración guardada exitosamente" });
+        setTimeout(() => setMessage(null), 5000);
       } else {
         setMessage({ type: "error", text: result.message || "Error al guardar" });
+        setTimeout(() => setMessage(null), 5000);
       }
     } catch {
       setMessage({ type: "error", text: "Error de conexión" });
+      setTimeout(() => setMessage(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -158,11 +161,14 @@ export function SistemaForm({
 
       if (response.ok) {
         setMessage({ type: "success", text: "Capacidad actualizada exitosamente" });
+        setTimeout(() => setMessage(null), 5000);
       } else {
         setMessage({ type: "error", text: result.message || "Error al guardar" });
+        setTimeout(() => setMessage(null), 5000);
       }
     } catch {
       setMessage({ type: "error", text: "Error de conexión" });
+      setTimeout(() => setMessage(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -625,6 +631,7 @@ export function SistemaForm({
                   type: "success",
                   text: "Horarios actualizados exitosamente",
                 });
+                setTimeout(() => setMessage(null), 5000);
                 
                 // Refrescar para obtener datos actualizados del servidor
                 setTimeout(() => {
@@ -635,6 +642,7 @@ export function SistemaForm({
                   type: "error",
                   text: error instanceof Error ? error.message : "Error de conexión",
                 });
+                setTimeout(() => setMessage(null), 5000);
                 throw error;
               } finally {
                 setLoading(false);
@@ -688,14 +696,17 @@ export function SistemaForm({
                     type: "success",
                     text: "Configuración de impresión actualizada exitosamente",
                   });
+                  setTimeout(() => setMessage(null), 5000);
                 } else {
                   setMessage({
                     type: "error",
                     text: result.message || "Error al guardar",
                   });
+                  setTimeout(() => setMessage(null), 5000);
                 }
               } catch {
                 setMessage({ type: "error", text: "Error de conexión" });
+                setTimeout(() => setMessage(null), 5000);
               } finally {
                 setLoading(false);
               }
@@ -732,14 +743,17 @@ export function SistemaForm({
                     type: "success",
                     text: "Apariencia actualizada exitosamente",
                   });
+                  setTimeout(() => setMessage(null), 5000);
                 } else {
                   setMessage({
                     type: "error",
                     text: result.message || "Error al guardar",
                   });
+                  setTimeout(() => setMessage(null), 5000);
                 }
               } catch {
                 setMessage({ type: "error", text: "Error de conexión" });
+                setTimeout(() => setMessage(null), 5000);
               } finally {
                 setLoading(false);
               }
