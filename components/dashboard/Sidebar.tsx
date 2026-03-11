@@ -5,22 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Activity,
   BarChart3,
   Building2,
-  Car,
   ChevronDown,
   CreditCard,
-  DollarSign,
   Home,
   LogIn,
   LogOut,
-  Receipt,
   Search,
   Server,
   Settings,
-  Ticket,
-  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -42,23 +36,12 @@ const navItems: NavItem[] = [
   { label: "Inicio", icon: Home, href: "/dashboard" },
   { label: "Ingreso Vehicular", icon: LogIn, href: "/dashboard/ingreso" },
   { label: "Pago y Salida", icon: CreditCard, href: "/dashboard/pago" },
-  {
-    label: "Consultas",
-    icon: Search,
-    subItems: [
-      { label: "Tarjetas Emitidas", icon: Ticket, href: "/dashboard/consultas/tarjetas" },
-      { label: "Costos Registrados", icon: DollarSign, href: "/dashboard/consultas/costos" },
-      { label: "Vehículos", icon: Car, href: "/dashboard/consultas/vehiculos" },
-      { label: "Actividad", icon: Activity, href: "/dashboard/consultas/actividad" },
-    ],
-  },
+  { label: "Consultas", icon: Search, href: "/dashboard/consultas" },
   { label: "Reportes", icon: BarChart3, href: "/dashboard/reportes" },
   {
     label: "Configuración",
     icon: Settings,
     subItems: [
-      { label: "Tarjetas", icon: Receipt, href: "/dashboard/configuracion/tarjetas" },
-      { label: "Usuarios", icon: Users, href: "/dashboard/configuracion/usuarios" },
       { label: "Negocio", icon: Building2, href: "/dashboard/configuracion/negocio" },
       { label: "Sistema", icon: Server, href: "/dashboard/configuracion/sistema" },
     ],

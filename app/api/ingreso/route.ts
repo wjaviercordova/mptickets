@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { obtenerFechaHoraActual } from "@/lib/timezone";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -134,6 +135,10 @@ export async function POST(request: NextRequest) {
 
     // Crear registro en tabla codigos
     console.log("💾 [API INGRESO] Creando nuevo ingreso...");
+    
+    // Obtener hora actual en el timezone del negocio
+    const horaEntrada = await obtenerFechaHoraActual(negocioId);
+    
     const nuevoIngreso = {
       negocio_id: negocioId,
       tarjeta_id: tarjetaId,
@@ -147,7 +152,7 @@ export async function POST(request: NextRequest) {
       color: "",
       marca: "",
       modelo: "",
-      hora_entrada: new Date().toISOString(),
+      hora_entrada: horaEntrada,
       hora_salida: null,
       costo: 0,
       descuento: 0,

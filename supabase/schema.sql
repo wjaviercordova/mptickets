@@ -13,9 +13,9 @@ create table if not exists public.negocios (
   ciudad character varying default ''::character varying,
   logo_url text,
   configuracion jsonb default '{}'::jsonb,
-  plan character varying default 'basic'::character varying check (
+  plan character varying default 'demo'::character varying check (
     plan::text = any (
-      array['basic'::character varying, 'premium'::character varying, 'enterprise'::character varying]
+      array['demo'::character varying, 'basica'::character varying, 'premium'::character varying]
     )
   ),
   estado character varying default 'activo'::character varying check (
@@ -25,9 +25,11 @@ create table if not exists public.negocios (
   ),
   fecha_creacion timestamp with time zone default now(),
   fecha_actualizacion timestamp with time zone default now(),
+  fecha_expiracion timestamp with time zone default (now() + interval '30 days'),
   metadata jsonb default '{}'::jsonb,
   limite_usuarios integer default 10,
-  limite_tarjetas integer default 1000,
+  limite_tarjetas integer default 10,
+  capacidad_maxima integer default 10,
   codigo character varying(20),
   constraint negocios_pkey primary key (id),
   constraint negocios_codigo_key unique (codigo),

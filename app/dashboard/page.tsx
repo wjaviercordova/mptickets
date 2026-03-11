@@ -94,11 +94,12 @@ export default async function DashboardPage() {
 
       const { data: negocioData } = await supabase
         .from("negocios")
-        .select("nombre")
+        .select("nombre, capacidad_maxima")
         .eq("id", negocioId)
         .single();
 
       negocioNombre = negocioData?.nombre ?? "";
+      const capacidadMaxima = negocioData?.capacidad_maxima ?? 100;
 
       // Obtener configuración del tema
       const { data: temaData } = await supabase
@@ -141,21 +142,27 @@ export default async function DashboardPage() {
         .from("codigos")
         .select("total, hora_entrada, hora_salida", { count: "exact" })
         .eq("negocio_id", negocioId)
+        .eq("estado", "1")
         .gte("hora_entrada", startIso);
 
-      // Obtener capacidad máxima del negocio
-      const { data: negocioConfig } = await supabase
-        .from("negocios")
-        .select("capacidad_maxima")
-        .eq("id", negocioId)
-        .single();
-
-      const capacidadMaxima = negocioConfig?.capacidad_maxima ?? 100;
+      // Obtener tickets de ayer para comparación
+      const startOfYesterday = new Date(startOfDay);
+      startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+      const endOfYesterday = new Date(startOfDay);
+      
+      const { data: ticketsAyer } = await supabase
+        .from("codigos")
+        .select("total")
+        .eq("negocio_id", negocioId)
+        .eq("estado", "1")
+        .gte("hora_entrada", startOfYesterday.toISOString())
+        .lt("hora_entrada", endOfYesterday.toISOString());
 
       const { data: movimientos } = await supabase
         .from("codigos")
         .select("id, codigo, placa, hora_entrada, hora_salida, total")
         .eq("negocio_id", negocioId)
+        .eq("estado", "1")
         .order("fecha_creacion", { ascending: false })
         .limit(3);
 
@@ -168,6 +175,18 @@ export default async function DashboardPage() {
       const totalCobros =
         ticketsHoy?.reduce((acc, item) => acc + Number(item.total ?? 0), 0) ??
         0;
+
+      const totalCobrosAyer =
+        ticketsAyer?.reduce((acc, item) => acc + Number(item.total ?? 0), 0) ??
+        0;
+
+      // Calcular porcentaje de cambio en ingresos
+      let cambioIngresos = 0;
+      if (totalCobrosAyer > 0) {
+        cambioIngresos = ((totalCobros - totalCobrosAyer) / totalCobrosAyer) * 100;
+      } else if (totalCobros > 0) {
+        cambioIngresos = 100;
+      }
 
       const duraciones =
         ticketsHoy
@@ -188,13 +207,27 @@ export default async function DashboardPage() {
         ? Math.round((Number(activosCount ?? 0) / capacidadMaxima) * 100)
         : 0;
 
+      // Actualizar estadísticas con datos reales
       stats[0].value = String(activosCount ?? 0);
-      stats[0].description = `+${ticketsCount ?? 0} hoy`;
+      stats[0].description = ticketsCount ? `${ticketsCount} registros hoy` : "Sin vehículos activos";
+      
       stats[1].value = currencyFormatter.format(totalCobros);
+      const signo = cambioIngresos >= 0 ? "+" : "";
+      stats[1].description = totalCobrosAyer > 0 
+        ? `${signo}${cambioIngresos.toFixed(1)}% vs ayer`
+        : totalCobros > 0 
+          ? "Primeros ingresos del día" 
+          : "Sin ingresos hoy";
+      
       stats[2].value = formatDuration(promedio);
+      stats[2].description = duraciones.length > 0 
+        ? `Basado en ${duraciones.length} vehículos` 
+        : "Sin datos de estancia";
+      
       stats[3].value = `${ocupacion}%`;
-      stats[3].description = `Capacidad máxima: ${capacidadMaxima}`;
+      stats[3].description = `${activosCount ?? 0}/${capacidadMaxima} espacios ocupados`;
     } catch (error) {
+      console.error("Error al cargar datos del dashboard:", error);
       warningMessage = "No se pudieron cargar los datos en tiempo real.";
     }
   } else {

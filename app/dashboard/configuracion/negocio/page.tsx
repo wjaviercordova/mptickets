@@ -24,6 +24,10 @@ export default async function NegocioConfigPage() {
     .eq("id", negocioId)
     .single();
 
+  // Obtener días restantes de la licencia (para plan Demo)
+  const { data: diasRestantes } = await supabase
+    .rpc('get_dias_restantes_licencia', { negocio_uuid: negocioId });
+
   // Obtener usuarios del negocio
   const { data: usuarios } = await supabase
     .from("usuarios")
@@ -45,6 +49,7 @@ export default async function NegocioConfigPage() {
         usuarios={usuarios || []}
         tarjetas={tarjetas || []}
         negocioId={negocioId}
+        diasRestantes={diasRestantes}
       />
     </div>
   );

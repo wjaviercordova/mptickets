@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { calcularTarifa } from "@/lib/calcular-tarifa";
+import { obtenerFechaHoraActual } from "@/lib/timezone";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -116,7 +117,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const horaSalida = new Date().toISOString();
+    // Obtener hora actual en el timezone del negocio
+    const horaSalida = await obtenerFechaHoraActual(negocioId);
     console.log("⏰ [API PAGO] Calculando tarifa:", {
       hora_entrada: ingreso.hora_entrada,
       hora_salida: horaSalida

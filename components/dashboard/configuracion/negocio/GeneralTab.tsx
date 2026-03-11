@@ -22,16 +22,18 @@ interface Negocio {
   estado: string;
   fecha_creacion: string;
   fecha_actualizacion: string;
+  fecha_expiracion: string | null;
   codigo: string;
 }
 
 interface GeneralTabProps {
   negocio: Negocio;
+  diasRestantes: number | null;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
 }
 
-export function GeneralTab({ negocio, onSuccess, onError }: GeneralTabProps) {
+export function GeneralTab({ negocio, diasRestantes, onSuccess, onError }: GeneralTabProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -84,11 +86,14 @@ export function GeneralTab({ negocio, onSuccess, onError }: GeneralTabProps) {
 
   const getPlanBadge = (plan: string) => {
     const plans: Record<string, { label: string; color: string }> = {
-      basic: { label: "Básico", color: "from-gray-500/20 to-gray-600/20 text-gray-300 border-gray-400/30" },
+      demo: { label: "Demo (30 días)", color: "from-blue-500/20 to-cyan-600/20 text-blue-300 border-blue-400/30" },
+      basica: { label: "Básica", color: "from-emerald-500/20 to-green-600/20 text-emerald-300 border-emerald-400/30" },
       premium: { label: "Premium", color: "from-amber-500/20 to-yellow-600/20 text-amber-300 border-amber-400/30" },
-      enterprise: { label: "Enterprise", color: "from-purple-500/20 to-indigo-600/20 text-purple-300 border-purple-400/30" },
+      // Mantener compatibilidad con nombres antiguos
+      basic: { label: "Básica", color: "from-emerald-500/20 to-green-600/20 text-emerald-300 border-emerald-400/30" },
+      enterprise: { label: "Premium", color: "from-amber-500/20 to-yellow-600/20 text-amber-300 border-amber-400/30" },
     };
-    return plans[plan] || plans.basic;
+    return plans[plan] || plans.demo;
   };
 
   const getEstadoBadge = (estado: string) => {
@@ -267,6 +272,47 @@ export function GeneralTab({ negocio, onSuccess, onError }: GeneralTabProps) {
               {estadoInfo.label}
             </div>
           </div>
+
+          {/* Días Restantes (solo para plan Demo) */}
+          {negocio.plan === 'demo' && diasRestantes !== null && (
+            <div className={`rounded-2xl border p-4 backdrop-blur-sm ${
+              diasRestantes <= 3 
+                ? 'border-red-400/30 bg-red-950/20'
+                : diasRestantes <= 7
+                  ? 'border-amber-400/30 bg-amber-950/20'
+                  : 'border-blue-400/20 bg-blue-950/20'
+            }`}>
+              <div className="mb-2 text-sm font-medium text-blue-300">
+                Licencia Demo
+              </div>
+              <div className={`inline-flex items-center gap-2 rounded-3xl border bg-gradient-to-r px-3 py-1.5 text-sm font-semibold backdrop-blur-sm ${
+                diasRestantes === 0
+                  ? 'from-red-500/20 to-red-600/20 text-red-300 border-red-400/30'
+                  : diasRestantes <= 3
+                    ? 'from-red-500/20 to-orange-600/20 text-red-300 border-red-400/30'
+                    : diasRestantes <= 7
+                      ? 'from-amber-500/20 to-yellow-600/20 text-amber-300 border-amber-400/30'
+                      : 'from-emerald-500/20 to-green-600/20 text-emerald-300 border-emerald-400/30'
+              }`}>
+                {diasRestantes === 0 
+                  ? 'Expira hoy'
+                  : diasRestantes === 1
+                    ? '1 día restante'
+                    : `${diasRestantes} días restantes`
+                }
+              </div>
+              {diasRestantes <= 7 && (
+                <p className="mt-2 text-xs text-amber-300/70">
+                  {diasRestantes === 0 
+                    ? '¡Tu licencia expira hoy! Actualiza a un plan pago.'
+                    : diasRestantes <= 3
+                      ? '¡Actualiza pronto a un plan pago para no perder acceso!'
+                      : 'Considera actualizar a Básica o Premium.'
+                  }
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Código */}
           <div className="rounded-2xl border border-blue-400/20 bg-blue-950/20 p-4 backdrop-blur-sm">

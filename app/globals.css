@@ -176,3 +176,264 @@ body {
     border-radius: 10px;
   }
 }
+
+/* Estilos de impresión para reportes */
+@media print {
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Ocultar elementos innecesarios al imprimir */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Eliminar sombras y efectos glassmorphism */
+  * {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Forzar colores de texto legibles */
+  .print\:text-gray-900 {
+    color: #111827 !important;
+  }
+
+  .print\:text-gray-600 {
+    color: #4b5563 !important;
+  }
+
+  .print\:text-gray-500 {
+    color: #6b7280 !important;
+  }
+
+  /* Forzar fondos blancos */
+  .print\:bg-white {
+    background: white !important;
+    background-color: white !important;
+    background-image: none !important;
+  }
+
+  /* Bordes para tablas y tarjetas */
+  .print\:border-gray-300 {
+    border-color: #d1d5db !important;
+  }
+
+  .print\:border-gray-200 {
+    border-color: #e5e7eb !important;
+  }
+
+  .print\:shadow {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  /* Evitar saltos de página dentro de elementos */
+  .print\:break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Permitir saltos de página antes de elementos */
+  .print\:break-before {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Colores específicos para gráficos en impresión */
+  .print\:text-emerald-600 {
+    color: #059669 !important;
+  }
+
+  .print\:text-cyan-600 {
+    color: #0891b2 !important;
+  }
+
+  .print\:text-purple-600 {
+    color: #9333ea !important;
+  }
+
+  .print\:text-orange-600 {
+    color: #ea580c !important;
+  }
+
+  .print\:text-red-600 {
+    color: #dc2626 !important;
+  }
+
+  .print\:bg-gray-50 {
+    background-color: #f9fafb !important;
+  }
+
+  .print\:bg-gray-100 {
+    background-color: #f3f4f6 !important;
+  }
+
+  .print\:bg-emerald-100 {
+    background-color: #d1fae5 !important;
+  }
+
+  .print\:bg-cyan-100 {
+    background-color: #cffafe !important;
+  }
+
+  .print\:bg-purple-100 {
+    background-color: #f3e8ff !important;
+  }
+
+  .print\:bg-orange-100 {
+    background-color: #ffedd5 !important;
+  }
+
+  .print\:bg-red-100 {
+    background-color: #fee2e2 !important;
+  }
+
+  .print\:bg-amber-50 {
+    background-color: #fffbeb !important;
+  }
+
+  .print\:bg-cyan-50 {
+    background-color: #ecfeff !important;
+  }
+
+  .print\:bg-emerald-50 {
+    background-color: #ecfdf5 !important;
+  }
+
+  .print\:text-gray-700 {
+    color: #374151 !important;
+  }
+
+  .print\:text-emerald-700 {
+    color: #047857 !important;
+  }
+
+  .print\:text-cyan-700 {
+    color: #0e7490 !important;
+  }
+
+  .print\:text-amber-700 {
+    color: #b45309 !important;
+  }
+
+  .print\:text-cyan-900 {
+    color: #164e63 !important;
+  }
+
+  .print\:border-gray-400 {
+    border-color: #9ca3af !important;
+  }
+
+  .print\:from-cyan-500 {
+    /* En impresión, los gradientes se simplifican a colores sólidos */
+    background: #06b6d4 !important;
+  }
+
+  .print\:to-cyan-600 {
+    background: #0891b2 !important;
+  }
+
+  /* Optimizar tamaño de fuentes para impresión */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  /* Quitar animaciones y transiciones */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* ========================================
+     REGLAS ESPECÍFICAS PARA REPORTES
+     ======================================== */
+  
+  /* Ocultar navegación, sidebar y controles al imprimir */
+  nav,
+  aside,
+  header:not(.print-header),
+  footer:not(.print-footer),
+  button:not(.print-button),
+  .sidebar,
+  .navbar,
+  [role="navigation"],
+  [role="banner"] {
+    display: none !important;
+  }
+
+  /* Ocultar componentes visuales de reportes (gráficos, cards animadas) */
+  .motion-div,
+  svg:not(.print-svg),
+  canvas,
+  [class*="gradient"],
+  [class*="glassmorphism"],
+  [class*="backdrop-blur"] {
+    display: none !important;
+  }
+
+  /* Ocultar todos los reportes visuales al imprimir */
+  div[class*="ReporteEjecutivo"],
+  div[class*="ReporteConsolidado"],
+  div[class*="ReporteOcupacion"],
+  div[class*="ReporteTipoVehiculo"],
+  div[class*="ReporteMetodosPago"],
+  div[class*="ReporteProductividad"] {
+    display: none !important;
+  }
+
+  /* Asegurar que solo el ReporteImprimible sea visible */
+  .print\:block {
+    display: block !important;
+  }
+
+  /* Ocultar el selector de reportes y filtros al imprimir */
+  div[class*="rounded-2xl"][class*="border-blue-500"] {
+    display: none !important;
+  }
+
+  /* Mantener solo el contenido imprimible */
+  body > * {
+    visibility: hidden;
+  }
+
+  body > * .print\:block,
+  body > * .print\:block * {
+    visibility: visible;
+  }
+
+  /* Asegurar que el componente imprimible ocupe toda la página */
+  .print\:block {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

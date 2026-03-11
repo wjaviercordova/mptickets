@@ -27,6 +27,7 @@ interface Negocio {
   estado: string;
   fecha_creacion: string;
   fecha_actualizacion: string;
+  fecha_expiracion: string | null;
   codigo: string;
 }
 
@@ -65,6 +66,7 @@ interface NegocioFormProps {
   usuarios: Usuario[];
   tarjetas: Tarjeta[];
   negocioId: string;
+  diasRestantes: number | null;
 }
 
 type TabType = "general" | "usuarios" | "tarjetas";
@@ -74,6 +76,7 @@ export function NegocioForm({
   usuarios,
   tarjetas,
   negocioId,
+  diasRestantes,
 }: NegocioFormProps) {
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [message, setMessage] = useState<{
@@ -153,6 +156,7 @@ export function NegocioForm({
       {activeTab === "general" && negocio && (
         <GeneralTab
           negocio={negocio}
+          diasRestantes={diasRestantes}
           onSuccess={(msg) => {
             setMessage({ type: "success", text: msg });
             setTimeout(() => setMessage(null), 5000);
