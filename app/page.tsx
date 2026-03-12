@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   AlertCircle,
@@ -11,7 +12,6 @@ import {
   EyeOff,
   Lock,
   LogIn,
-  ParkingCircle,
   User,
 } from "lucide-react";
 
@@ -60,7 +60,7 @@ export default function Home() {
       setStatus("success");
       setMessage(data?.message ?? "Acceso concedido.");
       setTimeout(() => router.push("/dashboard"), 800);
-    } catch (error) {
+    } catch {
       setStatus("error");
       setMessage("No se pudo conectar con el servidor.");
     }
@@ -81,8 +81,15 @@ export default function Home() {
         >
           <div className="glass-card space-y-6 p-8 border border-blue-500/20 bg-gradient-to-br from-[#1e293b]/70 to-[#0f172a]/90 shadow-xl shadow-blue-500/10">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-400/40 bg-gradient-to-br from-blue-500/30 to-cyan-600/20 shadow-lg shadow-cyan-500/20">
-                <ParkingCircle className="h-6 w-6 text-cyan-400" />
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-400/40 bg-gradient-to-br from-blue-500/30 to-cyan-600/20 shadow-lg shadow-cyan-500/20 overflow-hidden">
+                <Image
+                  src="/images/logos/mptickets.png"
+                  alt="MPTickets Logo"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                  priority
+                />
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-cyan-300/70">
@@ -106,7 +113,7 @@ export default function Home() {
                     name="usuario"
                     type="text"
                     placeholder="admin"
-                    className="glass-input pl-11 border-blue-500/30 bg-[#0f172a]/60 text-white placeholder:text-blue-200/40"
+                    className="glass-input !pl-12 border-blue-500/30 bg-[#0f172a]/60 text-white placeholder:text-blue-200/40"
                     autoComplete="username"
                   />
                 </div>
@@ -120,7 +127,7 @@ export default function Home() {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="glass-input pl-11 pr-12 border-blue-500/30 bg-[#0f172a]/60 text-white placeholder:text-blue-200/40"
+                    className="glass-input !pl-12 pr-12 border-blue-500/30 bg-[#0f172a]/60 text-white placeholder:text-blue-200/40"
                     autoComplete="current-password"
                   />
                   <button
@@ -150,7 +157,7 @@ export default function Home() {
                     name="negocioCodigo"
                     type="text"
                     placeholder="MP-001"
-                    className="glass-input pl-11 border-blue-500/30 bg-[#0f172a]/60 text-white placeholder:text-blue-200/40"
+                    className="glass-input !pl-12 border-blue-500/30 bg-[#0f172a]/60 text-white placeholder:text-blue-200/40"
                   />
                 </div>
               </label>

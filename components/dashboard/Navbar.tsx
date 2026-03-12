@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Menu, ParkingCircle, Search, Star } from "lucide-react";
+import Image from "next/image";
+import { Menu, Search, Star } from "lucide-react";
 import { usePageHeader } from "@/contexts/PageHeaderContext";
 
 interface NavbarProps {
@@ -44,9 +45,16 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
               <>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
-                  className="flex h-10 w-10 items-center justify-center rounded-2xl border border-cyan-400/40 bg-gradient-to-br from-blue-500/40 to-cyan-500/30 shadow-lg shadow-cyan-500/30"
+                  className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-cyan-400/40 bg-gradient-to-br from-blue-500/40 to-cyan-500/30 shadow-lg shadow-cyan-500/30 overflow-hidden"
                 >
-                  <ParkingCircle className="h-5 w-5 text-blue-300" />
+                  <Image
+                    src="/images/logos/mptickets.png"
+                    alt="MPTickets Logo"
+                    width={28}
+                    height={28}
+                    className="object-contain"
+                    priority
+                  />
                 </motion.div>
                 <div className="flex items-center gap-3">
                   <div>
