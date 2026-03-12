@@ -15,7 +15,9 @@ import {
   Save,
   FileText,
   Loader2,
+  Printer,
 } from "lucide-react";
+import { useImpresionConfig } from "@/contexts/ImpresionConfigContext";
 
 interface Codigo {
   id: string;
@@ -70,6 +72,11 @@ export function CostosRegistradosTab({
     descuento: 0,
   });
   const [guardando, setGuardando] = useState(false);
+  
+  // Estados para impresión
+  const [imprimiendo, setImprimiendo] = useState(false);
+  const [mensajeImpresion, setMensajeImpresion] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const { configImpresion } = useImpresionConfig();
 
   // Filtrar códigos completados con costo
   const codigosFiltrados = useMemo(() => {
@@ -263,6 +270,68 @@ export function CostosRegistradosTab({
   };
 
   const maxTendencia = Math.max(...tendenciaTemporal.map((d) => d.total), 1);
+
+  // Función para imprimir recibo
+  const handleImprimir = async () => {
+    if (!modalDetalle) return;
+    
+    setImprimiendo(true);
+    setMensajeImpresion(null);
+
+    try {
+      if (!configImpresion) {
+        throw new Error("No se pudo obtener la configuración de impresión");
+      }
+
+      // Preparar datos para el servidor de impresión
+      const datosImpresion = {
+        tipo: "PAGO",
+        datos: {
+          nombre_negocio: "miparking",
+          direccion: "Primera Imprenta y Maldonado",
+          telefono: "0999676346",
+          fecha: new Date(modalDetalle.hora_salida || modalDetalle.hora_entrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.'),
+          hora_entrada: new Date(modalDetalle.hora_entrada).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+          hora_salida: modalDetalle.hora_salida ? new Date(modalDetalle.hora_salida).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-',
+          numero_tarjeta: modalDetalle.codigo,
+          total: modalDetalle.total || 0,
+        },
+        config: {
+          cola_impresion: configImpresion.cola_impresion || "_3nStar",
+          copias_por_ticket: configImpresion.copias_por_ticket || 1,
+        },
+      };
+
+      console.log("🖨️ [RECIBO-CONSULTAS] Enviando datos a imprimir:", datosImpresion);
+
+      // Enviar a imprimir
+      const response = await fetch("http://localhost:3003/imprimir", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datosImpresion),
+      });
+
+      if (response.ok) {
+        setMensajeImpresion({
+          type: "success",
+          text: "✅ Recibo enviado a imprimir",
+        });
+        setTimeout(() => setMensajeImpresion(null), 3000);
+      } else {
+        const data = await response.json();
+        throw new Error(data.error || "Error al imprimir");
+      }
+    } catch (error) {
+      console.error("Error al imprimir:", error);
+      setMensajeImpresion({
+        type: "error",
+        text: `❌ Error: ${error instanceof Error ? error.message : "No se pudo imprimir"}`,
+      });
+      setTimeout(() => setMensajeImpresion(null), 5000);
+    } finally {
+      setImprimiendo(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -994,11 +1063,39 @@ export function CostosRegistradosTab({
                   </div>
                 </div>
 
-                {/* Botón Cerrar */}
-                <div className="mt-6">
+                {/* Mensaje de estado */}
+                {mensajeImpresion && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className={`mt-4 rounded-lg p-3 text-sm text-center ${
+                      mensajeImpresion.type === "success"
+                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        : "bg-red-500/20 text-red-300 border border-red-500/30"
+                    }`}
+                  >
+                    {mensajeImpresion.text}
+                  </motion.div>
+                )}
+
+                {/* Botones */}
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={handleImprimir}
+                    disabled={imprimiendo}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/20 to-cyan-600/20 px-4 py-3 font-semibold text-blue-300 backdrop-blur-xl transition hover:from-blue-500/30 hover:to-cyan-600/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {imprimiendo ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Printer className="h-5 w-5" />
+                    )}
+                    {imprimiendo ? "Imprimiendo..." : "Imprimir"}
+                  </button>
                   <button
                     onClick={() => setModalDetalle(null)}
-                    className="w-full rounded-xl border border-gray-400/40 bg-gradient-to-r from-gray-500/20 to-gray-600/20 px-4 py-3 font-semibold text-gray-300 backdrop-blur-xl transition hover:from-gray-500/30 hover:to-gray-600/30"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-400/40 bg-gradient-to-r from-gray-500/20 to-gray-600/20 px-4 py-3 font-semibold text-gray-300 backdrop-blur-xl transition hover:from-gray-500/30 hover:to-gray-600/30"
                   >
                     Cerrar
                   </button>

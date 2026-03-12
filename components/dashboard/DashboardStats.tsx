@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import {
   Activity,
   Car,
@@ -15,7 +16,6 @@ import {
   Shield,
   Wallet,
   CheckCircle2,
-  AlertCircle,
   type LucideIcon,
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -52,6 +52,51 @@ interface DashboardStatsProps {
 }
 
 export function DashboardStats({ stats, movements }: DashboardStatsProps) {
+  const router = useRouter();
+
+  const accionesRapidas = [
+    { 
+      icon: Car, 
+      title: 'Ingreso de Vehículo', 
+      subtitle: 'Registrar entrada rápida', 
+      gradient: 'from-emerald-500/20 to-green-600/10', 
+      border: 'border-emerald-400/30', 
+      iconColor: 'text-emerald-400', 
+      shadow: 'shadow-emerald-500/10',
+      ruta: '/dashboard/ingreso'
+    },
+    { 
+      icon: CreditCard, 
+      title: 'Procesar Pago', 
+      subtitle: 'Cobro y salida de vehículo', 
+      gradient: 'from-amber-500/20 to-yellow-600/10', 
+      border: 'border-amber-400/30', 
+      iconColor: 'text-amber-400', 
+      shadow: 'shadow-amber-500/10',
+      ruta: '/dashboard/pago'
+    },
+    { 
+      icon: Search, 
+      title: 'Consultas Rápidas', 
+      subtitle: 'Buscar vehículo por placa', 
+      gradient: 'from-purple-500/20 to-pink-600/10', 
+      border: 'border-purple-400/30', 
+      iconColor: 'text-purple-400', 
+      shadow: 'shadow-purple-500/10',
+      ruta: '/dashboard/consultas'
+    },
+    { 
+      icon: BarChart3, 
+      title: 'Generar Reporte', 
+      subtitle: 'Reportes e informes', 
+      gradient: 'from-cyan-500/20 to-blue-600/10', 
+      border: 'border-cyan-400/30', 
+      iconColor: 'text-cyan-400', 
+      shadow: 'shadow-cyan-500/10',
+      ruta: '/dashboard/reportes'
+    },
+  ];
+
   return (
     <>
       {/* Acciones Rápidas */}
@@ -69,46 +114,10 @@ export function DashboardStats({ stats, movements }: DashboardStatsProps) {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[
-            { 
-              icon: Car, 
-              title: 'Ingreso de Vehículo', 
-              subtitle: 'Registrar entrada rápida', 
-              gradient: 'from-emerald-500/20 to-green-600/10', 
-              border: 'border-emerald-400/30', 
-              iconColor: 'text-emerald-400', 
-              shadow: 'shadow-emerald-500/10' 
-            },
-            { 
-              icon: CreditCard, 
-              title: 'Procesar Pago', 
-              subtitle: 'Cobro y salida de vehículo', 
-              gradient: 'from-amber-500/20 to-yellow-600/10', 
-              border: 'border-amber-400/30', 
-              iconColor: 'text-amber-400', 
-              shadow: 'shadow-amber-500/10' 
-            },
-            { 
-              icon: Search, 
-              title: 'Consultas Rápidas', 
-              subtitle: 'Buscar vehículo por placa', 
-              gradient: 'from-purple-500/20 to-pink-600/10', 
-              border: 'border-purple-400/30', 
-              iconColor: 'text-purple-400', 
-              shadow: 'shadow-purple-500/10' 
-            },
-            { 
-              icon: BarChart3, 
-              title: 'Generar Reporte', 
-              subtitle: 'Reportes e informes', 
-              gradient: 'from-cyan-500/20 to-blue-600/10', 
-              border: 'border-cyan-400/30', 
-              iconColor: 'text-cyan-400', 
-              shadow: 'shadow-cyan-500/10' 
-            },
-          ].map((action, index) => (
+          {accionesRapidas.map((action, index) => (
             <motion.button
               key={action.title}
+              onClick={() => router.push(action.ruta)}
               whileHover={{ scale: 1.05, y: -4 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 20 }}
