@@ -1,0 +1,212 @@
+[
+  {
+    "clave": "impresion_copias",
+    "valor": "1",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "impresion"
+  },
+  {
+    "clave": "capacidad_pesados",
+    "valor": "0",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "capacidad"
+  },
+  {
+    "clave": "capacidad_camionetas",
+    "valor": "3",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "capacidad"
+  },
+  {
+    "clave": "impresion_ancho_papel",
+    "valor": "80",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "impresion"
+  },
+  {
+    "clave": "aplicar_iva",
+    "valor": "TRUE",
+    "tipo": "boolean",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "horarios_atencion",
+    "valor": "{\"lunes\":{\"open\":true,\"24h\":false,\"from\":\"08:00\",\"to\":\"19:00\"},\"martes\":{\"open\":true,\"24h\":false,\"from\":\"08:00\",\"to\":\"19:00\"},\"miercoles\":{\"open\":true,\"24h\":false,\"from\":\"08:00\",\"to\":\"19:00\"},\"jueves\":{\"open\":true,\"24h\":false,\"from\":\"08:00\",\"to\":\"19:00\"},\"viernes\":{\"open\":true,\"24h\":false,\"from\":\"08:00\",\"to\":\"19:00\"},\"sabado\":{\"open\":true,\"24h\":false,\"from\":\"08:00\",\"to\":\"19:00\"},\"domingo\":{\"open\":false,\"24h\":false,\"from\":\"08:00\",\"to\":\"19:00\"}}",
+    "tipo": "json",
+    "descripcion": "",
+    "categoria": "horarios"
+  },
+  {
+    "clave": "impresion_nombre",
+    "valor": "",
+    "tipo": "string",
+    "descripcion": "",
+    "categoria": "impresion"
+  },
+  {
+    "clave": "impresion_cola",
+    "valor": "",
+    "tipo": "string",
+    "descripcion": "",
+    "categoria": "impresion"
+  },
+  {
+    "clave": "impresion_habilitada",
+    "valor": "TRUE",
+    "tipo": "boolean",
+    "descripcion": "",
+    "categoria": "impresion"
+  },
+  {
+    "clave": "maximo_horas_parqueo",
+    "valor": "10",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "impresion_formato",
+    "valor": "basico",
+    "tipo": "string",
+    "descripcion": "",
+    "categoria": "impresion"
+  },
+  {
+    "clave": "fraccion_cobro_minutos",
+    "valor": "30",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "capacidad_autos",
+    "valor": "10",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "capacidad"
+  },
+  {
+    "clave": "impresion_en_pago",
+    "valor": "FALSE",
+    "tipo": "boolean",
+    "descripcion": "",
+    "categoria": "impresion"
+  },
+  {
+    "clave": "tema_config",
+    "valor": "{\"mode\":\"dark\",\"preset\":\"glassmorphism-dark\",\"colors\":{\"bgPrimary\":\"#0a0e27\",\"bgSecondary\":\"#1e293b\",\"bgTertiary\":\"#0f172a\",\"bgGradient\":\"linear-gradient(to bottom right, #0a0e27, #16213e, #0f1729)\",\"glassBase\":\"rgba(30, 41, 59, 0.6)\",\"glassOverlay\":\"rgba(15, 23, 42, 0.8)\",\"borderPrimary\":\"rgba(59, 130, 246, 0.2)\",\"borderSecondary\":\"rgba(34, 211, 238, 0.3)\",\"textPrimary\":\"#ffffff\",\"textSecondary\":\"rgba(191, 219, 254, 0.8)\",\"textTertiary\":\"rgba(191, 219, 254, 0.6)\",\"accentCyan\":\"#22d3ee\",\"accentPurple\":\"#a855f7\",\"accentEmerald\":\"#10b981\",\"accentRed\":\"#ef4444\",\"accentYellow\":\"#f59e0b\",\"shadowColor\":\"rgba(34, 211, 238, 0.2)\"},\"blurIntensity\":\"medium\",\"glassOpacity\":60,\"borderRadius\":\"large\",\"shadowIntensity\":\"medium\",\"animationSpeed\":\"normal\",\"sidebarCollapsed\":false,\"uiDensity\":\"normal\",\"useDashboardBackground\":true}",
+    "tipo": "string",
+    "descripcion": "",
+    "categoria": "apariencia"
+  },
+  {
+    "clave": "capacidad_motos",
+    "valor": "3",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "capacidad"
+  },
+  {
+    "clave": "impresion_en_ingreso",
+    "valor": "TRUE",
+    "tipo": "boolean",
+    "descripcion": "",
+    "categoria": "impresion"
+  },
+  {
+    "clave": "impresion_logo",
+    "valor": "FALSE",
+    "tipo": "boolean",
+    "descripcion": "",
+    "categoria": "impresion"
+  },
+  {
+    "clave": "tiempo_gracia_minutos",
+    "valor": "2",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "capacidad_total",
+    "valor": "10",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "capacidad"
+  },
+  {
+    "clave": "espacios_reservados",
+    "valor": "0",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "capacidad"
+  },
+  {
+    "clave": "moneda",
+    "valor": "USD",
+    "tipo": "string",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "moneda_simbolo",
+    "valor": "$",
+    "tipo": "string",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "alerta_ocupacion_porcentaje",
+    "valor": "90",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "longitud_codigo",
+    "valor": "4",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "placa_obligatoria",
+    "valor": "FALSE",
+    "tipo": "boolean",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "iva_porcentaje",
+    "valor": "15",
+    "tipo": "number",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "prefijo_codigo",
+    "valor": "MP",
+    "tipo": "string",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "permitir_salida_sin_pago",
+    "valor": "FALSE",
+    "tipo": "boolean",
+    "descripcion": "",
+    "categoria": "general"
+  },
+  {
+    "clave": "tipo_redondeo",
+    "valor": "hacia_arriba",
+    "tipo": "string",
+    "descripcion": "",
+    "categoria": "general"
+  }
+]

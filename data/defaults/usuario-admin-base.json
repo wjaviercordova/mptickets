@@ -1,0 +1,19 @@
+{
+  "usuario": "admin",
+  "nombre": "Administrador",
+  "apellido": "Sistema",
+  "email": "admin@mipartking.com",
+  "telefono": null,
+  "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=man",
+  "password_plain": "admin123",
+  "estado": "1",
+  "rol": "admin",
+  "permisos": {
+    "pago": true,
+    "ingreso": true,
+    "reportes": true,
+    "consultas": true,
+    "configuracion": true
+  },
+  "configuracion_personal": {}
+}

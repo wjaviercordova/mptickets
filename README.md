@@ -1,6 +1,49 @@
 # 🎫 MPTickets - Sistema de Gestión de Parqueaderos
 
-Sistema comercial profesional para la gestión de parqueaderos con diseño moderno de glassmorfismo oscuro y efectos neón.
+Sistema comercial profesional **multi-tenant** para la gestión de parqueaderos con diseño moderno de glassmorfismo oscuro y efectos neón.
+
+## 🆕 Panel de Administración MPTickets Admin
+
+**MPTickets** es ahora una plataforma **multi-tenant** que permite gestionar múltiples negocios de parqueaderos desde un panel de administración centralizado.
+
+### 🔐 Características del Admin Dashboard
+
+- ✅ **Autenticación separada** para administradores (superadmins)
+- ✅ **CRUD completo de negocios** - Crear, editar, eliminar negocios
+- ✅ **Gestión de licencias** - Planes DEMO (30 días) y PREMIUM (ilimitado)
+- ✅ **Sistema de plantillas** - Creación automática de configuraciones iniciales
+- ✅ **Dashboard con métricas** - Estadísticas en tiempo real de toda la plataforma
+- ✅ **Cambio de contraseñas** - Gestión de admins de cada negocio
+- ✅ **Seeds automáticos** - 30 configuraciones + parámetros + tarjetas
+
+### 📚 Documentación Completa
+
+Toda la documentación del panel admin está en [`/docs/admin/`](./docs/admin/):
+
+- **[README.md](./docs/admin/README.md)** - Índice y quick start
+- **[MPTICKETS_ADMIN_ARCHITECTURE.md](./docs/admin/MPTICKETS_ADMIN_ARCHITECTURE.md)** - Arquitectura completa
+- **[API_REFERENCE.md](./docs/admin/API_REFERENCE.md)** - Documentación del API
+- **[GUIA_IMPLEMENTACION.md](./docs/admin/GUIA_IMPLEMENTACION.md)** - Tutorial paso a paso
+
+### 🚀 Quick Start Admin
+
+```bash
+# 1. Ejecutar migration de admin_users en Supabase
+# Ver: /supabase/migrations/create_admin_users.sql
+
+# 2. Instalar dependencias adicionales
+npm install bcryptjs jsonwebtoken
+
+# 3. Configurar JWT_SECRET en .env.local
+JWT_SECRET=tu_secret_key_aqui
+
+# 4. Acceder al panel admin
+# URL: http://localhost:3000/admin/login
+# Usuario: superadmin
+# Password: Admin@2024 (cambiar en producción)
+```
+
+---
 
 ## 🎨 Características del Diseño
 
