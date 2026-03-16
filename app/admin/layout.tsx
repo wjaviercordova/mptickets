@@ -53,7 +53,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         {/* Contenido principal */}
         <div className="flex-1 overflow-x-hidden">
           {/* Navbar */}
-          <Navbar userName={adminUser.nombre} />
+          <Navbar />
 
           {/* Contenido de página */}
           <main className="min-h-[calc(100vh-5rem)] p-8">{children}</main>

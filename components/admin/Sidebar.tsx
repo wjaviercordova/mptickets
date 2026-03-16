@@ -69,7 +69,7 @@ export default function Sidebar() {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1, width: collapsed ? 80 : 280 }}
       transition={{ duration: 0.3 }}
-      className="glass-card sticky top-0 flex h-screen flex-col border-r border-purple-400/20 bg-[#0a0e27]/95 shadow-xl shadow-purple-500/5"
+      className="sticky top-0 flex h-screen flex-col border-r border-purple-400/20 bg-[#0f172a]/90 shadow-2xl shadow-purple-500/10 backdrop-blur-xl"
     >
       {/* Logo y Toggle */}
       <div className="flex h-20 items-center justify-between border-b border-purple-400/10 px-6">
@@ -82,26 +82,30 @@ export default function Sidebar() {
               exit={{ opacity: 0 }}
               className="flex items-center gap-3"
             >
-              <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-purple-400/40 bg-gradient-to-br from-purple-500/30 to-pink-600/20 shadow-lg shadow-purple-500/20">
+              <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-purple-400/40 bg-gradient-to-br from-purple-500/30 to-pink-600/20 shadow-lg shadow-purple-500/20">
                 <Image
                   src="/images/logos/mptickets.png"
                   alt="MPTickets"
-                  width={24}
-                  height={24}
+                  width={28}
+                  height={28}
                   className="object-contain"
                 />
               </div>
               <div>
-                <h2 className="font-display text-sm font-bold text-white">MPTickets</h2>
-                <p className="font-caption text-xs text-purple-300/60">Admin Panel</p>
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/60">
+                  Admin
+                </p>
+                <h2 className="font-heading text-white">MPTickets</h2>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setCollapsed(!collapsed)}
-          className="rounded-lg border border-purple-400/20 bg-purple-500/10 p-1.5 text-purple-300 transition-colors hover:border-purple-400/40 hover:bg-purple-500/20"
+          className="rounded-xl border border-purple-400/30 bg-purple-950/30 p-2 text-purple-300 backdrop-blur-sm transition hover:border-purple-400/60 hover:bg-purple-900/40 hover:text-white hover:shadow-lg hover:shadow-purple-500/20"
           aria-label={collapsed ? "Expandir sidebar" : "Contraer sidebar"}
         >
           {collapsed ? (
@@ -109,7 +113,7 @@ export default function Sidebar() {
           ) : (
             <ChevronLeft className="h-4 w-4" />
           )}
-        </button>
+        </motion.button>
       </div>
 
       {/* Navegación */}
@@ -122,10 +126,10 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
+              className={`group relative flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all ${
                 isActive
-                  ? "bg-gradient-to-r from-purple-500/20 to-pink-600/10 text-white shadow-lg shadow-purple-500/10"
-                  : "text-blue-200/70 hover:bg-purple-500/10 hover:text-white"
+                  ? "bg-gradient-to-r from-purple-500/30 to-pink-600/20 text-white shadow-lg shadow-purple-500/20 border border-purple-400/30"
+                  : "text-blue-200/70 hover:bg-purple-500/20 hover:text-white hover:border hover:border-purple-400/20"
               }`}
             >
               {/* Indicador activo */}
