@@ -20,6 +20,8 @@ import {
   EyeOff,
   CheckCircle2,
 } from "lucide-react";
+import { useLimites } from "@/hooks/useLimites";
+import { AlertaLimite, BadgeLimite, ModalLimiteAlcanzado } from "@/components/limites/AlertaLimite";
 
 interface Usuario {
   id: string;
@@ -93,8 +95,24 @@ export function UsuariosTab({
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showLimiteModal, setShowLimiteModal] = useState(false);
+
+  // ============================================================================
+  // VALIDACIÓN DE LÍMITES
+  // ============================================================================
+  const { validarUsuarios, planConfig, loading: loadingLimites } = useLimites({ negocioId });
+  
+  // Contar solo usuarios activos (estado = '1')
+  const usuariosActivos = usuarios.filter(u => u.estado === '1');
+  const validacion = validarUsuarios(usuariosActivos.length);
 
   const handleCreate = () => {
+    // VALIDACIÓN: Verificar si puede agregar usuario
+    if (!validacion.permitido) {
+      setShowLimiteModal(true);
+      return;
+    }
+    
     setEditingUser(null);
     setFormData(emptyUsuario);
     setShowModal(true);
@@ -227,24 +245,50 @@ export function UsuariosTab({
     <div className={`space-y-6 transition-all duration-300 ${showModal ? 'min-h-[800px] xl:min-h-[900px] 2xl:min-h-[1000px]' : ''}`}>
       {/* Header con botón agregar */}
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-heading text-xl text-white">
-            Gestión de Usuarios
-          </h3>
+        <div className="flex-1">
+          <div className="flex items-center gap-4 mb-2">
+            <h3 className="font-heading text-xl text-white">
+              Gestión de Usuarios
+            </h3>
+            {/* Badge de límite */}
+            {!loadingLimites && planConfig && (
+              <BadgeLimite 
+                actual={usuariosActivos.length}
+                maximo={planConfig.usuarios_maximo}
+                showProgress={false}
+                size="sm"
+              />
+            )}
+          </div>
           <p className="text-sm text-blue-200/70">
             Administre los usuarios del negocio con sus roles y permisos
           </p>
         </div>
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={validacion.permitido ? { scale: 1.02 } : {}}
+          whileTap={validacion.permitido ? { scale: 0.98 } : {}}
           onClick={handleCreate}
-          className="flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/30 to-green-600/30 px-5 py-2.5 font-semibold text-white backdrop-blur-xl transition hover:from-emerald-500/50 hover:to-green-600/50 hover:shadow-xl hover:shadow-emerald-500/30"
+          disabled={!validacion.permitido}
+          className={`flex items-center gap-2 rounded-2xl border px-5 py-2.5 font-semibold backdrop-blur-xl transition ${
+            validacion.permitido
+              ? 'border-emerald-400/40 bg-gradient-to-r from-emerald-500/30 to-green-600/30 text-white hover:from-emerald-500/50 hover:to-green-600/50 hover:shadow-xl hover:shadow-emerald-500/30'
+              : 'border-gray-500/30 bg-gray-500/20 text-gray-400 cursor-not-allowed opacity-50'
+          }`}
         >
           <Plus className="h-5 w-5" />
           Agregar Usuario
         </motion.button>
       </div>
+
+      {/* Alerta de límite */}
+      {(validacion.cerca_limite || !validacion.permitido) && (
+        <AlertaLimite 
+          validacion={validacion}
+          onActualizarPlan={() => {
+            window.open('mailto:soporte@mptickets.com?subject=Actualizar Plan&body=Hola, necesito actualizar mi plan para tener más usuarios.', '_blank');
+          }}
+        />
+      )}
 
       {/* Lista de usuarios */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -692,6 +736,18 @@ export function UsuariosTab({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Modal de Límite Alcanzado */}
+      <ModalLimiteAlcanzado
+        open={showLimiteModal}
+        onClose={() => setShowLimiteModal(false)}
+        tipoRecurso="usuarios"
+        planActual={planConfig?.plan_tipo || 'demo'}
+        limiteActual={planConfig?.usuarios_maximo || 0}
+        onContactar={() => {
+          window.open('mailto:soporte@mptickets.com?subject=Actualizar Plan - Más Usuarios&body=Hola, mi negocio ID: ' + negocioId + ' necesita más usuarios. Actualmente tengo ' + usuariosActivos.length + ' usuario(s) activo(s).', '_blank');
+        }}
+      />
     </div>
   );
 }

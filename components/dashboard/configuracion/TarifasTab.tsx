@@ -15,6 +15,12 @@ import {
   AlertCircle,
   CheckCircle2,
 } from "lucide-react";
+import { useLimites } from "@/hooks/useLimites";
+import {
+  AlertaLimite,
+  BadgeLimite,
+  ModalLimiteAlcanzado,
+} from "@/components/limites/AlertaLimite";
 
 interface Parametro {
   id: string;
@@ -92,8 +98,22 @@ export function TarifasTab({ negocioId, parametros, onUpdate }: TarifasTabProps)
     text: string;
   } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [showLimiteModal, setShowLimiteModal] = useState(false);
+
+  // ============================================================================
+  // VALIDACIÓN DE LÍMITES DEL PLAN (PARÁMETROS = TARIFAS)
+  // ============================================================================
+  const { validarParametros, planConfig, loading: loadingLimites } =
+    useLimites({ negocioId });
+  const parametrosActivos = parametros.filter((p) => p.estado === "activo");
+  const validacion = validarParametros(parametrosActivos.length);
 
   const handleCreate = () => {
+    // Validar límite antes de abrir el modal
+    if (!validacion.permitido) {
+      setShowLimiteModal(true);
+      return;
+    }
     setEditingParam(null);
     setFormData(emptyParametro);
     setShowModal(true);
@@ -177,24 +197,50 @@ export function TarifasTab({ negocioId, parametros, onUpdate }: TarifasTabProps)
     <div className={`space-y-6 transition-all duration-300 ${showModal ? 'min-h-[700px] xl:min-h-[800px] 2xl:min-h-[900px]' : ''}`}>
       {/* Header con botón agregar */}
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-heading text-xl text-white">
-            Tarifas por Tipo de Vehículo
-          </h3>
+        <div className="flex-1">
+          <div className="flex items-center gap-4 mb-2">
+            <h3 className="font-heading text-xl text-white">
+              Tarifas por Tipo de Vehículo
+            </h3>
+            {!loadingLimites && planConfig && (
+              <BadgeLimite
+                actual={parametrosActivos.length}
+                maximo={planConfig.parametros_maximo}
+              />
+            )}
+          </div>
           <p className="text-sm text-blue-200/70">
             Configure las tarifas y precios para cada tipo de vehículo
           </p>
         </div>
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: validacion.permitido ? 1.02 : 1 }}
+          whileTap={{ scale: validacion.permitido ? 0.98 : 1 }}
           onClick={handleCreate}
-          className="flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/30 to-green-600/30 px-5 py-2.5 font-semibold text-white backdrop-blur-xl transition hover:from-emerald-500/50 hover:to-green-600/50 hover:shadow-xl hover:shadow-emerald-500/30"
+          disabled={!validacion.permitido}
+          className={`flex items-center gap-2 rounded-2xl border px-5 py-2.5 font-semibold backdrop-blur-xl transition ${
+            validacion.permitido
+              ? "border-emerald-400/40 bg-gradient-to-r from-emerald-500/30 to-green-600/30 text-white hover:from-emerald-500/50 hover:to-green-600/50 hover:shadow-xl hover:shadow-emerald-500/30"
+              : "border-gray-500/40 bg-gray-500/20 text-gray-400 opacity-50 cursor-not-allowed"
+          }`}
         >
           <Plus className="h-5 w-5" />
           Agregar Tarifa
         </motion.button>
       </div>
+
+      {/* Alerta de límite */}
+      {(validacion.cerca_limite || !validacion.permitido) && (
+        <AlertaLimite
+          validacion={validacion}
+          onActualizarPlan={() => {
+            window.open(
+              "mailto:soporte@mptickets.com?subject=Actualizar Plan&body=Hola, me gustaría actualizar mi plan para tener más tarifas.",
+              "_blank"
+            );
+          }}
+        />
+      )}
 
       {/* Mensaje de estado */}
       {message && (
@@ -643,6 +689,22 @@ export function TarifasTab({ negocioId, parametros, onUpdate }: TarifasTabProps)
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Modal de Límite Alcanzado */}
+      <ModalLimiteAlcanzado
+        open={showLimiteModal}
+        onClose={() => setShowLimiteModal(false)}
+        tipoRecurso="tarifas"
+        planActual={planConfig?.plan_tipo || "demo"}
+        limiteActual={planConfig?.parametros_maximo || 0}
+        onContactar={() => {
+          window.open(
+            "mailto:soporte@mptickets.com?subject=Actualizar Plan - Tarifas&body=Hola, necesito aumentar el límite de tarifas (parámetros) en mi plan actual.",
+            "_blank"
+          );
+          setShowLimiteModal(false);
+        }}
+      />
     </div>
   );
 }

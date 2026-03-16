@@ -1,6 +1,7 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { validarAgregarParametro } from "@/lib/planes-limites-db";
 
 export async function POST(request: Request) {
   try {
@@ -24,6 +25,23 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { message: "Complete los campos obligatorios" },
         { status: 400 }
+      );
+    }
+
+    // ============================================================================
+    // VALIDACIÓN DE LÍMITE DEL PLAN (PARÁMETROS)
+    // ============================================================================
+    const validacionLimite = await validarAgregarParametro(negocioId);
+    
+    if (!validacionLimite.permitido) {
+      return NextResponse.json(
+        { 
+          message: validacionLimite.mensaje,
+          error: "LIMITE_ALCANZADO",
+          actual: validacionLimite.actual,
+          maximo: validacionLimite.maximo,
+        },
+        { status: 403 } // 403 Forbidden
       );
     }
 

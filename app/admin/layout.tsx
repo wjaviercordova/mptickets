@@ -48,7 +48,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* Layout principal */}
       <div className="relative z-10 flex">
         {/* Sidebar */}
-        <Sidebar userNombre={adminUser.nombre} userRol={adminUser.rol} />
+        <Sidebar />
 
         {/* Contenido principal */}
         <div className="flex-1 overflow-x-hidden">

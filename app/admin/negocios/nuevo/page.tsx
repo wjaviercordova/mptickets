@@ -20,6 +20,8 @@ import {
   Trash2,
   Edit2,
   FileCheck,
+  Car,
+  Clock,
 } from "lucide-react";
 
 // Tipos
@@ -58,16 +60,27 @@ interface ConfiguracionItem {
 interface ParametroItem {
   tipo_vehiculo: string;
   nombre: string;
+  descripcion: string;
+  prioridad: number;
   tarifa_1_nombre: string;
   tarifa_1_valor: number;
   tarifa_2_nombre: string;
   tarifa_2_valor: number;
+  tarifa_3_nombre: string;
+  tarifa_3_valor: number;
+  tarifa_4_nombre: string;
+  tarifa_4_valor: number;
   tarifa_5_nombre: string;
   tarifa_5_valor: number;
   tarifa_6_nombre: string;
   tarifa_6_valor: number;
   tarifa_7_nombre: string;
   tarifa_7_valor: number;
+  tarifa_extra: number;
+  tarifa_auxiliar: number;
+  tarifa_nocturna: number;
+  tarifa_fin_semana: number;
+  estado: string;
 }
 
 interface TarjetaItem {
@@ -1009,6 +1022,12 @@ function StepConfiguracion({ data, onChange }: { data: ConfiguracionItem[]; onCh
 function StepParametros({ data, onChange }: { data: ParametroItem[]; onChange: (data: ParametroItem[]) => void }) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
+  const updateParametro = (index: number, field: string, value: string | number) => {
+    const newData = [...data];
+    newData[index] = { ...newData[index], [field]: value };
+    onChange(newData);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -1032,106 +1051,214 @@ function StepParametros({ data, onChange }: { data: ParametroItem[]; onChange: (
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {data.map((param, index) => (
-          <div key={index} className="bg-white/5 border border-white/10 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white">{param.tipo_vehiculo} - {param.nombre}</h3>
-              <button
-                onClick={() => setEditingIndex(editingIndex === index ? null : index)}
-                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm flex items-center gap-2"
-              >
-                <Edit2 className="w-4 h-4" />
-                {editingIndex === index ? "Cerrar" : "Editar"}
-              </button>
+          <div key={index} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
+            {/* Header Card */}
+            <div className="p-6 border-b border-white/10">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                    <Car className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">{param.tipo_vehiculo}</h3>
+                    <p className="text-sm text-blue-200/60">{param.nombre}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditingIndex(editingIndex === index ? null : index)}
+                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm flex items-center gap-2 transition-colors"
+                >
+                  <Edit2 className="w-4 h-4" />
+                  {editingIndex === index ? "Cerrar" : "Editar"}
+                </button>
+              </div>
+
+              {editingIndex !== index && (
+                <div className="grid grid-cols-3 gap-3 mt-4">
+                  <div className="bg-white/5 rounded-lg p-3">
+                    <p className="text-xs text-blue-200/60 mb-1">{param.tarifa_1_nombre}</p>
+                    <p className="text-lg font-bold text-emerald-400">${param.tarifa_1_valor}</p>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-3">
+                    <p className="text-xs text-blue-200/60 mb-1">{param.tarifa_5_nombre}</p>
+                    <p className="text-lg font-bold text-emerald-400">${param.tarifa_5_valor}</p>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-3">
+                    <p className="text-xs text-blue-200/60 mb-1">{param.tarifa_7_nombre}</p>
+                    <p className="text-lg font-bold text-emerald-400">${param.tarifa_7_valor}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {editingIndex === index ? (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs text-blue-200/60 mb-1">{param.tarifa_1_nombre}</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={param.tarifa_1_valor}
-                    onChange={(e) => {
-                      const newData = [...data];
-                      newData[index].tarifa_1_valor = parseFloat(e.target.value);
-                      onChange(newData);
-                    }}
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
-                  />
+            {/* Formulario Expandido */}
+            {editingIndex === index && (
+              <div className="p-6 space-y-6 max-h-[600px] overflow-y-auto">
+                {/* Sección 1: Información Básica */}
+                <div className="space-y-4 rounded-2xl border border-blue-500/20 bg-[#0a0e27]/40 p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Info className="w-5 h-5 text-blue-400" />
+                    <h4 className="text-base font-semibold text-white">Información Básica</h4>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-medium text-blue-200/80 mb-2">Tipo de Vehículo</label>
+                      <select
+                        value={param.tipo_vehiculo}
+                        onChange={(e) => updateParametro(index, 'tipo_vehiculo', e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20 transition-all"
+                      >
+                        <option value="MOTO">MOTO</option>
+                        <option value="AUTO">AUTO</option>
+                        <option value="CAMIONETA">CAMIONETA</option>
+                        <option value="PESADO">PESADO</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-blue-200/80 mb-2">Nombre de Tarifa</label>
+                      <input
+                        type="text"
+                        value={param.nombre}
+                        onChange={(e) => updateParametro(index, 'nombre', e.target.value)}
+                        placeholder="Ej: Tarifa para Motocicletas"
+                        className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20 transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-blue-200/80 mb-2">Descripción</label>
+                      <textarea
+                        value={param.descripcion}
+                        onChange={(e) => updateParametro(index, 'descripcion', e.target.value)}
+                        placeholder="Descripción opcional de la tarifa"
+                        rows={2}
+                        className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20 transition-all resize-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-blue-200/80 mb-2">Prioridad</label>
+                        <input
+                          type="number"
+                          value={param.prioridad}
+                          onChange={(e) => updateParametro(index, 'prioridad', parseInt(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-blue-200/80 mb-2">Estado</label>
+                        <select
+                          value={param.estado}
+                          onChange={(e) => updateParametro(index, 'estado', e.target.value)}
+                          className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20 transition-all"
+                        >
+                          <option value="activo">Activo</option>
+                          <option value="inactivo">Inactivo</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs text-blue-200/60 mb-1">{param.tarifa_2_nombre}</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={param.tarifa_2_valor}
-                    onChange={(e) => {
-                      const newData = [...data];
-                      newData[index].tarifa_2_valor = parseFloat(e.target.value);
-                      onChange(newData);
-                    }}
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
-                  />
+
+                {/* Sección 2: Tarifas Progresivas */}
+                <div className="space-y-4 rounded-2xl border border-purple-500/20 bg-[#0a0e27]/40 p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Clock className="w-5 h-5 text-purple-400" />
+                    <h4 className="text-base font-semibold text-white">Tarifas Progresivas (Horas)</h4>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                      <div key={num} className="grid gap-3 md:grid-cols-2">
+                        <div>
+                          <label className="block text-xs font-medium text-blue-200/80 mb-2">Nombre Tarifa {num}</label>
+                          <input
+                            type="text"
+                            value={param[`tarifa_${num}_nombre` as keyof ParametroItem] as string}
+                            onChange={(e) => updateParametro(index, `tarifa_${num}_nombre`, e.target.value)}
+                            placeholder={`Ej: ${num === 1 ? '1-2' : num === 2 ? '3-59' : `Tarifa ${num}`}`}
+                            className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/20 transition-all"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-blue-200/80 mb-2">Valor ($)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={param[`tarifa_${num}_valor` as keyof ParametroItem] as number}
+                            onChange={(e) => updateParametro(index, `tarifa_${num}_valor`, parseFloat(e.target.value) || 0)}
+                            placeholder="0.00"
+                            className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/20 transition-all"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs text-blue-200/60 mb-1">{param.tarifa_5_nombre}</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={param.tarifa_5_valor}
-                    onChange={(e) => {
-                      const newData = [...data];
-                      newData[index].tarifa_5_valor = parseFloat(e.target.value);
-                      onChange(newData);
-                    }}
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-blue-200/60 mb-1">{param.tarifa_6_nombre}</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={param.tarifa_6_valor}
-                    onChange={(e) => {
-                      const newData = [...data];
-                      newData[index].tarifa_6_valor = parseFloat(e.target.value);
-                      onChange(newData);
-                    }}
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-blue-200/60 mb-1">{param.tarifa_7_nombre}</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={param.tarifa_7_valor}
-                    onChange={(e) => {
-                      const newData = [...data];
-                      newData[index].tarifa_7_valor = parseFloat(e.target.value);
-                      onChange(newData);
-                    }}
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white/5 rounded-lg p-3">
-                  <p className="text-xs text-blue-200/60 mb-1">{param.tarifa_1_nombre}</p>
-                  <p className="text-lg font-bold text-emerald-400">${param.tarifa_1_valor}</p>
-                </div>
-                <div className="bg-white/5 rounded-lg p-3">
-                  <p className="text-xs text-blue-200/60 mb-1">{param.tarifa_5_nombre}</p>
-                  <p className="text-lg font-bold text-emerald-400">${param.tarifa_5_valor}</p>
-                </div>
-                <div className="bg-white/5 rounded-lg p-3">
-                  <p className="text-xs text-blue-200/60 mb-1">{param.tarifa_7_nombre}</p>
-                  <p className="text-lg font-bold text-emerald-400">${param.tarifa_7_valor}</p>
+
+                {/* Sección 3: Tarifas Adicionales */}
+                <div className="space-y-4 rounded-2xl border border-emerald-500/20 bg-[#0a0e27]/40 p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <DollarSign className="w-5 h-5 text-emerald-400" />
+                    <h4 className="text-base font-semibold text-white">Tarifas Adicionales</h4>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-blue-200/80 mb-2">Tarifa Extra</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={param.tarifa_extra}
+                        onChange={(e) => updateParametro(index, 'tarifa_extra', parseFloat(e.target.value) || 0)}
+                        placeholder="0.00"
+                        className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-blue-200/80 mb-2">Tarifa Auxiliar</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={param.tarifa_auxiliar}
+                        onChange={(e) => updateParametro(index, 'tarifa_auxiliar', parseFloat(e.target.value) || 0)}
+                        placeholder="0.00"
+                        className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-blue-200/80 mb-2">Tarifa Nocturna</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={param.tarifa_nocturna}
+                        onChange={(e) => updateParametro(index, 'tarifa_nocturna', parseFloat(e.target.value) || 0)}
+                        placeholder="0.00"
+                        className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-blue-200/80 mb-2">Tarifa Fin de Semana</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={param.tarifa_fin_semana}
+                        onChange={(e) => updateParametro(index, 'tarifa_fin_semana', parseFloat(e.target.value) || 0)}
+                        placeholder="0.00"
+                        className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 transition-all"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

@@ -16,11 +16,6 @@ import {
   LogOut,
 } from "lucide-react";
 
-interface SidebarProps {
-  userNombre?: string;
-  userRol?: string;
-}
-
 interface MenuItem {
   name: string;
   href: string;
@@ -56,7 +51,7 @@ const menuItems: MenuItem[] = [
   },
 ];
 
-export default function Sidebar({ userNombre = "Admin", userRol = "Superadmin" }: SidebarProps) {
+export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
@@ -168,44 +163,43 @@ export default function Sidebar({ userNombre = "Admin", userRol = "Superadmin" }
         })}
       </nav>
 
-      {/* Footer con usuario */}
+      {/* Footer con botón de cerrar sesión */}
       <div className="border-t border-purple-400/10 p-4">
-        <div
-          className={`flex items-center gap-3 rounded-xl border border-purple-400/20 bg-purple-500/5 p-3 ${
-            collapsed ? "justify-center" : ""
-          }`}
-        >
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-500 font-display text-sm font-bold text-white shadow-lg shadow-purple-500/20">
-            {userNombre.charAt(0).toUpperCase()}
-          </div>
-
-          <AnimatePresence mode="wait">
-            {!collapsed && (
-              <motion.div
-                key="user-info"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex-1 overflow-hidden"
-              >
-                <p className="truncate font-body text-sm font-semibold text-white">{userNombre}</p>
-                <p className="truncate font-caption text-xs text-purple-300/60">{userRol}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {!collapsed && (
-            <button
+        <AnimatePresence mode="wait">
+          {!collapsed ? (
+            <motion.button
+              key="logout-expanded"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-purple-300/60 transition-colors hover:bg-purple-500/10 hover:text-purple-300"
+              className="flex w-full items-center justify-between rounded-xl border border-red-400/40 bg-gradient-to-r from-red-500/25 to-pink-600/15 px-4 py-3 text-sm font-medium text-red-200 backdrop-blur-sm shadow-lg shadow-red-500/15 transition hover:border-red-400/60 hover:from-red-500/35 hover:to-pink-600/25 hover:text-red-100 hover:shadow-red-500/25"
+              type="button"
+            >
+              <span className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/40 bg-red-500/25 shadow-inner shadow-red-500/20">
+                  <LogOut className="h-4 w-4" />
+                </div>
+                Cerrar Sesión
+              </span>
+            </motion.button>
+          ) : (
+            <motion.button
+              key="logout-collapsed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleLogout}
+              className="flex w-full items-center justify-center rounded-lg border border-red-400/40 bg-red-500/25 p-3 text-red-200 transition hover:bg-red-500/35"
               aria-label="Cerrar sesión"
               title="Cerrar sesión"
             >
-              <LogOut className="h-4 w-4" />
-              <span className="font-caption text-xs">Cerrar Sesión</span>
-            </button>
+              <LogOut className="h-5 w-5" />
+            </motion.button>
           )}
-        </div>
+        </AnimatePresence>
       </div>
     </motion.aside>
   );

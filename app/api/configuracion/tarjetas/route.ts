@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@/lib/supabase/server";
+import { validarAgregarTarjeta } from "@/lib/planes-limites-db";
 
 // POST - Crear nueva tarjeta
 export async function POST(request: Request) {
@@ -31,6 +32,23 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { message: "Faltan campos requeridos (codigo, codigo_interno)" },
         { status: 400 }
+      );
+    }
+
+    // ============================================================================
+    // VALIDACIÓN DE LÍMITE DEL PLAN (TARJETAS)
+    // ============================================================================
+    const validacionLimite = await validarAgregarTarjeta(negocioId);
+    
+    if (!validacionLimite.permitido) {
+      return NextResponse.json(
+        { 
+          message: validacionLimite.mensaje,
+          error: "LIMITE_ALCANZADO",
+          actual: validacionLimite.actual,
+          maximo: validacionLimite.maximo,
+        },
+        { status: 403 } // 403 Forbidden
       );
     }
 
