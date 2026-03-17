@@ -119,7 +119,11 @@ export default function Sidebar() {
       {/* Navegación */}
       <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-4">
         {menuItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          // Para "Inicio" (/admin) solo activar cuando estés exactamente en esa ruta
+          // Para otras rutas, activar cuando coincida exactamente o sea una subruta
+          const isActive = item.href === "/admin"
+            ? pathname === "/admin"
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
 
           return (
