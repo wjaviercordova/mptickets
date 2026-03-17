@@ -160,14 +160,14 @@ export default function NegociosPage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Búsqueda */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-purple-400/60" />
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-purple-400/60" />
             <input
               type="text"
               placeholder="Buscar por nombre, código o ciudad..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="glass-input w-full border-purple-500/20 bg-[#0f172a]/60 pl-10 text-white placeholder:text-blue-200/40 focus:border-purple-400/40"
+              className="glass-input w-full border-purple-500/20 bg-[#0f172a]/60 pl-11 text-white placeholder:text-blue-200/40 focus:border-purple-400/40"
             />
           </div>
 
@@ -175,20 +175,20 @@ export default function NegociosPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`glass-button flex items-center gap-2 border-purple-400/30 px-4 py-2 ${
-                showFilters ? "bg-purple-500/20" : "bg-purple-500/10"
+              className={`flex items-center gap-2 rounded-xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/25 to-green-600/15 px-4 py-2.5 text-sm font-medium text-emerald-200 backdrop-blur-sm transition hover:from-emerald-500/35 hover:to-green-600/25 ${
+                showFilters ? "from-emerald-500/35 to-green-600/25" : ""
               }`}
             >
               <Filter className="h-4 w-4" />
-              <span className="font-body text-sm">Filtros</span>
+              <span>Filtros</span>
             </button>
 
             <Link
               href="/admin/negocios/nuevo"
-              className="glass-button group flex items-center gap-2 border-purple-400/30 bg-gradient-to-r from-purple-500/20 to-pink-600/10 px-4 py-2 shadow-lg shadow-purple-500/10"
+              className="group flex items-center gap-2 rounded-xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/25 to-green-600/15 px-4 py-2.5 text-sm font-medium text-emerald-200 backdrop-blur-sm transition hover:from-emerald-500/35 hover:to-green-600/25"
             >
               <Plus className="h-4 w-4 transition-transform group-hover:scale-110" />
-              <span className="font-body text-sm font-semibold">Nuevo Negocio</span>
+              <span>Nuevo Negocio</span>
             </Link>
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function NegociosPage() {
           {!searchTerm && filterEstado === "all" && filterPlan === "all" && (
             <Link
               href="/admin/negocios/nuevo"
-              className="glass-button mt-4 inline-flex items-center gap-2 border-purple-400/30 bg-gradient-to-r from-purple-500/20 to-pink-600/10 px-4 py-2"
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/25 to-green-600/15 px-4 py-2.5 text-sm font-medium text-emerald-200 backdrop-blur-sm transition hover:from-emerald-500/35 hover:to-green-600/25"
             >
               <Plus className="h-4 w-4" />
               Crear primer negocio
@@ -341,32 +341,32 @@ export default function NegociosPage() {
                 </div>
 
                 {/* Acciones */}
-                <div className="flex items-center gap-2 lg:flex-col">
+                <div className="flex items-center gap-2 lg:flex-col lg:w-32">
                   <Link
                     href={`/admin/negocios/${negocio.id}`}
-                    className="glass-button flex items-center gap-2 border-cyan-400/30 bg-cyan-500/10 px-3 py-2 hover:border-cyan-400/50 hover:bg-cyan-500/20"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/25 to-cyan-600/15 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:from-blue-500/35 hover:to-cyan-600/25"
                     title="Ver detalles"
                   >
                     <Eye className="h-4 w-4" />
-                    <span className="font-caption text-xs">Ver</span>
+                    <span>Ver</span>
                   </Link>
 
                   <Link
                     href={`/admin/negocios/${negocio.id}/editar`}
-                    className="glass-button flex items-center gap-2 border-purple-400/30 bg-purple-500/10 px-3 py-2 hover:border-purple-400/50 hover:bg-purple-500/20"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/25 to-cyan-600/15 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:from-blue-500/35 hover:to-cyan-600/25"
                     title="Editar"
                   >
                     <Edit className="h-4 w-4" />
-                    <span className="font-caption text-xs">Editar</span>
+                    <span>Editar</span>
                   </Link>
 
                   <button
                     onClick={() => handleDelete(negocio.id, negocio.nombre)}
-                    className="glass-button flex items-center gap-2 border-red-400/30 bg-red-500/10 px-3 py-2 hover:border-red-400/50 hover:bg-red-500/20"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/25 to-cyan-600/15 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:from-blue-500/35 hover:to-cyan-600/25"
                     title="Eliminar"
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="font-caption text-xs">Eliminar</span>
+                    <span>Eliminar</span>
                   </button>
                 </div>
               </div>
