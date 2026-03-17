@@ -22,6 +22,7 @@ import {
 import type { NegocioExtended, PlanType } from "@/types/admin";
 import { ModalVerDetalles } from "@/components/admin/negocios/ModalVerDetalles";
 import { ModalEditarLicencia } from "@/components/admin/negocios/ModalEditarLicencia";
+import { ModalConfirmacion } from "@/components/admin/negocios/ModalConfirmacion";
 
 type FilterEstado = "all" | "activo" | "inactivo" | "suspendido";
 type FilterPlan = "all" | "DEMO" | "PREMIUM" | "basica";
@@ -38,6 +39,22 @@ export default function NegociosPage() {
   const [modalVerOpen, setModalVerOpen] = useState(false);
   const [modalEditarOpen, setModalEditarOpen] = useState(false);
   const [selectedNegocio, setSelectedNegocio] = useState<NegocioExtended | null>(null);
+
+  // Estados para modal de confirmación/alerta
+  const [modalConfirmacionOpen, setModalConfirmacionOpen] = useState(false);
+  const [modalConfirmacionConfig, setModalConfirmacionConfig] = useState<{
+    tipo: "error" | "confirmacion" | "exito";
+    titulo: string;
+    mensaje: string | string[];
+    textoConfirmar?: string;
+    textoCancelar?: string;
+    onConfirmar?: () => void;
+  }>({
+    tipo: "error",
+    titulo: "",
+    mensaje: "",
+    textoCancelar: "Cerrar",
+  });
 
   useEffect(() => {
     fetchNegocios();
@@ -83,7 +100,13 @@ export default function NegociosPage() {
   const handleDelete = async (negocio: NegocioExtended) => {
     // Validar condiciones antes de mostrar confirmación
     if (negocio.plan !== "demo") {
-      alert("Solo se pueden eliminar negocios con plan DEMO");
+      setModalConfirmacionConfig({
+        tipo: "error",
+        titulo: "No Permitido",
+        mensaje: "Solo se pueden eliminar negocios con plan DEMO",
+        textoCancelar: "Entendido",
+      });
+      setModalConfirmacionOpen(true);
       return;
     }
 
@@ -97,44 +120,80 @@ export default function NegociosPage() {
     }
 
     if (licenciaActiva) {
-      alert(
-        "Solo se pueden eliminar negocios DEMO con licencia INACTIVA (vencida).\n\n" +
-        `Este negocio aún tiene ${negocio.dias_restantes} días restantes.`
-      );
-      return;
-    }
-
-    const confirmMessage = 
-      `⚠️ ADVERTENCIA: Esta acción es IRREVERSIBLE\n\n` +
-      `Se eliminará permanentemente:\n` +
-      `• Negocio: ${negocio.nombre}\n` +
-      `• Todos los usuarios asociados\n` +
-      `• Todas las tarjetas\n` +
-      `• Todos los registros de ingresos\n` +
-      `• Toda la configuración\n\n` +
-      `¿Estás seguro de continuar?`;
-
-    if (!confirm(confirmMessage)) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/admin/negocios/${negocio.id}`, {
-        method: "DELETE",
+      setModalConfirmacionConfig({
+        tipo: "error",
+        titulo: "Licencia Activa",
+        mensaje: [
+          "Solo se pueden eliminar negocios DEMO con licencia INACTIVA (vencida).",
+          `Este negocio aún tiene ${negocio.dias_restantes} días restantes.`,
+        ],
+        textoCancelar: "Entendido",
       });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert("Negocio y todos sus datos relacionados eliminados exitosamente");
-        fetchNegocios();
-      } else {
-        alert(data.error || "Error al eliminar negocio");
-      }
-    } catch (error) {
-      console.error("Error deleting negocio:", error);
-      alert("Error al eliminar negocio");
+      setModalConfirmacionOpen(true);
+      return;
     }
+
+    // Mostrar confirmación de eliminación
+    setModalConfirmacionConfig({
+      tipo: "confirmacion",
+      titulo: "⚠️ Eliminar Negocio",
+      mensaje: [
+        "Esta acción es IRREVERSIBLE",
+        "",
+        "Se eliminará permanentemente:",
+        `• Negocio: ${negocio.nombre}`,
+        "• Todos los usuarios asociados",
+        "• Todas las tarjetas",
+        "• Todos los registros de ingresos",
+        "• Toda la configuración",
+        "",
+        "¿Estás seguro de continuar?",
+      ],
+      textoConfirmar: "Sí, Eliminar",
+      textoCancelar: "Cancelar",
+      onConfirmar: async () => {
+        setModalConfirmacionOpen(false);
+        
+        try {
+          const response = await fetch(`/api/admin/negocios/${negocio.id}`, {
+            method: "DELETE",
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Mostrar éxito
+            setModalConfirmacionConfig({
+              tipo: "exito",
+              titulo: "Eliminado Exitosamente",
+              mensaje: "Negocio y todos sus datos relacionados han sido eliminados",
+              textoCancelar: "Cerrar",
+            });
+            setModalConfirmacionOpen(true);
+            fetchNegocios();
+          } else {
+            // Mostrar error
+            setModalConfirmacionConfig({
+              tipo: "error",
+              titulo: "Error al Eliminar",
+              mensaje: data.error || "Error al eliminar negocio",
+              textoCancelar: "Cerrar",
+            });
+            setModalConfirmacionOpen(true);
+          }
+        } catch (error) {
+          console.error("Error deleting negocio:", error);
+          setModalConfirmacionConfig({
+            tipo: "error",
+            titulo: "Error",
+            mensaje: "Error al eliminar negocio. Por favor intenta nuevamente.",
+            textoCancelar: "Cerrar",
+          });
+          setModalConfirmacionOpen(true);
+        }
+      },
+    });
+    setModalConfirmacionOpen(true);
   };
 
   const getEstadoBadge = (estado: string) => {
@@ -445,6 +504,17 @@ export default function NegociosPage() {
         onSuccess={() => {
           fetchNegocios(); // Recargar lista después de actualizar
         }}
+      />
+
+      <ModalConfirmacion
+        isOpen={modalConfirmacionOpen}
+        tipo={modalConfirmacionConfig.tipo}
+        titulo={modalConfirmacionConfig.titulo}
+        mensaje={modalConfirmacionConfig.mensaje}
+        textoConfirmar={modalConfirmacionConfig.textoConfirmar}
+        textoCancelar={modalConfirmacionConfig.textoCancelar}
+        onConfirmar={modalConfirmacionConfig.onConfirmar}
+        onCancelar={() => setModalConfirmacionOpen(false)}
       />
     </div>
   );
