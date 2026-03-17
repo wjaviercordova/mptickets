@@ -102,7 +102,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 }
 
 /**
- * DELETE: Eliminar negocio (soft delete)
+ * DELETE: Eliminar negocio completamente (hard delete)
+ * Solo permite eliminar negocios DEMO con estado INACTIVO (licencia vencida)
  */
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {

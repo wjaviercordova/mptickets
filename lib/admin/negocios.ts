@@ -458,7 +458,9 @@ export async function updateNegocio(
 }
 
 /**
- * Elimina un negocio (soft delete)
+ * Elimina un negocio completamente (hard delete)
+ * VALIDACIÓN: Solo permite eliminar negocios DEMO con licencia INACTIVA (vencida)
+ * Elimina en cascada todos los registros relacionados
  */
 export async function deleteNegocio(id: string): Promise<{
   success: boolean;
@@ -466,21 +468,80 @@ export async function deleteNegocio(id: string): Promise<{
   error?: string;
 }> {
   try {
-    // Soft delete: cambiar estado a 'inactivo'
-    const { error } = await supabaseAdmin
+    // 1. Obtener información del negocio
+    const { data: negocio, error: getNegocioError } = await supabaseAdmin
       .from('negocios')
-      .update({ estado: 'inactivo' })
-      .eq('id', id);
+      .select('plan, fecha_expiracion, estado, nombre')
+      .eq('id', id)
+      .single();
 
-    if (error) {
-      console.error('Error eliminando negocio:', error);
-      return { success: false, error: 'Error al eliminar negocio' };
+    if (getNegocioError || !negocio) {
+      return { success: false, error: 'Negocio no encontrado' };
     }
 
-    return { success: true, message: 'Negocio eliminado exitosamente' };
+    // 2. Validar que sea plan DEMO
+    if (negocio.plan !== 'demo') {
+      return {
+        success: false,
+        error: 'Solo se pueden eliminar negocios con plan DEMO',
+      };
+    }
+
+    // 3. Validar que la licencia esté vencida (INACTIVO)
+    if (negocio.fecha_expiracion) {
+      const diasRestantes = Math.ceil(
+        (new Date(negocio.fecha_expiracion).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (diasRestantes > 0) {
+        return {
+          success: false,
+          error: 'Solo se pueden eliminar negocios DEMO con licencia vencida (INACTIVO)',
+        };
+      }
+    } else {
+      // Si no tiene fecha de expiración pero es DEMO, verificar el estado
+      if (negocio.estado === 'activo') {
+        return {
+          success: false,
+          error: 'Solo se pueden eliminar negocios DEMO con estado INACTIVO',
+        };
+      }
+    }
+
+    // 4. Eliminación en cascada (la BD lo manejará con ON DELETE CASCADE, pero por seguridad verificamos)
+    // Las tablas relacionadas que se eliminarán automáticamente:
+    // - usuarios (usuarios del negocio)
+    // - parametros (tarifas y configuraciones)
+    // - tarjetas (tarjetas del negocio)
+    // - codigos (registros de ingresos)
+    // - configuracion_sistema (configuración del negocio)
+    // - auditoria (registros de auditoría)
+
+    // 5. Eliminar negocio (eliminará todo en cascada)
+    const { error: deleteError } = await supabaseAdmin
+      .from('negocios')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('Error eliminando negocio:', deleteError);
+      return { 
+        success: false, 
+        error: 'Error al eliminar negocio de la base de datos' 
+      };
+    }
+
+    return {
+      success: true,
+      message: `Negocio "${negocio.nombre}" y todos sus datos relacionados han sido eliminados exitosamente`,
+    };
   } catch (error) {
     console.error('Error en deleteNegocio:', error);
-    return { success: false, error: 'Error interno al eliminar negocio' };
+    return { 
+      success: false, 
+      error: 'Error interno al eliminar negocio' 
+    };
   }
 }
 

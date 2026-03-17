@@ -20,6 +20,8 @@ import {
   Phone,
 } from "lucide-react";
 import type { NegocioExtended, PlanType } from "@/types/admin";
+import { ModalVerDetalles } from "@/components/admin/negocios/ModalVerDetalles";
+import { ModalEditarLicencia } from "@/components/admin/negocios/ModalEditarLicencia";
 
 type FilterEstado = "all" | "activo" | "inactivo" | "suspendido";
 type FilterPlan = "all" | "DEMO" | "PREMIUM" | "basica";
@@ -31,6 +33,11 @@ export default function NegociosPage() {
   const [filterEstado, setFilterEstado] = useState<FilterEstado>("all");
   const [filterPlan, setFilterPlan] = useState<FilterPlan>("all");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Estados para modales
+  const [modalVerOpen, setModalVerOpen] = useState(false);
+  const [modalEditarOpen, setModalEditarOpen] = useState(false);
+  const [selectedNegocio, setSelectedNegocio] = useState<NegocioExtended | null>(null);
 
   useEffect(() => {
     fetchNegocios();
@@ -63,20 +70,63 @@ export default function NegociosPage() {
     fetchNegocios();
   };
 
-  const handleDelete = async (id: string, nombre: string) => {
-    if (!confirm(`¿Estás seguro de eliminar el negocio "${nombre}"?`)) {
+  const handleVerDetalles = (negocio: NegocioExtended) => {
+    setSelectedNegocio(negocio);
+    setModalVerOpen(true);
+  };
+
+  const handleEditarLicencia = (negocio: NegocioExtended) => {
+    setSelectedNegocio(negocio);
+    setModalEditarOpen(true);
+  };
+
+  const handleDelete = async (negocio: NegocioExtended) => {
+    // Validar condiciones antes de mostrar confirmación
+    if (negocio.plan !== "demo") {
+      alert("Solo se pueden eliminar negocios con plan DEMO");
+      return;
+    }
+
+    // Calcular si la licencia está activa
+    let licenciaActiva = true;
+    if (negocio.fecha_expiracion) {
+      const diasRestantes = Math.ceil(
+        (new Date(negocio.fecha_expiracion).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      );
+      licenciaActiva = diasRestantes > 0;
+    }
+
+    if (licenciaActiva) {
+      alert(
+        "Solo se pueden eliminar negocios DEMO con licencia INACTIVA (vencida).\n\n" +
+        `Este negocio aún tiene ${negocio.dias_restantes} días restantes.`
+      );
+      return;
+    }
+
+    const confirmMessage = 
+      `⚠️ ADVERTENCIA: Esta acción es IRREVERSIBLE\n\n` +
+      `Se eliminará permanentemente:\n` +
+      `• Negocio: ${negocio.nombre}\n` +
+      `• Todos los usuarios asociados\n` +
+      `• Todas las tarjetas\n` +
+      `• Todos los registros de ingresos\n` +
+      `• Toda la configuración\n\n` +
+      `¿Estás seguro de continuar?`;
+
+    if (!confirm(confirmMessage)) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/admin/negocios/${id}`, {
+      const response = await fetch(`/api/admin/negocios/${negocio.id}`, {
         method: "DELETE",
       });
 
       const data = await response.json();
 
       if (data.success) {
-        alert("Negocio eliminado exitosamente");
+        alert("Negocio y todos sus datos relacionados eliminados exitosamente");
         fetchNegocios();
       } else {
         alert(data.error || "Error al eliminar negocio");
@@ -342,26 +392,26 @@ export default function NegociosPage() {
 
                 {/* Acciones */}
                 <div className="flex items-center gap-2 lg:flex-col lg:w-32">
-                  <Link
-                    href={`/admin/negocios/${negocio.id}`}
+                  <button
+                    onClick={() => handleVerDetalles(negocio)}
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/25 to-cyan-600/15 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:from-blue-500/35 hover:to-cyan-600/25"
                     title="Ver detalles"
                   >
                     <Eye className="h-4 w-4" />
                     <span>Ver</span>
-                  </Link>
+                  </button>
 
-                  <Link
-                    href={`/admin/negocios/${negocio.id}/editar`}
+                  <button
+                    onClick={() => handleEditarLicencia(negocio)}
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/25 to-cyan-600/15 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:from-blue-500/35 hover:to-cyan-600/25"
-                    title="Editar"
+                    title="Editar licencia"
                   >
                     <Edit className="h-4 w-4" />
                     <span>Editar</span>
-                  </Link>
+                  </button>
 
                   <button
-                    onClick={() => handleDelete(negocio.id, negocio.nombre)}
+                    onClick={() => handleDelete(negocio)}
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/25 to-cyan-600/15 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:from-blue-500/35 hover:to-cyan-600/25"
                     title="Eliminar"
                   >
@@ -374,6 +424,28 @@ export default function NegociosPage() {
           ))}
         </div>
       )}
+
+      {/* Modales */}
+      <ModalVerDetalles
+        negocio={selectedNegocio}
+        isOpen={modalVerOpen}
+        onClose={() => {
+          setModalVerOpen(false);
+          setSelectedNegocio(null);
+        }}
+      />
+
+      <ModalEditarLicencia
+        negocio={selectedNegocio}
+        isOpen={modalEditarOpen}
+        onClose={() => {
+          setModalEditarOpen(false);
+          setSelectedNegocio(null);
+        }}
+        onSuccess={() => {
+          fetchNegocios(); // Recargar lista después de actualizar
+        }}
+      />
     </div>
   );
 }
