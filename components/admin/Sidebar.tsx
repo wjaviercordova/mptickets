@@ -25,7 +25,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    name: "Dashboard",
+    name: "Inicio",
     href: "/admin",
     icon: LayoutDashboard,
   },

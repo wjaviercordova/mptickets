@@ -7,7 +7,7 @@ import { Search } from "lucide-react";
 
 const routeNames: Record<string, { title: string; subtitle: string }> = {
   "/admin": { 
-    title: "Dashboard", 
+    title: "Inicio", 
     subtitle: "Panel de control principal" 
   },
   "/admin/negocios": { 

@@ -64,11 +64,11 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         <Link
           href="/admin/negocios/nuevo"
-          className="glass-card group border-purple-400/20 p-6 transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/10"
+          className="glass-card group border-blue-500/20 p-6 transition-all hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/10"
         >
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-purple-500/20 to-pink-600/10 shadow-lg shadow-purple-500/10 transition-transform group-hover:scale-110">
-              <Plus className="h-6 w-6 text-purple-300" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-400/30 bg-gradient-to-br from-emerald-500/20 to-green-600/10 shadow-lg shadow-emerald-500/10 transition-transform group-hover:scale-110">
+              <Plus className="h-6 w-6 text-emerald-300" />
             </div>
             <div>
               <h3 className="font-display text-lg font-semibold text-white">Nuevo Negocio</h3>
@@ -81,11 +81,11 @@ export default async function AdminDashboardPage() {
 
         <Link
           href="/admin/negocios"
-          className="glass-card group border-purple-400/20 p-6 transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/10"
+          className="glass-card group border-blue-500/20 p-6 transition-all hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/10"
         >
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-cyan-500/20 to-blue-600/10 shadow-lg shadow-cyan-500/10 transition-transform group-hover:scale-110">
-              <Building2 className="h-6 w-6 text-cyan-300" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-amber-400/30 bg-gradient-to-br from-amber-500/20 to-yellow-600/10 shadow-lg shadow-amber-500/10 transition-transform group-hover:scale-110">
+              <Building2 className="h-6 w-6 text-amber-300" />
             </div>
             <div>
               <h3 className="font-display text-lg font-semibold text-white">Gestionar Negocios</h3>
@@ -98,11 +98,11 @@ export default async function AdminDashboardPage() {
 
         <Link
           href="/admin/consultas"
-          className="glass-card group border-purple-400/20 p-6 transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/10"
+          className="glass-card group border-blue-500/20 p-6 transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/10"
         >
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-emerald-500/20 to-green-600/10 shadow-lg shadow-emerald-500/10 transition-transform group-hover:scale-110">
-              <Search className="h-6 w-6 text-emerald-300" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-purple-500/20 to-pink-600/10 shadow-lg shadow-purple-500/10 transition-transform group-hover:scale-110">
+              <Search className="h-6 w-6 text-purple-300" />
             </div>
             <div>
               <h3 className="font-display text-lg font-semibold text-white">Consultas</h3>
@@ -115,11 +115,11 @@ export default async function AdminDashboardPage() {
 
         <Link
           href="/admin/reportes"
-          className="glass-card group border-purple-400/20 p-6 transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/10"
+          className="glass-card group border-blue-500/20 p-6 transition-all hover:border-cyan-400/40 hover:shadow-lg hover:shadow-cyan-500/10"
         >
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-amber-500/20 to-orange-600/10 shadow-lg shadow-amber-500/10 transition-transform group-hover:scale-110">
-              <FileBarChart className="h-6 w-6 text-amber-300" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-cyan-400/30 bg-gradient-to-br from-cyan-500/20 to-blue-600/10 shadow-lg shadow-cyan-500/10 transition-transform group-hover:scale-110">
+              <FileBarChart className="h-6 w-6 text-cyan-300" />
             </div>
             <div>
               <h3 className="font-display text-lg font-semibold text-white">Reportes</h3>
