@@ -69,10 +69,10 @@ export default function Sidebar() {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1, width: collapsed ? 80 : 280 }}
       transition={{ duration: 0.3 }}
-      className="sticky top-0 flex h-screen flex-col border-r border-purple-400/20 bg-[#0f172a]/90 shadow-2xl shadow-purple-500/10 backdrop-blur-xl"
+      className="sticky top-0 flex h-screen flex-col border-r border-blue-500/20 bg-[#0f172a]/90 shadow-2xl shadow-blue-500/10 backdrop-blur-xl"
     >
       {/* Logo y Toggle */}
-      <div className="flex h-20 items-center justify-between border-b border-purple-400/10 px-6">
+      <div className="flex h-20 items-center justify-between border-b border-blue-500/20 px-6">
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.div
@@ -82,7 +82,7 @@ export default function Sidebar() {
               exit={{ opacity: 0 }}
               className="flex items-center gap-3"
             >
-              <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-purple-400/40 bg-gradient-to-br from-purple-500/30 to-pink-600/20 shadow-lg shadow-purple-500/20">
+              <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-cyan-400/40 bg-gradient-to-br from-cyan-500/30 to-blue-600/20 shadow-lg shadow-cyan-500/20">
                 <Image
                   src="/images/logos/mptickets.png"
                   alt="MPTickets"
@@ -105,7 +105,7 @@ export default function Sidebar() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setCollapsed(!collapsed)}
-          className="rounded-xl border border-purple-400/30 bg-purple-950/30 p-2 text-purple-300 backdrop-blur-sm transition hover:border-purple-400/60 hover:bg-purple-900/40 hover:text-white hover:shadow-lg hover:shadow-purple-500/20"
+          className="rounded-xl border border-blue-500/30 bg-blue-950/30 p-2 text-cyan-400 backdrop-blur-sm transition hover:border-cyan-400/60 hover:bg-blue-900/40 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20"
           aria-label={collapsed ? "Expandir sidebar" : "Contraer sidebar"}
         >
           {collapsed ? (
@@ -128,15 +128,15 @@ export default function Sidebar() {
               href={item.href}
               className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium backdrop-blur-sm transition-all ${
                 isActive
-                  ? "border-purple-400/50 bg-gradient-to-r from-purple-500/30 to-pink-600/20 text-white shadow-lg shadow-purple-500/20"
-                  : "border-purple-500/20 bg-[#1e293b]/40 text-blue-200/70 hover:border-purple-400/50 hover:bg-gradient-to-r hover:from-purple-500/30 hover:to-pink-500/20 hover:text-white hover:shadow-lg hover:shadow-purple-500/20"
+                  ? "border-cyan-400/50 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 text-white shadow-lg shadow-cyan-500/20"
+                  : "border-blue-500/20 bg-[#1e293b]/40 text-blue-100/80 hover:border-cyan-400/50 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-cyan-500/20 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20"
               }`}
             >
               {/* Indicador activo */}
               {isActive && (
                 <motion.div
                   layoutId="sidebar-active"
-                  className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-purple-400 to-pink-500"
+                  className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-cyan-400 to-blue-500"
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />
               )}
@@ -144,10 +144,10 @@ export default function Sidebar() {
               {/* Contenedor del ícono con efecto Modern Glass */}
               <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border transition ${
                 isActive
-                  ? "border-purple-400/40 bg-purple-500/20 shadow-lg shadow-purple-400/30"
-                  : "border-purple-500/20 bg-purple-950/30 group-hover:border-purple-400/40 group-hover:bg-purple-500/20 group-hover:shadow-lg group-hover:shadow-purple-400/30"
+                  ? "border-cyan-400/40 bg-cyan-500/20 shadow-lg shadow-cyan-400/30"
+                  : "border-blue-500/20 bg-blue-950/30 group-hover:border-cyan-400/40 group-hover:bg-cyan-500/20 group-hover:shadow-lg group-hover:shadow-cyan-400/30"
               }`}>
-                <Icon className="h-4 w-4 text-purple-300 transition group-hover:text-purple-200" />
+                <Icon className="h-4 w-4 text-cyan-400 transition group-hover:text-cyan-300" />
               </div>
 
               <AnimatePresence mode="wait">
@@ -165,7 +165,7 @@ export default function Sidebar() {
               </AnimatePresence>
 
               {!collapsed && item.badge && (
-                <span className="ml-auto rounded-full bg-purple-500/20 px-2 py-0.5 font-caption text-xs text-purple-300">
+                <span className="ml-auto rounded-full bg-cyan-500/20 px-2 py-0.5 font-caption text-xs text-cyan-300">
                   {item.badge}
                 </span>
               )}
@@ -175,7 +175,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer con botón de cerrar sesión */}
-      <div className="border-t border-purple-400/10 p-4">
+      <div className="border-t border-blue-500/20 p-4">
         <AnimatePresence mode="wait">
           {!collapsed ? (
             <motion.button
