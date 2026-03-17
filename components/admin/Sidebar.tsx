@@ -117,7 +117,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navegación */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-4">
         {menuItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
@@ -126,10 +126,10 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`group relative flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all ${
+              className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium backdrop-blur-sm transition-all ${
                 isActive
-                  ? "bg-gradient-to-r from-purple-500/30 to-pink-600/20 text-white shadow-lg shadow-purple-500/20 border border-purple-400/30"
-                  : "text-blue-200/70 hover:bg-purple-500/20 hover:text-white hover:border hover:border-purple-400/20"
+                  ? "border-purple-400/50 bg-gradient-to-r from-purple-500/30 to-pink-600/20 text-white shadow-lg shadow-purple-500/20"
+                  : "border-purple-500/20 bg-[#1e293b]/40 text-blue-200/70 hover:border-purple-400/50 hover:bg-gradient-to-r hover:from-purple-500/30 hover:to-pink-500/20 hover:text-white hover:shadow-lg hover:shadow-purple-500/20"
               }`}
             >
               {/* Indicador activo */}
@@ -141,7 +141,14 @@ export default function Sidebar() {
                 />
               )}
 
-              <Icon className={`h-5 w-5 flex-shrink-0 ${isActive ? "text-purple-300" : ""}`} />
+              {/* Contenedor del ícono con efecto Modern Glass */}
+              <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border transition ${
+                isActive
+                  ? "border-purple-400/40 bg-purple-500/20 shadow-lg shadow-purple-400/30"
+                  : "border-purple-500/20 bg-purple-950/30 group-hover:border-purple-400/40 group-hover:bg-purple-500/20 group-hover:shadow-lg group-hover:shadow-purple-400/30"
+              }`}>
+                <Icon className="h-4 w-4 text-purple-300 transition group-hover:text-purple-200" />
+              </div>
 
               <AnimatePresence mode="wait">
                 {!collapsed && (
@@ -150,7 +157,7 @@ export default function Sidebar() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="font-body text-sm font-medium"
+                    className="flex-1 text-left font-body font-medium"
                   >
                     {item.name}
                   </motion.span>
