@@ -167,7 +167,7 @@ export default function NegociosPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="glass-input w-full border-purple-500/20 bg-[#0f172a]/60 pl-11 text-white placeholder:text-blue-200/40 focus:border-purple-400/40"
+              className="glass-input w-full border-purple-500/20 bg-[#0f172a]/60 !pl-11 text-white placeholder:text-blue-200/40 focus:border-purple-400/40"
             />
           </div>
 
