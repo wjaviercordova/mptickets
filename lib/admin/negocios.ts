@@ -22,6 +22,12 @@ const PLAN_CONFIGS = {
     capacidad_maxima: 10,
     dias_vigencia: 30,
   },
+  anual: {
+    limite_usuarios: 99999,
+    limite_tarjetas: 99999,
+    capacidad_maxima: 99999,
+    dias_vigencia: 365, // 1 año de vigencia
+  },
   premium: {
     limite_usuarios: 99999,
     limite_tarjetas: 99999,

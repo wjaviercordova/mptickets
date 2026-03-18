@@ -27,7 +27,7 @@ import {
 // Tipos
 interface NegocioData {
   codigo: string;
-  plan: "demo" | "premium";
+  plan: "demo" | "anual" | "premium";
   fecha_expiracion: string | null;
   nombre: string;
   descripcion: string;
@@ -725,15 +725,16 @@ function StepNegocio({ data, onChange }: { data: NegocioData; onChange: (data: N
           </label>
           <select
             value={data.plan}
-            onChange={(e) => onChange({ ...data, plan: e.target.value as "demo" | "premium" })}
+            onChange={(e) => onChange({ ...data, plan: e.target.value as "demo" | "anual" | "premium" })}
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
           >
             <option value="demo">DEMO (30 días)</option>
+            <option value="anual">ANUAL (1 año)</option>
             <option value="premium">PREMIUM (Sin vencimiento)</option>
           </select>
         </div>
 
-        {data.plan === "demo" && (
+        {(data.plan === "demo" || data.plan === "anual") && (
           <div>
             <label className="block text-sm font-medium text-blue-100 mb-2">Fecha de Expiración</label>
             <input

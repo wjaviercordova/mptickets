@@ -1,5 +1,5 @@
 /**
- * API Route: Cambio de Plan de Negocio (DEMO → PREMIUM)
+ * API Route: Cambio de Plan de Negocio (DEMO → ANUAL/PREMIUM, ANUAL → PREMIUM)
  * PATCH /api/admin/negocios/[id]/plan
  */
 
@@ -13,7 +13,7 @@ interface RouteContext {
 }
 
 /**
- * PATCH: Actualizar plan de negocio (solo DEMO → PREMIUM)
+ * PATCH: Actualizar plan de negocio con validación de transiciones
  */
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
@@ -21,10 +21,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const body = await request.json();
     const { plan } = body;
 
-    // Validar que el nuevo plan sea PREMIUM
-    if (plan !== 'premium') {
+    // Validar que el nuevo plan sea válido
+    if (plan !== 'premium' && plan !== 'anual') {
       return NextResponse.json(
-        { success: false, error: 'Solo se permite actualizar a plan PREMIUM' },
+        { success: false, error: 'Solo se permite actualizar a plan ANUAL o PREMIUM' },
         { status: 400 }
       );
     }
@@ -43,23 +43,51 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Validar que el plan actual sea DEMO
-    if (negocio.plan !== 'demo') {
+    // Validar transiciones permitidas
+    const from = negocio.plan;
+    const to = plan;
+
+    // PREMIUM no puede cambiar a ningún otro plan
+    if (from === 'premium') {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Solo se puede actualizar de DEMO a PREMIUM, no al revés' 
+          error: 'No se puede cambiar desde plan PREMIUM a otros planes' 
         },
         { status: 400 }
       );
     }
 
-    // Actualizar negocio a PREMIUM
+    // ANUAL no puede cambiar a DEMO
+    if (from === 'anual' && to === 'demo') {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'No se puede cambiar de ANUAL a DEMO' 
+        },
+        { status: 400 }
+      );
+    }
+
+    // Calcular fecha de expiración según el plan
+    let fecha_expiracion: string | null = null;
+    
+    if (to === 'anual') {
+      // ANUAL: 1 año desde hoy
+      const oneYearLater = new Date();
+      oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+      fecha_expiracion = oneYearLater.toISOString();
+    } else if (to === 'premium') {
+      // PREMIUM: sin fecha de expiración
+      fecha_expiracion = null;
+    }
+
+    // Actualizar negocio con el nuevo plan
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('negocios')
       .update({
-        plan: 'premium',
-        fecha_expiracion: null, // Anular fecha de expiración
+        plan: to,
+        fecha_expiracion,
         limite_usuarios: 99999,
         limite_tarjetas: 99999,
         capacidad_maxima: 99999,

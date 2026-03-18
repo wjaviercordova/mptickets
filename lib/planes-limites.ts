@@ -13,7 +13,7 @@
 /**
  * Tipos de planes disponibles en el sistema
  */
-export type PlanTipo = 'demo' | 'basica' | 'premium';
+export type PlanTipo = 'demo' | 'basica' | 'anual' | 'premium';
 
 /**
  * Configuración de límites para un plan específico
@@ -129,6 +129,22 @@ export const PLAN_LIMITS_FALLBACK: Record<PlanTipo, Omit<PlanConfig, 'id' | 'fec
     capacidad_maximo: 200,
     capacidad_por_defecto: 50,
     descripcion: 'Plan Básico - Funcionalidades estándar',
+  },
+  anual: {
+    plan_tipo: 'anual',
+    usuarios_minimo: 1,
+    usuarios_maximo: 10,
+    usuarios_por_defecto: 1,
+    tarjetas_minimo: 1,
+    tarjetas_maximo: 100,
+    tarjetas_por_defecto: 10,
+    parametros_minimo: 1,
+    parametros_maximo: 10,
+    parametros_por_defecto: 1,
+    capacidad_minimo: 1,
+    capacidad_maximo: 9999,
+    capacidad_por_defecto: 50,
+    descripcion: 'Plan Anual - Todas las funcionalidades por 1 año',
   },
   premium: {
     plan_tipo: 'premium',

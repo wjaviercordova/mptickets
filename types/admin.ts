@@ -37,7 +37,7 @@ export interface AdminLoginResponse {
 // NEGOCIOS
 // ============================================
 
-export type PlanType = 'demo' | 'premium';
+export type PlanType = 'demo' | 'anual' | 'premium';
 export type EstadoNegocio = 'activo' | 'inactivo' | 'suspendido';
 export type EstadoLicencia = 'Activa' | 'Expirada' | 'Sin vencimiento';
 

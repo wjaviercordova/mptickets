@@ -18,7 +18,7 @@ export function ModalEditarLicencia({
   onClose,
   onSuccess,
 }: ModalEditarLicenciaProps) {
-  const [selectedPlan, setSelectedPlan] = useState<"demo" | "premium">(
+  const [selectedPlan, setSelectedPlan] = useState<"demo" | "anual" | "premium">(
     negocio?.plan || "demo"
   );
   const [loading, setLoading] = useState(false);
@@ -26,11 +26,32 @@ export function ModalEditarLicencia({
 
   if (!negocio) return null;
 
-  const puedeActualizar = negocio.plan === "demo" && selectedPlan === "premium";
+  // Lógica de transiciones permitidas
+  const puedeActualizar = (() => {
+    const from = negocio.plan;
+    const to = selectedPlan;
+
+    // No cambiar al mismo plan
+    if (from === to) return false;
+
+    // DEMO puede cambiar a ANUAL o PREMIUM
+    if (from === "demo" && (to === "anual" || to === "premium")) return true;
+
+    // ANUAL puede cambiar solo a PREMIUM
+    if (from === "anual" && to === "premium") return true;
+
+    // PREMIUM no puede cambiar a nada
+    if (from === "premium") return false;
+
+    // ANUAL no puede cambiar a DEMO
+    if (from === "anual" && to === "demo") return false;
+
+    return false;
+  })();
 
   const handleActualizar = async () => {
     if (!puedeActualizar) {
-      setError("Solo se puede actualizar de DEMO a PREMIUM");
+      setError("Transición de plan no permitida");
       return;
     }
 
@@ -41,7 +62,7 @@ export function ModalEditarLicencia({
       const response = await fetch(`/api/admin/negocios/${negocio.id}/plan`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: "premium" }),
+        body: JSON.stringify({ plan: selectedPlan }),
       });
 
       const data = await response.json();
@@ -115,16 +136,16 @@ export function ModalEditarLicencia({
               </label>
 
               <div className="space-y-3">
-                {/* Opción DEMO (deshabilitada si ya es PREMIUM) */}
+                {/* Opción DEMO */}
                 <button
                   onClick={() => setSelectedPlan("demo")}
-                  disabled={negocio.plan === "premium"}
+                  disabled={negocio.plan !== "demo"}
                   className={`w-full rounded-2xl border p-4 text-left transition ${
                     selectedPlan === "demo"
                       ? "border-blue-400/50 bg-gradient-to-br from-blue-500/20 to-cyan-600/10"
                       : "border-blue-500/20 bg-[#0f172a]/40 hover:border-blue-400/30"
                   } ${
-                    negocio.plan === "premium"
+                    negocio.plan !== "demo"
                       ? "cursor-not-allowed opacity-40"
                       : ""
                   }`}
@@ -136,7 +157,39 @@ export function ModalEditarLicencia({
                         30 días de prueba
                       </p>
                     </div>
-                    {negocio.plan === "premium" && (
+                    {negocio.plan !== "demo" && (
+                      <span className="text-xs text-red-300">
+                        No permitido
+                      </span>
+                    )}
+                  </div>
+                </button>
+
+                {/* Opción ANUAL */}
+                <button
+                  onClick={() => setSelectedPlan("anual")}
+                  disabled={negocio.plan === "premium" || negocio.plan === "anual"}
+                  className={`w-full rounded-2xl border p-4 text-left transition ${
+                    selectedPlan === "anual"
+                      ? "border-amber-400/50 bg-gradient-to-br from-amber-500/20 to-orange-600/10"
+                      : "border-blue-500/20 bg-[#0f172a]/40 hover:border-amber-400/30"
+                  } ${
+                    negocio.plan === "premium" || negocio.plan === "anual"
+                      ? "cursor-not-allowed opacity-40"
+                      : ""
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-semibold text-white">ANUAL</h4>
+                      <p className="mt-1 text-sm text-blue-200/60">
+                        1 año de validez • Todas las funcionalidades
+                      </p>
+                    </div>
+                    {negocio.plan === "demo" && selectedPlan === "anual" && (
+                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                    )}
+                    {(negocio.plan === "premium" || negocio.plan === "anual") && (
                       <span className="text-xs text-red-300">
                         No permitido
                       </span>
@@ -147,10 +200,15 @@ export function ModalEditarLicencia({
                 {/* Opción PREMIUM */}
                 <button
                   onClick={() => setSelectedPlan("premium")}
+                  disabled={negocio.plan === "premium"}
                   className={`w-full rounded-2xl border p-4 text-left transition ${
                     selectedPlan === "premium"
                       ? "border-purple-400/50 bg-gradient-to-br from-purple-500/20 to-pink-600/10"
                       : "border-blue-500/20 bg-[#0f172a]/40 hover:border-purple-400/30"
+                  } ${
+                    negocio.plan === "premium"
+                      ? "cursor-not-allowed opacity-40"
+                      : ""
                   }`}
                 >
                   <div className="flex items-start justify-between">
@@ -160,7 +218,7 @@ export function ModalEditarLicencia({
                         Sin fecha de vencimiento • Ilimitado
                       </p>
                     </div>
-                    {puedeActualizar && (
+                    {puedeActualizar && selectedPlan === "premium" && (
                       <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                     )}
                   </div>
@@ -168,28 +226,51 @@ export function ModalEditarLicencia({
               </div>
             </div>
 
-            {/* Advertencia */}
-            {puedeActualizar && (
+            {/* Advertencias según la transición */}
+            {puedeActualizar && selectedPlan === "anual" && negocio.plan === "demo" && (
               <div className="mb-6 flex items-start gap-3 rounded-2xl border border-yellow-400/30 bg-yellow-500/10 p-4">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0 text-yellow-400" />
                 <div className="text-sm text-yellow-200">
-                  <p className="font-semibold">Cambio de licencia</p>
+                  <p className="font-semibold">Cambio a ANUAL</p>
                   <p className="mt-1 text-yellow-200/80">
-                    Al cambiar a PREMIUM, la fecha de expiración se eliminará y
-                    el negocio tendrá acceso ilimitado.
+                    La licencia tendrá validez de 1 año desde la fecha de activación.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Mensaje no permitido */}
-            {negocio.plan === "premium" && selectedPlan === "demo" && (
+            {puedeActualizar && selectedPlan === "premium" && (
+              <div className="mb-6 flex items-start gap-3 rounded-2xl border border-yellow-400/30 bg-yellow-500/10 p-4">
+                <AlertTriangle className="h-5 w-5 flex-shrink-0 text-yellow-400" />
+                <div className="text-sm text-yellow-200">
+                  <p className="font-semibold">Cambio a PREMIUM</p>
+                  <p className="mt-1 text-yellow-200/80">
+                    La fecha de expiración se eliminará y el negocio tendrá acceso ilimitado.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Mensajes de transiciones no permitidas */}
+            {negocio.plan === "premium" && (selectedPlan === "demo" || selectedPlan === "anual") && (
               <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-400/30 bg-red-500/10 p-4">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-400" />
                 <div className="text-sm text-red-200">
                   <p className="font-semibold">Cambio no permitido</p>
                   <p className="mt-1 text-red-200/80">
-                    No se puede cambiar de PREMIUM a DEMO.
+                    No se puede cambiar de PREMIUM a otros planes.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {negocio.plan === "anual" && selectedPlan === "demo" && (
+              <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-400/30 bg-red-500/10 p-4">
+                <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-400" />
+                <div className="text-sm text-red-200">
+                  <p className="font-semibold">Cambio no permitido</p>
+                  <p className="mt-1 text-red-200/80">
+                    No se puede cambiar de ANUAL a DEMO.
                   </p>
                 </div>
               </div>
