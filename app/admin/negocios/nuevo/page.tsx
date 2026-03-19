@@ -725,7 +725,23 @@ function StepNegocio({ data, onChange }: { data: NegocioData; onChange: (data: N
           </label>
           <select
             value={data.plan}
-            onChange={(e) => onChange({ ...data, plan: e.target.value as "demo" | "anual" | "premium" })}
+            onChange={(e) => {
+              const selectedPlan = e.target.value as "demo" | "anual" | "premium";
+              const updatedData = { ...data, plan: selectedPlan };
+              
+              // Actualizar límites según el plan
+              if (selectedPlan === "demo") {
+                updatedData.limite_usuarios = 1;
+                updatedData.limite_tarjetas = 10;
+                updatedData.capacidad_maxima = 10;
+              } else if (selectedPlan === "anual" || selectedPlan === "premium") {
+                updatedData.limite_usuarios = 99999;
+                updatedData.limite_tarjetas = 99999;
+                updatedData.capacidad_maxima = 99999;
+              }
+              
+              onChange(updatedData);
+            }}
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
           >
             <option value="demo">DEMO (30 días)</option>
