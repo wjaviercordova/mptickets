@@ -252,25 +252,26 @@ export async function createNegocio(
 
     console.log('✅ [createNegocio] Código disponible');
 
-    // 3. Preparar datos del negocio
-    let fecha_expiracion = null;
+    // 3. Forzar plan DEMO en creación (todos los negocios nuevos inician con DEMO)
+    console.log('🔒 [createNegocio] Forzando plan DEMO para nuevo negocio');
     
-    if (negocio.plan === 'demo') {
-      // DEMO: usar la fecha proporcionada en el formulario
-      fecha_expiracion = negocio.fecha_expiracion || null;
-    } else if (negocio.plan === 'anual') {
-      // ANUAL: calcular 1 año desde hoy
-      const fechaAnual = new Date();
-      fechaAnual.setFullYear(fechaAnual.getFullYear() + 1);
-      fecha_expiracion = fechaAnual.toISOString();
-    }
-    // PREMIUM: fecha_expiracion permanece null (sin vencimiento)
+    // DEMO: usar la fecha proporcionada en el formulario o calcular 30 días
+    const fecha_expiracion = negocio.fecha_expiracion || null;
 
     console.log('📅 [createNegocio] Fecha de expiración calculada:', fecha_expiracion);
 
+    // Forzar límites de plan DEMO
+    const limitesDEMO = {
+      limite_usuarios: 1,
+      limite_tarjetas: 10,
+      capacidad_maxima: 10,
+    };
+
+    console.log('📊 [createNegocio] Límites de plan DEMO aplicados:', limitesDEMO);
+
     const negocioData = {
       codigo: negocio.codigo.toUpperCase(),
-      plan: negocio.plan,
+      plan: 'demo', // Siempre DEMO en creación
       fecha_expiracion,
       nombre: negocio.nombre,
       descripcion: negocio.descripcion,
@@ -289,9 +290,7 @@ export async function createNegocio(
       },
       estado: 'activo',
       metadata: {},
-      limite_usuarios: negocio.limite_usuarios,
-      limite_tarjetas: negocio.limite_tarjetas,
-      capacidad_maxima: negocio.capacidad_maxima,
+      ...limitesDEMO, // Usar límites forzados de DEMO
     };
 
     console.log('📦 [createNegocio] Datos a insertar:', JSON.stringify(negocioData, null, 2));

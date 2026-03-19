@@ -709,6 +709,14 @@ function StepNegocio({ data, onChange }: { data: NegocioData; onChange: (data: N
         </p>
       </div>
 
+      {/* Warning Box - Plan DEMO fijo */}
+      <div className="bg-amber-500/10 border border-amber-400/30 rounded-xl p-4 mb-6">
+        <p className="text-sm text-amber-200/80 flex items-start gap-2">
+          <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <span>Todos los negocios nuevos se crean con <strong>Plan DEMO</strong> (30 días de prueba). Para cambiar a plan <strong>ANUAL</strong> o <strong>PREMIUM</strong>, edita el negocio desde el panel de administración después de crearlo.</span>
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-blue-100 mb-2">
@@ -727,44 +735,24 @@ function StepNegocio({ data, onChange }: { data: NegocioData; onChange: (data: N
           <label className="block text-sm font-medium text-blue-100 mb-2">
             Plan <span className="text-red-400">*</span>
           </label>
-          <select
-            value={data.plan}
-            onChange={(e) => {
-              const selectedPlan = e.target.value as "demo" | "anual" | "premium";
-              const updatedData = { ...data, plan: selectedPlan };
-              
-              // Actualizar límites según el plan
-              if (selectedPlan === "demo") {
-                updatedData.limite_usuarios = 1;
-                updatedData.limite_tarjetas = 10;
-                updatedData.capacidad_maxima = 10;
-              } else if (selectedPlan === "anual" || selectedPlan === "premium") {
-                updatedData.limite_usuarios = 99999;
-                updatedData.limite_tarjetas = 99999;
-                updatedData.capacidad_maxima = 99999;
-              }
-              
-              onChange(updatedData);
-            }}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
-          >
-            <option value="demo">DEMO (30 días)</option>
-            <option value="anual">ANUAL (1 año)</option>
-            <option value="premium">PREMIUM (Sin vencimiento)</option>
-          </select>
+          <div className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-blue-300/60 flex items-center gap-2">
+            <span className="px-3 py-1 bg-blue-500/20 border border-blue-400/30 rounded-lg text-blue-300 font-medium text-sm">
+              DEMO
+            </span>
+            <span className="text-sm">30 días de prueba</span>
+          </div>
+          <p className="text-xs text-blue-300/50 mt-1">El plan se puede actualizar después desde el panel de administración</p>
         </div>
 
-        {(data.plan === "demo" || data.plan === "anual") && (
-          <div>
-            <label className="block text-sm font-medium text-blue-100 mb-2">Fecha de Expiración</label>
-            <input
-              type="date"
-              value={data.fecha_expiracion || ""}
-              onChange={(e) => onChange({ ...data, fecha_expiracion: e.target.value })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
-            />
-          </div>
-        )}
+        <div>
+          <label className="block text-sm font-medium text-blue-100 mb-2">Fecha de Expiración</label>
+          <input
+            type="date"
+            value={data.fecha_expiracion || ""}
+            onChange={(e) => onChange({ ...data, fecha_expiracion: e.target.value })}
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+          />
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-blue-100 mb-2">Nombre del Negocio</label>
@@ -827,33 +815,36 @@ function StepNegocio({ data, onChange }: { data: NegocioData; onChange: (data: N
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-blue-100 mb-2">Límite de Usuarios</label>
+          <label className="block text-sm font-medium text-blue-100 mb-2">Límite de Usuarios (Plan DEMO)</label>
           <input
             type="number"
             value={data.limite_usuarios}
-            onChange={(e) => onChange({ ...data, limite_usuarios: parseInt(e.target.value) || 1 })}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50"
+            disabled
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-blue-300/60 cursor-not-allowed"
           />
+          <p className="text-xs text-blue-300/50 mt-1">Límite fijo para plan DEMO</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-blue-100 mb-2">Límite de Tarjetas</label>
+          <label className="block text-sm font-medium text-blue-100 mb-2">Límite de Tarjetas (Plan DEMO)</label>
           <input
             type="number"
             value={data.limite_tarjetas}
-            onChange={(e) => onChange({ ...data, limite_tarjetas: parseInt(e.target.value) || 10 })}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50"
+            disabled
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-blue-300/60 cursor-not-allowed"
           />
+          <p className="text-xs text-blue-300/50 mt-1">Límite fijo para plan DEMO</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-blue-100 mb-2">Capacidad Máxima</label>
+          <label className="block text-sm font-medium text-blue-100 mb-2">Capacidad Máxima (Plan DEMO)</label>
           <input
             type="number"
             value={data.capacidad_maxima}
-            onChange={(e) => onChange({ ...data, capacidad_maxima: parseInt(e.target.value) || 10 })}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50"
+            disabled
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-blue-300/60 cursor-not-allowed"
           />
+          <p className="text-xs text-blue-300/50 mt-1">Límite fijo para plan DEMO</p>
         </div>
       </div>
     </motion.div>

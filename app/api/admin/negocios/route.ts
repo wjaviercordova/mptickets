@@ -130,23 +130,17 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Validación pasada - Longitud de código válida');
 
-    // Validar plan
-    if (!['demo', 'anual', 'premium'].includes(body.negocio.plan)) {
-      console.error('❌ Validación fallida - Plan inválido:', body.negocio.plan);
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Plan inválido',
-          details: {
-            field: 'plan',
-            message: 'El plan debe ser "demo", "anual" o "premium"',
-          },
-        },
-        { status: 400 }
-      );
+    // Forzar plan DEMO en creación (ignorar cualquier otro valor)
+    if (body.negocio.plan !== 'demo') {
+      console.log('⚠️ Plan recibido no es DEMO, forzando a DEMO:', body.negocio.plan, '→ demo');
+      body.negocio.plan = 'demo';
+      // Forzar también límites de DEMO
+      body.negocio.limite_usuarios = 1;
+      body.negocio.limite_tarjetas = 10;
+      body.negocio.capacidad_maxima = 10;
     }
 
-    // Validar usuario
+    console.log('✅ Plan validado - Todos los negocios nuevos se crean con plan DEMO');
     if (!body.usuario.usuario || !body.usuario.password) {
       return NextResponse.json(
         {
