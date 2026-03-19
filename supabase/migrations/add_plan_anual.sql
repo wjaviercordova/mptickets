@@ -2,7 +2,16 @@
 -- Descripción: Plan anual con las mismas características que PREMIUM pero con validez de 1 año
 -- Fecha: 2026-03-18
 
--- Primero, actualizar el orden del plan PREMIUM para hacer espacio
+-- 1. Eliminar el constraint CHECK existente
+ALTER TABLE planes_config 
+DROP CONSTRAINT IF EXISTS planes_config_plan_tipo_check;
+
+-- 2. Agregar el nuevo constraint CHECK que incluye 'anual'
+ALTER TABLE planes_config 
+ADD CONSTRAINT planes_config_plan_tipo_check 
+CHECK (plan_tipo IN ('demo', 'basica', 'anual', 'premium'));
+
+-- 3. Actualizar el orden del plan PREMIUM para hacer espacio
 UPDATE planes_config 
 SET orden = 3, fecha_actualizacion = now()
 WHERE plan_tipo = 'premium';
@@ -52,3 +61,4 @@ INSERT INTO planes_config (
 
 -- Comentario: Este plan tiene los mismos límites que PREMIUM pero con dias_vigencia = 365
 -- La lógica de validez se manejará en la aplicación al calcular fecha_expiracion
+-- El constraint CHECK fue actualizado para permitir el valor 'anual' en plan_tipo
