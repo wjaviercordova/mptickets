@@ -211,8 +211,32 @@ export default function NuevoNegocioWizardPage() {
   };
 
   const handleSubmit = async () => {
+    // Validaciones antes de enviar
+    if (!negocioData.codigo || negocioData.codigo.length < 3) {
+      setError("El código debe tener al menos 3 caracteres");
+      return;
+    }
+
+    if (!negocioData.email || negocioData.email.trim() === "") {
+      setError("El email es requerido");
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(negocioData.email)) {
+      setError("El formato del email no es válido");
+      return;
+    }
+
+    if (!usuarioData.usuario || !usuarioData.password) {
+      setError("Usuario y contraseña son requeridos");
+      return;
+    }
+
     setInstalling(true);
     setInstallProgress(0);
+    setError(null);
     
     const modules: string[] = [];
 

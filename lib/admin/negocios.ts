@@ -315,6 +315,7 @@ export async function createNegocio(
       let userFriendlyError = 'Error al crear negocio en la base de datos';
       let errorField = 'negocio';
       
+      // Errores de duplicación (23505)
       if (errorCode === '23505' || errorMessage.includes('duplicate key')) {
         if (errorMessage.includes('negocios_codigo_key') || errorMessage.includes('codigo')) {
           userFriendlyError = 'El código de negocio ya existe';
@@ -324,6 +325,14 @@ export async function createNegocio(
           errorField = 'email';
         } else {
           userFriendlyError = 'Ya existe un negocio con estos datos';
+        }
+      }
+      
+      // Errores de constraint CHECK (23514)
+      if (errorCode === '23514' || errorMessage.includes('check constraint')) {
+        if (errorMessage.includes('negocios_email_valid') || errorMessage.includes('email_valid')) {
+          userFriendlyError = 'El formato del email no es válido. Use un email válido (ej: ejemplo@dominio.com)';
+          errorField = 'email';
         }
       }
       
