@@ -25,7 +25,7 @@ import { ModalEditarLicencia } from "@/components/admin/negocios/ModalEditarLice
 import { ModalConfirmacion } from "@/components/admin/negocios/ModalConfirmacion";
 
 type FilterEstado = "all" | "activo" | "inactivo" | "suspendido";
-type FilterPlan = "all" | "DEMO" | "PREMIUM" | "basica";
+type FilterPlan = "all" | "demo" | "anual" | "premium" | "basica";
 
 export default function NegociosPage() {
   const [negocios, setNegocios] = useState<NegocioExtended[]>([]);
@@ -213,12 +213,14 @@ export default function NegociosPage() {
 
   const getPlanBadge = (plan: PlanType) => {
     const configs = {
-      demo: { color: "bg-blue-500/20 text-blue-300", label: "DEMO" },
-      premium: { color: "bg-purple-500/20 text-purple-300", label: "PREMIUM" },
+      demo: { color: "bg-blue-500/20 text-blue-300 border-blue-400/30", label: "DEMO" },
+      basica: { color: "bg-cyan-500/20 text-cyan-300 border-cyan-400/30", label: "BÁSICA" },
+      anual: { color: "bg-amber-500/20 text-amber-300 border-amber-400/30", label: "ANUAL" },
+      premium: { color: "bg-purple-500/20 text-purple-300 border-purple-400/30", label: "PREMIUM" },
     };
     const config = configs[plan] || configs.demo;
     return (
-      <span className={`rounded-full px-2.5 py-1 font-caption text-xs font-semibold ${config.color}`}>
+      <span className={`rounded-full border px-2.5 py-1 font-caption text-xs font-semibold ${config.color}`}>
         {config.label}
       </span>
     );
@@ -336,9 +338,10 @@ export default function NegociosPage() {
                 className="glass-input w-full border-purple-500/20 bg-[#0f172a]/60 text-white"
               >
                 <option value="all">Todos</option>
-                <option value="DEMO">DEMO</option>
-                <option value="PREMIUM">PREMIUM</option>
-                <option value="basica">Básica</option>
+                <option value="demo">DEMO</option>
+                <option value="anual">ANUAL</option>
+                <option value="premium">PREMIUM</option>
+                <option value="basica">BÁSICA</option>
               </select>
             </div>
           </motion.div>
