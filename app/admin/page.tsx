@@ -14,7 +14,7 @@ async function getDashboardData() {
 
     const totalNegocios = negociosResult.count || 0;
     const negociosActivos =
-      negociosResult.data?.filter((n) => n.estado === "1").length || 0;
+      negociosResult.data?.filter((n) => n.estado === "activo").length || 0;
     const totalAdmins = adminsResult.count || 0;
     const totalUsuarios = usuariosResult.count || 0;
 
@@ -160,10 +160,9 @@ export default async function AdminDashboardPage() {
         ) : (
           <div className="space-y-3">
             {negociosRecientes.map((negocio) => (
-              <Link
+              <div
                 key={negocio.id}
-                href={`/admin/negocios/${negocio.id}`}
-                className="flex items-center justify-between rounded-xl border border-purple-400/20 bg-purple-500/5 p-4 transition-all hover:border-purple-400/40 hover:bg-purple-500/10"
+                className="flex items-center justify-between rounded-xl border border-purple-400/20 bg-purple-500/5 p-4"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-purple-400/30 bg-gradient-to-br from-purple-500/20 to-pink-600/10">
@@ -186,15 +185,15 @@ export default async function AdminDashboardPage() {
                 <div>
                   <span
                     className={`inline-flex rounded-full px-3 py-1 font-caption text-xs font-semibold ${
-                      negocio.estado === "1"
+                      negocio.estado === "activo"
                         ? "bg-emerald-500/20 text-emerald-300"
                         : "bg-red-500/20 text-red-300"
                     }`}
                   >
-                    {negocio.estado === "1" ? "Activo" : "Inactivo"}
+                    {negocio.estado === "activo" ? "Activo" : "Inactivo"}
                   </span>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
