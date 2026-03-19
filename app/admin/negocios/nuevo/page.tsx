@@ -116,7 +116,7 @@ export default function NuevoNegocioWizardPage() {
     descripcion: "Sistema de gestión de parqueadero - mptickets",
     direccion: "direccion-mptickets",
     telefono: "9999999999",
-    email: "", // Email opcional - puede estar vacío o duplicado entre negocios
+    email: "", // Email obligatorio - puede estar duplicado entre negocios
     ciudad: "Ciudad",
     limite_usuarios: 1,
     limite_tarjetas: 10,
@@ -217,13 +217,15 @@ export default function NuevoNegocioWizardPage() {
       return;
     }
 
-    // Email es OPCIONAL, pero si se ingresa debe tener formato válido
-    if (negocioData.email && negocioData.email.trim() !== "") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(negocioData.email)) {
-        setError("El formato del email no es válido");
-        return;
-      }
+    // Email es OBLIGATORIO y debe tener formato válido
+    if (!negocioData.email || negocioData.email.trim() === "") {
+      setError("El email es requerido");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(negocioData.email)) {
+      setError("El formato del email no es válido");
+      return;
     }
 
     if (!usuarioData.usuario || !usuarioData.password) {
@@ -787,7 +789,7 @@ function StepNegocio({ data, onChange }: { data: NegocioData; onChange: (data: N
 
         <div>
           <label className="block text-sm font-medium text-blue-100 mb-2">
-            Email <span className="text-blue-300/50 text-xs">(Opcional)</span>
+            Email <span className="text-red-400">*</span>
           </label>
           <input
             type="email"
@@ -795,8 +797,9 @@ function StepNegocio({ data, onChange }: { data: NegocioData; onChange: (data: N
             onChange={(e) => onChange({ ...data, email: e.target.value })}
             placeholder="ejemplo@dominio.com"
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-blue-300/40 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            required
           />
-          <p className="text-xs text-blue-300/50 mt-1">Puede estar vacío o repetirse entre negocios</p>
+          <p className="text-xs text-blue-300/50 mt-1">Puede repetirse entre negocios</p>
         </div>
 
         <div>

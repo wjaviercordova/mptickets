@@ -1,28 +1,38 @@
--- Migration: Eliminar constraint UNIQUE del email en negocios
--- Descripción: Permitir emails duplicados entre negocios, solo el código debe ser único
--- Fecha: 2026-03-19
+-- Migration: Hacer email OBLIGATORIO pero NO único
+-- Permite que varios negocios tengan el mismo email
+-- Solo el código (código) debe ser único
 
--- 1. Eliminar el constraint UNIQUE del email
+-- Comentario:
+-- - El email es OBLIGATORIO (NOT NULL) pero puede repetirse entre negocios
+-- - Solo el CÓDIGO sigue siendo UNIQUE
+-- - El email debe tener formato válido
+
+-- Paso 1: Eliminar constraint UNIQUE del email (si existe)
 ALTER TABLE negocios 
 DROP CONSTRAINT IF EXISTS negocios_email_key;
 
--- 2. Modificar el check constraint para permitir email NULL o vacío
+-- Paso 2: Eliminar constraint CHECK anterior del email (si existe)
 ALTER TABLE negocios 
 DROP CONSTRAINT IF EXISTS negocios_email_valid;
 
--- 3. Agregar nuevo check constraint que solo valida formato si el email no es NULL/vacío
+-- Paso 3: Agregar constraint CHECK para validar formato de email (sin permitir NULL)
 ALTER TABLE negocios 
 ADD CONSTRAINT negocios_email_valid 
 CHECK (
-  email IS NULL 
-  OR email = '' 
-  OR email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+  email IS NOT NULL 
+  AND email != '' 
+  AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
 );
 
--- 4. Eliminar el índice en email (ya no es necesario si no es UNIQUE)
+-- Paso 4: Asegurar que la columna sea NOT NULL
+ALTER TABLE negocios 
+ALTER COLUMN email SET NOT NULL;
+
+-- Paso 5: Eliminar índice del email si existe (optimización, ya no es necesario)
 DROP INDEX IF EXISTS idx_negocios_email;
 
--- Comentario: 
--- - El email ahora es OPCIONAL y puede repetirse entre negocios
--- - Solo el CÓDIGO sigue siendo UNIQUE
--- - Si se proporciona un email, debe tener formato válido
+-- Resultado: 
+-- ✅ email es OBLIGATORIO (NOT NULL)
+-- ✅ email NO es único (puede repetirse)
+-- ✅ email debe tener formato válido
+-- ✅ código sigue siendo UNIQUE
