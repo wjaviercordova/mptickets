@@ -240,7 +240,18 @@ export async function createNegocio(
     }
 
     // 3. Preparar datos del negocio
-    const fecha_expiracion = negocio.plan === 'demo' ? (negocio.fecha_expiracion || null) : null;
+    let fecha_expiracion = null;
+    
+    if (negocio.plan === 'demo') {
+      // DEMO: usar la fecha proporcionada en el formulario
+      fecha_expiracion = negocio.fecha_expiracion || null;
+    } else if (negocio.plan === 'anual') {
+      // ANUAL: calcular 1 año desde hoy
+      const fechaAnual = new Date();
+      fechaAnual.setFullYear(fechaAnual.getFullYear() + 1);
+      fecha_expiracion = fechaAnual.toISOString();
+    }
+    // PREMIUM: fecha_expiracion permanece null (sin vencimiento)
 
     // 4. Crear negocio con todos los datos del wizard
     const { data: negocioCreado, error: negocioError } = await supabaseAdmin

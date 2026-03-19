@@ -110,14 +110,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar plan
-    if (!['demo', 'premium'].includes(body.negocio.plan)) {
+    if (!['demo', 'anual', 'premium'].includes(body.negocio.plan)) {
       return NextResponse.json(
         {
           success: false,
           error: 'Plan inválido',
           details: {
             field: 'plan',
-            message: 'El plan debe ser "demo" o "premium"',
+            message: 'El plan debe ser "demo", "anual" o "premium"',
           },
         },
         { status: 400 }
