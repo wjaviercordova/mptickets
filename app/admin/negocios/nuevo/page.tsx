@@ -263,6 +263,10 @@ export default function NuevoNegocioWizardPage() {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
+        console.error("Error del servidor:", result);
+        console.error("Status:", response.status);
+        console.error("Error detallado:", result.error);
+        console.error("Details:", result.details);
         throw new Error(result.error || "Error al crear el negocio");
       }
 

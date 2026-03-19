@@ -54,9 +54,18 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    
+    console.log('📦 [POST /api/admin/negocios] Body recibido:', JSON.stringify(body, null, 2));
 
     // Validar que tenga todas las secciones requeridas
     if (!body.negocio || !body.usuario || !body.configuraciones || !body.parametros || !body.tarjetas) {
+      console.error('❌ Datos incompletos:', {
+        negocio: !!body.negocio,
+        usuario: !!body.usuario,
+        configuraciones: !!body.configuraciones,
+        parametros: !!body.parametros,
+        tarjetas: !!body.tarjetas,
+      });
       return NextResponse.json(
         {
           success: false,
@@ -69,6 +78,10 @@ export async function POST(request: NextRequest) {
 
     // Validaciones de negocio
     if (!body.negocio.codigo || !body.negocio.plan) {
+      console.error('❌ Validación fallida - Código o plan faltante:', {
+        codigo: body.negocio.codigo,
+        plan: body.negocio.plan,
+      });
       return NextResponse.json(
         {
           success: false,
@@ -79,8 +92,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('✅ Validación pasada - Código y plan presentes');
+
     // Validar formato de código (solo letras y números, sin espacios)
     if (!/^[A-Z0-9]+$/i.test(body.negocio.codigo)) {
+      console.error('❌ Validación fallida - Código con formato inválido:', body.negocio.codigo);
       return NextResponse.json(
         {
           success: false,
@@ -94,8 +110,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('✅ Validación pasada - Formato de código válido');
+
     // Validar que el código tenga al menos 3 caracteres
     if (body.negocio.codigo.length < 3) {
+      console.error('❌ Validación fallida - Código muy corto:', body.negocio.codigo);
       return NextResponse.json(
         {
           success: false,
@@ -109,8 +128,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('✅ Validación pasada - Longitud de código válida');
+
     // Validar plan
     if (!['demo', 'anual', 'premium'].includes(body.negocio.plan)) {
+      console.error('❌ Validación fallida - Plan inválido:', body.negocio.plan);
       return NextResponse.json(
         {
           success: false,
@@ -162,6 +184,7 @@ export async function POST(request: NextRequest) {
 
     // Validar que haya tarjetas
     if (!Array.isArray(body.tarjetas) || body.tarjetas.length === 0) {
+      console.error('❌ Validación fallida - Tarjetas inválidas');
       return NextResponse.json(
         {
           success: false,
@@ -172,10 +195,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('✅ Todas las validaciones pasadas - Llamando a createNegocio');
+
     // Crear negocio con todos los datos del wizard
     const result = await createNegocio(body);
 
     if (!result.success) {
+      console.error('❌ Error en createNegocio:', result.error);
+      console.error('❌ Detalles:', result.details);
       return NextResponse.json(
         {
           success: false,
@@ -185,6 +212,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    console.log('✅ Negocio creado exitosamente:', result.data?.negocio?.id);
 
     return NextResponse.json(
       {

@@ -213,16 +213,26 @@ export async function createNegocio(
   formData: WizardCompleteData
 ): Promise<CreateNegocioResponse> {
   try {
+    console.log('🏢 [createNegocio] Iniciando creación de negocio');
     const { negocio, usuario, configuraciones, parametros, tarjetas } = formData;
 
     // 1. Validar datos requeridos
     if (!negocio?.codigo || !negocio?.plan) {
+      console.error('❌ [createNegocio] Validación fallida - Datos faltantes:', {
+        codigo: negocio?.codigo,
+        plan: negocio?.plan,
+      });
       return {
         success: false,
         error: 'Código y plan son obligatorios',
         details: { field: 'codigo', message: 'El código y el plan son requeridos' },
       };
     }
+
+    console.log('✅ [createNegocio] Datos básicos validados:', {
+      codigo: negocio.codigo,
+      plan: negocio.plan,
+    });
 
     // 2. Verificar que el código no exista
     const { data: existingCodigo } = await supabaseAdmin
@@ -232,12 +242,15 @@ export async function createNegocio(
       .single();
 
     if (existingCodigo) {
+      console.error('❌ [createNegocio] Código duplicado:', negocio.codigo);
       return {
         success: false,
         error: 'El código de negocio ya existe',
         details: { field: 'codigo', message: 'Este código ya está en uso' },
       };
     }
+
+    console.log('✅ [createNegocio] Código disponible');
 
     // 3. Preparar datos del negocio
     let fecha_expiracion = null;
@@ -253,44 +266,58 @@ export async function createNegocio(
     }
     // PREMIUM: fecha_expiracion permanece null (sin vencimiento)
 
+    console.log('📅 [createNegocio] Fecha de expiración calculada:', fecha_expiracion);
+
+    const negocioData = {
+      codigo: negocio.codigo.toUpperCase(),
+      plan: negocio.plan,
+      fecha_expiracion,
+      nombre: negocio.nombre,
+      descripcion: negocio.descripcion,
+      direccion: negocio.direccion,
+      telefono: negocio.telefono,
+      email: negocio.email,
+      ciudad: negocio.ciudad,
+      logo_url: null,
+      configuracion: {
+        tema: 'moderno',
+        idioma: 'es',
+        moneda: 'USD',
+        formato_hora: '24h',
+        zona_horaria: 'America/Guayaquil',
+        formato_fecha: 'DD/MM/YYYY',
+      },
+      estado: 'activo',
+      metadata: {},
+      limite_usuarios: negocio.limite_usuarios,
+      limite_tarjetas: negocio.limite_tarjetas,
+      capacidad_maxima: negocio.capacidad_maxima,
+    };
+
+    console.log('📦 [createNegocio] Datos a insertar:', JSON.stringify(negocioData, null, 2));
+
     // 4. Crear negocio con todos los datos del wizard
     const { data: negocioCreado, error: negocioError } = await supabaseAdmin
       .from('negocios')
-      .insert({
-        codigo: negocio.codigo.toUpperCase(),
-        plan: negocio.plan,
-        fecha_expiracion,
-        nombre: negocio.nombre,
-        descripcion: negocio.descripcion,
-        direccion: negocio.direccion,
-        telefono: negocio.telefono,
-        email: negocio.email,
-        ciudad: negocio.ciudad,
-        logo_url: null,
-        configuracion: {
-          tema: 'moderno',
-          idioma: 'es',
-          moneda: 'USD',
-          formato_hora: '24h',
-          zona_horaria: 'America/Guayaquil',
-          formato_fecha: 'DD/MM/YYYY',
-        },
-        estado: 'activo',
-        metadata: {},
-        limite_usuarios: negocio.limite_usuarios,
-        limite_tarjetas: negocio.limite_tarjetas,
-        capacidad_maxima: negocio.capacidad_maxima,
-      })
+      .insert(negocioData)
       .select()
       .single();
 
     if (negocioError || !negocioCreado) {
-      console.error('Error creando negocio:', negocioError);
+      console.error('❌ [createNegocio] Error de Supabase:', negocioError);
+      console.error('❌ [createNegocio] Mensaje:', negocioError?.message);
+      console.error('❌ [createNegocio] Detalles:', negocioError?.details);
       return {
         success: false,
         error: 'Error al crear negocio en la base de datos',
+        details: {
+          field: 'negocio',
+          message: negocioError?.message || 'Error desconocido',
+        },
       };
     }
+
+    console.log('✅ [createNegocio] Negocio creado exitosamente:', negocioCreado.id);
 
     // 5. Crear usuario administrador
     const hashedPassword = await hashPassword(usuario.password);
