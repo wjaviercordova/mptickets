@@ -320,9 +320,6 @@ export async function createNegocio(
         if (errorMessage.includes('negocios_codigo_key') || errorMessage.includes('codigo')) {
           userFriendlyError = 'El código de negocio ya existe';
           errorField = 'codigo';
-        } else if (errorMessage.includes('negocios_email_key') || errorMessage.includes('email')) {
-          userFriendlyError = 'El email ya está registrado en otro negocio';
-          errorField = 'email';
         } else {
           userFriendlyError = 'Ya existe un negocio con estos datos';
         }
