@@ -88,6 +88,13 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const limite_tarjetas = 100;
     const capacidad_maxima = 9999;
 
+    console.log(`📝 Actualizando plan de ${from} a ${to}:`, {
+      limite_usuarios,
+      limite_tarjetas,
+      capacidad_maxima,
+      fecha_expiracion,
+    });
+
     // Actualizar negocio con el nuevo plan
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('negocios')
@@ -98,24 +105,48 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         limite_tarjetas,
         capacidad_maxima,
         estado: 'activo',
-        fecha_actualizacion: new Date().toISOString(),
       })
       .eq('id', id)
       .select()
       .single();
 
-    if (updateError || !updated) {
-      console.error('Error actualizando plan:', updateError);
+    if (updateError) {
+      console.error('❌ Error actualizando plan:', {
+        error: updateError,
+        message: updateError.message,
+        details: updateError.details,
+        hint: updateError.hint,
+        code: updateError.code,
+      });
       return NextResponse.json(
-        { success: false, error: 'Error al actualizar el plan' },
+        { success: false, error: `Error al actualizar el plan: ${updateError.message}` },
         { status: 500 }
       );
     }
+
+    if (!updated) {
+      console.error('❌ No se retornaron datos después de actualizar');
+      return NextResponse.json(
+        { success: false, error: 'No se pudo actualizar el plan' },
+        { status: 500 }
+      );
+    }
+
+    console.log('✅ Plan actualizado exitosamente:', updated);
 
     return NextResponse.json({
       success: true,
       message: `Plan actualizado a ${to.toUpperCase()} exitosamente`,
       data: updated,
+      resumen: {
+        plan_anterior: from,
+        plan_nuevo: to,
+        limite_usuarios,
+        limite_tarjetas,
+        capacidad_maxima,
+        fecha_expiracion: fecha_expiracion ? new Date(fecha_expiracion).toLocaleDateString('es-ES') : 'Sin expiración',
+        valido_hasta: fecha_expiracion ? `${Math.round((new Date(fecha_expiracion).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} días` : 'Ilimitado',
+      },
     });
   } catch (error) {
     console.error('Error en PATCH /api/admin/negocios/[id]/plan:', error);

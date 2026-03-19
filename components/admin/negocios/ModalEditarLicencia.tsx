@@ -2,8 +2,18 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import { X, AlertTriangle, CheckCircle2, Loader2, Calendar, Users, CreditCard, Car } from "lucide-react";
 import type { NegocioExtended } from "@/types/admin";
+
+interface ResumenPlan {
+  plan_anterior: string;
+  plan_nuevo: string;
+  limite_usuarios: number;
+  limite_tarjetas: number;
+  capacidad_maxima: number;
+  fecha_expiracion: string;
+  valido_hasta: string;
+}
 
 interface ModalEditarLicenciaProps {
   negocio: NegocioExtended | null;
@@ -23,6 +33,8 @@ export function ModalEditarLicencia({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mostrarResumen, setMostrarResumen] = useState(false);
+  const [resumenPlan, setResumenPlan] = useState<ResumenPlan | null>(null);
 
   if (!negocio) return null;
 
@@ -71,13 +83,27 @@ export function ModalEditarLicencia({
         throw new Error(data.error || "Error al actualizar plan");
       }
 
-      onSuccess();
-      onClose();
+      // Guardar resumen para mostrarlo
+      if (data.resumen) {
+        setResumenPlan(data.resumen);
+        setMostrarResumen(true);
+      } else {
+        // Si no hay resumen, solo cerrar y actualizar
+        onSuccess();
+        onClose();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCerrarResumen = () => {
+    setMostrarResumen(false);
+    setResumenPlan(null);
+    onSuccess();
+    onClose();
   };
 
   return (
@@ -309,6 +335,110 @@ export function ModalEditarLicencia({
               </button>
             </div>
           </motion.div>
+
+          {/* Modal de Resumen del Plan Actualizado */}
+          <AnimatePresence>
+            {mostrarResumen && resumenPlan && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="absolute inset-0 z-10 flex items-center justify-center p-4"
+              >
+                {/* Overlay adicional */}
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+
+                {/* Modal de resumen */}
+                <div className="relative w-full max-w-lg rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-[#1e293b]/95 to-[#0f172a]/95 p-8 backdrop-blur-xl shadow-2xl">
+                  {/* Header */}
+                  <div className="mb-6 flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/20 p-3">
+                        <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-heading text-2xl font-bold text-white">
+                          Plan Actualizado
+                        </h3>
+                        <p className="mt-1 text-sm text-emerald-200/60">
+                          {negocio.nombre}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cambio de plan */}
+                  <div className="mb-6 rounded-2xl border border-blue-500/20 bg-[#0f172a]/60 p-4">
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="rounded-xl border border-blue-400/30 bg-blue-500/20 px-4 py-2 font-semibold text-blue-300">
+                        {resumenPlan.plan_anterior.toUpperCase()}
+                      </span>
+                      <span className="text-blue-300">→</span>
+                      <span className="rounded-xl border border-emerald-400/30 bg-emerald-500/20 px-4 py-2 font-semibold text-emerald-300">
+                        {resumenPlan.plan_nuevo.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Detalles del plan */}
+                  <div className="mb-6 space-y-3">
+                    <div className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-[#0f172a]/40 p-4">
+                      <div className="flex items-center gap-3">
+                        <Users className="h-5 w-5 text-blue-400" />
+                        <span className="text-sm text-blue-200">Usuarios</span>
+                      </div>
+                      <span className="font-semibold text-white">
+                        {resumenPlan.limite_usuarios}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-xl border border-purple-500/20 bg-[#0f172a]/40 p-4">
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="h-5 w-5 text-purple-400" />
+                        <span className="text-sm text-blue-200">Tarjetas</span>
+                      </div>
+                      <span className="font-semibold text-white">
+                        {resumenPlan.limite_tarjetas}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-[#0f172a]/40 p-4">
+                      <div className="flex items-center gap-3">
+                        <Car className="h-5 w-5 text-amber-400" />
+                        <span className="text-sm text-blue-200">Capacidad</span>
+                      </div>
+                      <span className="font-semibold text-white">
+                        {resumenPlan.capacidad_maxima}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-[#0f172a]/40 p-4">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="h-5 w-5 text-emerald-400" />
+                        <span className="text-sm text-blue-200">Validez</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-white">
+                          {resumenPlan.valido_hasta}
+                        </div>
+                        <div className="text-xs text-blue-200/60">
+                          {resumenPlan.fecha_expiracion}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Botón de cerrar */}
+                  <button
+                    onClick={handleCerrarResumen}
+                    className="w-full rounded-xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/25 to-green-600/15 px-4 py-3 font-medium text-emerald-200 transition hover:from-emerald-500/35 hover:to-green-600/25"
+                  >
+                    Entendido
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </AnimatePresence>
