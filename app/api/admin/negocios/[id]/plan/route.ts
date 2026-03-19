@@ -82,15 +82,21 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       fecha_expiracion = null;
     }
 
+    // Establecer límites según el plan
+    // ANUAL y PREMIUM tienen los mismos límites
+    const limite_usuarios = 10;
+    const limite_tarjetas = 100;
+    const capacidad_maxima = 9999;
+
     // Actualizar negocio con el nuevo plan
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('negocios')
       .update({
         plan: to,
         fecha_expiracion,
-        limite_usuarios: 99999,
-        limite_tarjetas: 99999,
-        capacidad_maxima: 99999,
+        limite_usuarios,
+        limite_tarjetas,
+        capacidad_maxima,
         estado: 'activo',
         fecha_actualizacion: new Date().toISOString(),
       })
@@ -108,7 +114,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({
       success: true,
-      message: 'Plan actualizado a PREMIUM exitosamente',
+      message: `Plan actualizado a ${to.toUpperCase()} exitosamente`,
       data: updated,
     });
   } catch (error) {
