@@ -116,7 +116,7 @@ export default function NuevoNegocioWizardPage() {
     descripcion: "Sistema de gestión de parqueadero - mptickets",
     direccion: "direccion-mptickets",
     telefono: "9999999999",
-    email: "", // Email obligatorio - puede estar duplicado entre negocios
+    email: "correo@dominio.com", // Email obligatorio - puede estar duplicado entre negocios
     ciudad: "Ciudad",
     limite_usuarios: 1,
     limite_tarjetas: 10,
@@ -799,7 +799,6 @@ function StepNegocio({ data, onChange }: { data: NegocioData; onChange: (data: N
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-blue-300/40 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
             required
           />
-          <p className="text-xs text-blue-300/50 mt-1">Puede repetirse entre negocios</p>
         </div>
 
         <div>
