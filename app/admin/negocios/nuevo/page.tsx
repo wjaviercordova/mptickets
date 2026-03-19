@@ -116,7 +116,7 @@ export default function NuevoNegocioWizardPage() {
     descripcion: "Sistema de gestión de parqueadero - mptickets",
     direccion: "direccion-mptickets",
     telefono: "9999999999",
-    email: "correo@dominio.com",
+    email: "", // Email vacío por defecto - debe ser único para cada negocio
     ciudad: "Ciudad",
     limite_usuarios: 1,
     limite_tarjetas: 10,
@@ -765,13 +765,18 @@ function StepNegocio({ data, onChange }: { data: NegocioData; onChange: (data: N
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-blue-100 mb-2">Email</label>
+          <label className="block text-sm font-medium text-blue-100 mb-2">
+            Email <span className="text-red-400">*</span>
+          </label>
           <input
             type="email"
             value={data.email}
             onChange={(e) => onChange({ ...data, email: e.target.value })}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50"
+            required
+            placeholder="ejemplo@dominio.com"
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-blue-300/40 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
           />
+          <p className="text-xs text-blue-300/50 mt-1">Debe ser único para cada negocio</p>
         </div>
 
         <div>

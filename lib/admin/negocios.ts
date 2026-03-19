@@ -306,12 +306,33 @@ export async function createNegocio(
       console.error('❌ [createNegocio] Error de Supabase:', negocioError);
       console.error('❌ [createNegocio] Mensaje:', negocioError?.message);
       console.error('❌ [createNegocio] Detalles:', negocioError?.details);
+      
+      // Detectar errores específicos de duplicación
+      const errorMessage = negocioError?.message || '';
+      const postgresError = negocioError as { code?: string; message?: string; details?: string };
+      const errorCode = postgresError?.code;
+      
+      let userFriendlyError = 'Error al crear negocio en la base de datos';
+      let errorField = 'negocio';
+      
+      if (errorCode === '23505' || errorMessage.includes('duplicate key')) {
+        if (errorMessage.includes('negocios_codigo_key') || errorMessage.includes('codigo')) {
+          userFriendlyError = 'El código de negocio ya existe';
+          errorField = 'codigo';
+        } else if (errorMessage.includes('negocios_email_key') || errorMessage.includes('email')) {
+          userFriendlyError = 'El email ya está registrado en otro negocio';
+          errorField = 'email';
+        } else {
+          userFriendlyError = 'Ya existe un negocio con estos datos';
+        }
+      }
+      
       return {
         success: false,
-        error: 'Error al crear negocio en la base de datos',
+        error: userFriendlyError,
         details: {
-          field: 'negocio',
-          message: negocioError?.message || 'Error desconocido',
+          field: errorField,
+          message: errorMessage,
         },
       };
     }
