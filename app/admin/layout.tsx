@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Sidebar from "@/components/admin/Sidebar";
 import Navbar from "@/components/admin/Navbar";
 import { getAdminFromToken } from "@/lib/admin/auth";
@@ -9,15 +9,28 @@ export const metadata = {
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Obtener pathname desde el header personalizado agregado por middleware
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const isLoginPage = pathname === "/admin/login";
+
+  console.log('🎨 [ADMIN LAYOUT] Pathname:', pathname, '| isLoginPage:', isLoginPage);
+
+  // Si estamos en la página de login, renderizar solo children (sin sidebar/navbar)
+  if (isLoginPage) {
+    console.log('🎨 [ADMIN LAYOUT] Página de login detectada, renderizando solo children');
+    return <>{children}</>;
+  }
+
   // Obtener token de cookie
   const cookieStore = await cookies();
   const adminSession = cookieStore.get("admin_session");
 
   console.log('🎨 [ADMIN LAYOUT] Cookie admin_session presente:', !!adminSession);
 
-  // Si no hay sesión, renderizar solo children (página de login)
+  // Si no hay sesión, renderizar solo children (página de login con su propio layout)
   if (!adminSession) {
-    console.log('🎨 [ADMIN LAYOUT] Sin sesión, renderizando solo login');
+    console.log('🎨 [ADMIN LAYOUT] Sin sesión, renderizando solo children');
     return <>{children}</>;
   }
 
@@ -30,8 +43,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   // Si el token es inválido, renderizar solo children
   if (!adminUser) {
-    console.log('❌ [ADMIN LAYOUT] Token inválido o expirado');
-    // Aquí podríamos eliminar la cookie, pero el usuario tendrá que hacer login de nuevo
+    console.log('❌ [ADMIN LAYOUT] Token inválido o expirado, renderizando solo children');
     return <>{children}</>;
   }
 

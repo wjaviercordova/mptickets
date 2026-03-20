@@ -4,23 +4,35 @@
  */
 
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 export async function POST() {
   try {
-    // Eliminar cookie de sesión
-    const cookieStore = cookies();
-    cookieStore.delete('admin_session');
-
-    return NextResponse.json(
+    console.log('🔐 [LOGOUT API] Iniciando proceso de cierre de sesión...');
+    
+    // Crear respuesta exitosa
+    const response = NextResponse.json(
       {
         success: true,
         message: 'Sesión cerrada exitosamente'
       },
       { status: 200 }
     );
+
+    // Eliminar cookie usando el mismo método que el login
+    console.log('🔐 [LOGOUT API] Eliminando cookie admin_session...');
+    response.cookies.set('admin_session', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0, // Expirar inmediatamente
+      path: '/',
+    });
+
+    console.log('✅ [LOGOUT API] Cookie admin_session eliminada exitosamente');
+
+    return response;
   } catch (error) {
-    console.error('Error en POST /api/admin/auth/logout:', error);
+    console.error('❌ [LOGOUT API] Error en POST /api/admin/auth/logout:', error);
 
     return NextResponse.json(
       {

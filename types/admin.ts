@@ -570,3 +570,39 @@ export interface NegocioWizardData {
     enviar_email: boolean;
   };
 }
+
+// ============================================
+// MÓDULO USUARIOS ADMIN
+// ============================================
+
+export interface UsuarioAdminConNegocio extends UsuarioNegocio {
+  // Información del negocio asociado
+  negocio: {
+    id: string;
+    nombre: string;
+    codigo: string;
+    email: string;
+    ciudad: string;
+    plan: PlanType;
+    estado: EstadoNegocio;
+  };
+}
+
+export interface ActualizarUsuarioAdminRequest {
+  nombre: string;
+  apellido: string;
+  password?: string; // Opcional - solo si desea cambiar
+}
+
+export interface ActualizarUsuarioAdminResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    id: string;
+    usuario: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+  };
+  error?: string;
+}

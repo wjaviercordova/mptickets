@@ -11,8 +11,6 @@ import {
   ShieldCheck,
   Search,
   FileBarChart,
-  ChevronLeft,
-  ChevronRight,
   LogOut,
 } from "lucide-react";
 
@@ -52,15 +50,39 @@ const menuItems: MenuItem[] = [
 ];
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/admin/auth/logout", { method: "POST" });
-      window.location.href = "/admin/login";
+      console.log('🔐 [LOGOUT] Iniciando cierre de sesión...');
+      
+      const response = await fetch("/api/admin/auth/logout", { 
+        method: "POST",
+        credentials: "include", // Incluir cookies
+        cache: "no-store", // No cachear la respuesta
+      });
+
+      const data = await response.json();
+      console.log('🔐 [LOGOUT] Respuesta del servidor:', data);
+
+      if (!response.ok) {
+        console.error('❌ [LOGOUT] Error en respuesta del servidor:', response.status);
+      } else {
+        console.log('✅ [LOGOUT] Sesión cerrada exitosamente');
+      }
+
+      // Pequeño delay para asegurar que la cookie se procese
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Forzar redirección completa con replace (no deja historial)
+      console.log('🔄 [LOGOUT] Redirigiendo a login...');
+      window.location.replace("/admin/login");
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.error('❌ [LOGOUT] Error al cerrar sesión:', error);
+      // Aún así redirigir al login
+      await new Promise(resolve => setTimeout(resolve, 100));
+      window.location.replace("/admin/login");
     }
   };
 
@@ -69,10 +91,12 @@ export default function Sidebar() {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1, width: collapsed ? 80 : 280 }}
       transition={{ duration: 0.3 }}
+      onMouseEnter={() => setCollapsed(false)}
+      onMouseLeave={() => setCollapsed(true)}
       className="sticky top-0 flex h-screen flex-col border-r border-blue-500/20 bg-[#0f172a]/90 shadow-2xl shadow-blue-500/10 backdrop-blur-xl"
     >
-      {/* Logo y Toggle */}
-      <div className="flex h-20 items-center justify-between border-b border-blue-500/20 px-6">
+      {/* Logo */}
+      <div className="flex h-20 items-center px-6">
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.div
@@ -100,20 +124,6 @@ export default function Sidebar() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setCollapsed(!collapsed)}
-          className="rounded-xl border border-blue-500/30 bg-blue-950/30 p-2 text-cyan-400 backdrop-blur-sm transition hover:border-cyan-400/60 hover:bg-blue-900/40 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20"
-          aria-label={collapsed ? "Expandir sidebar" : "Contraer sidebar"}
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-        </motion.button>
       </div>
 
       {/* Navegación */}

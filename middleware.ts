@@ -4,6 +4,10 @@ import type { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Agregar pathname como header personalizado para los layouts
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', pathname);
+
   // ========================================
   // PROTECCIÓN RUTAS ADMIN
   // ========================================
@@ -41,7 +45,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // Retornar con headers personalizados
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 export const config = {

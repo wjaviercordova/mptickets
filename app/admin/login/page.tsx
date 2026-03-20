@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -22,7 +21,6 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<LoginStatus>("idle");
   const [message, setMessage] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
