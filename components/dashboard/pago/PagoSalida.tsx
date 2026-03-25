@@ -217,6 +217,9 @@ export function PagoSalida({
         `/api/tarjetas/buscar-pendiente?negocio_id=${negocioId}&codigo_barras=${codigoTarjeta}`
       );
       const data = await response.json();
+      
+      console.log("📥 [PAGO] Respuesta de buscar-pendiente:", data);
+      console.log("🔍 [PAGO] parametro_id recibido:", data.tarjeta?.parametro_id);
 
       if (response.ok && data.tarjeta) {
         procesarTarjetaConsultada(data.tarjeta);
@@ -256,63 +259,202 @@ export function PagoSalida({
     }
   };
 
-  const procesarTarjetaConsultada = (tarjeta: TarjetaPendiente) => {
+  const procesarTarjetaConsultada = async (tarjeta: TarjetaPendiente) => {
     console.log("🔄 [PAGO] Procesando tarjeta:", tarjeta.codigo, "con hora de salida actual");
+    console.log("🔍 [DEBUG] Tarjeta completa recibida:", JSON.stringify(tarjeta, null, 2));
+    console.log("🔍 [DEBUG] parametro_id de la tarjeta:", tarjeta.parametro_id);
+    
     setTarjetaSeleccionada(tarjeta);
     // Usar codigo_barras como identificador principal en el input
     setCodigoTarjeta(tarjeta.codigo_barras || tarjeta.codigo);
 
-    // Buscar el parámetro correspondiente al tipo de vehículo
-    const parametroVehiculo = parametros.find(
-      (p) => p.tipo_vehiculo === tarjeta.tipo_vehiculo && p.estado === "activo"
-    );
+    let parametroVehiculo: Parametro | null = null;
+
+    // Si no hay parametro_id (ingresos antiguos), buscar por tipo de vehículo
+    if (!tarjeta.parametro_id) {
+      console.log("⚠️ [PAGO] parametro_id es null/undefined, buscando parámetro activo por tipo_vehiculo:", tarjeta.tipo_vehiculo);
+      try {
+        // IMPORTANTE: Para ingresos antiguos, usar el parámetro más antiguo (por created_at)
+        // Usar API route para evitar problemas de RLS
+        const response = await fetch(`/api/configuracion/parametros?negocioId=${negocioId}&tipo_vehiculo=${tarjeta.tipo_vehiculo}&estado=activo`);
+        
+        if (!response.ok) {
+          console.error("❌ [PAGO] Error al consultar parámetro por tipo:", response.status);
+          reproducirSonidoError();
+          setMessage({
+            type: "error",
+            text: `No se encontró configuración de tarifas para vehículos tipo ${tarjeta.tipo_vehiculo}`,
+          });
+          setTimeout(() => setMessage(null), 5000);
+          return;
+        }
+
+        const parametrosData = await response.json();
+        console.log("🔍 [PAGO] Resultado búsqueda por tipo:", parametrosData);
+        console.log("📊 [PAGO] Detalles de parámetros encontrados:", parametrosData.map((p: any) => ({
+          id: p.id,
+          nombre: p.nombre,
+          prioridad: p.prioridad,
+          tarifa_1: p.tarifa_1_valor,
+          tarifa_2: p.tarifa_2_valor
+        })));
+
+        if (!parametrosData || parametrosData.length === 0) {
+          console.error("❌ [PAGO] No se encontraron parámetros para tipo:", tarjeta.tipo_vehiculo);
+          reproducirSonidoError();
+          setMessage({
+            type: "error",
+            text: `No se encontró configuración de tarifas para vehículos tipo ${tarjeta.tipo_vehiculo}`,
+          });
+          setTimeout(() => setMessage(null), 5000);
+          return;
+        }
+
+        // Para ingresos antiguos sin parametro_id: usar el de mayor prioridad (menor número)
+        // El API ya los devuelve ordenados por prioridad (ascending), así que usamos el primero
+        parametroVehiculo = parametrosData[0] as Parametro;
+        console.log("🎯 [PAGO] Usando parámetro de mayor prioridad para ingreso sin parametro_id:", {
+          id: parametroVehiculo.id,
+          nombre: parametroVehiculo.nombre,
+          prioridad: (parametroVehiculo as any).prioridad
+        });
+
+        // Nota: El backend actualizará el ingreso con el parametro_id cuando procese el pago
+      } catch (error) {
+        console.error("❌ [PAGO] Error al buscar parámetro por tipo:", error);
+        reproducirSonidoError();
+        setMessage({
+          type: "error",
+          text: `Error al buscar configuración de tarifas`,
+        });
+        setTimeout(() => setMessage(null), 5000);
+        return;
+      }
+    } else {
+      // Consultar el parámetro ACTUALIZADO desde la base de datos usando el ID
+      console.log("🔄 [PAGO] Consultando parámetro actualizado desde DB...");
+      try {
+        // Usar API route para evitar problemas de RLS
+        const response = await fetch(`/api/configuracion/parametros?negocioId=${negocioId}&id=${tarjeta.parametro_id}`);
+        
+        if (!response.ok) {
+          console.error("❌ [PAGO] Error al consultar parámetro:", response.status);
+          reproducirSonidoError();
+          setMessage({
+            type: "error",
+            text: `No se encontró configuración de tarifas para el vehículo`,
+          });
+          setTimeout(() => setMessage(null), 5000);
+          return;
+        }
+
+        const parametrosData = await response.json();
+        console.log("🔍 [PAGO] Resultado búsqueda por ID:", parametrosData);
+
+        if (!parametrosData || parametrosData.length === 0) {
+          console.error("❌ [PAGO] No se encontró parámetro con ID:", tarjeta.parametro_id);
+          reproducirSonidoError();
+          setMessage({
+            type: "error",
+            text: `No se encontró configuración de tarifas para el vehículo`,
+          });
+          setTimeout(() => setMessage(null), 5000);
+          return;
+        }
+
+        parametroVehiculo = parametrosData[0] as Parametro;
+        console.log("✅ [PAGO] Parámetro actualizado obtenido:", { id: parametroVehiculo.id, nombre: parametroVehiculo.nombre });
+      } catch (error) {
+        console.error("❌ [PAGO] Error al obtener parámetro por ID:", error);
+        reproducirSonidoError();
+        setMessage({
+          type: "error",
+          text: `Error al obtener configuración de tarifas`,
+        });
+        setTimeout(() => setMessage(null), 5000);
+        return;
+      }
+    }
 
     if (!parametroVehiculo) {
       reproducirSonidoError();
       setMessage({
         type: "error",
-        text: `No se encontró configuración de tarifas para ${tarjeta.tipo_vehiculo}`,
+        text: `No se encontró configuración de tarifas`,
       });
       setTimeout(() => setMessage(null), 5000);
       return;
     }
 
-    // Calcular el total a pagar CON LA HORA ACTUAL (hora de salida del momento)
-    const horaSalida = new Date().toISOString();
-    console.log("⏰ [PAGO] Hora entrada:", tarjeta.hora_entrada);
-    console.log("⏰ [PAGO] Hora salida (AHORA):", horaSalida);
-    
-    const calculo = calcularTarifa(
-      tarjeta.hora_entrada,
-      horaSalida,
-      parametroVehiculo
-    );
+    try {
+      // Obtener hora actual del servidor (misma que usará el backend)
+      const responseHora = await fetch(`/api/fecha-hora-actual?negocioId=${negocioId}`);
+      if (!responseHora.ok) {
+        console.error("❌ [PAGO] Error al obtener hora del servidor");
+        reproducirSonidoError();
+        setMessage({
+          type: "error",
+          text: `Error al obtener hora del servidor`,
+        });
+        setTimeout(() => setMessage(null), 5000);
+        return;
+      }
+      const { fechaHora: horaSalida } = await responseHora.json();
+      console.log("⏰ [PAGO] Hora entrada:", tarjeta.hora_entrada);
+      console.log("⏰ [PAGO] Hora salida (SERVIDOR):", horaSalida);
+      console.log("🔧 [PAGO] Parámetro usado para calcular:", {
+        id: parametroVehiculo.id,
+        nombre: parametroVehiculo.nombre,
+        tarifa_1_valor: parametroVehiculo.tarifa_1_valor,
+        tarifa_2_valor: parametroVehiculo.tarifa_2_valor,
+        tarifa_3_valor: parametroVehiculo.tarifa_3_valor,
+        tarifa_4_valor: parametroVehiculo.tarifa_4_valor,
+        tarifa_extra: parametroVehiculo.tarifa_extra,
+        tarifa_auxiliar: parametroVehiculo.tarifa_auxiliar
+      });
+      
+      const calculo = calcularTarifa(
+        tarjeta.hora_entrada,
+        horaSalida,
+        parametroVehiculo
+      );
 
-    console.log("💰 [PAGO] Total calculado:", calculo.totalAPagar);
-    console.log("⏱️ [PAGO] Tiempo transcurrido:", calculo.tiempoTotal);
+      console.log("💰 [PAGO] Total calculado:", calculo.totalAPagar);
+      console.log("⏱️ [PAGO] Tiempo transcurrido:", calculo.tiempoTotal);
+      console.log("📋 [PAGO] Desglose:", calculo.desglose);
 
-    setTotalAPagar(calculo.totalAPagar);
-    setTiempoTranscurrido(formatearTiempoTranscurrido(calculo.tiempoTotal));
+      setTotalAPagar(calculo.totalAPagar);
+      setTiempoTranscurrido(formatearTiempoTranscurrido(calculo.tiempoTotal));
 
-    // Preparar información vehicular
-    const fechaEntrada = new Date(tarjeta.hora_entrada);
-    setInformacionVehicular({
-      tipoVehiculo: tarjeta.tipo_vehiculo,
-      placa: tarjeta.placa || "N/A",
-      color: tarjeta.color || "",
-      marca: tarjeta.marca || "",
-      modelo: tarjeta.modelo || "",
-      horaEntrada: new Intl.DateTimeFormat("es-EC", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }).format(fechaEntrada),
-      fechaEntrada: new Intl.DateTimeFormat("es-EC", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }).format(fechaEntrada).replace(/\//g, "."),
-    });
+      // Preparar información vehicular
+      const fechaEntrada = new Date(tarjeta.hora_entrada);
+      setInformacionVehicular({
+        tipoVehiculo: tarjeta.tipo_vehiculo,
+        placa: tarjeta.placa || "N/A",
+        color: tarjeta.color || "",
+        marca: tarjeta.marca || "",
+        modelo: tarjeta.modelo || "",
+        horaEntrada: new Intl.DateTimeFormat("es-EC", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }).format(fechaEntrada),
+        fechaEntrada: new Intl.DateTimeFormat("es-EC", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }).format(fechaEntrada).replace(/\//g, "."),
+      });
+    } catch (error) {
+      console.error("❌ [PAGO] Error al obtener parámetro:", error);
+      reproducirSonidoError();
+      setMessage({
+        type: "error",
+        text: `Error al obtener configuración de tarifas`,
+      });
+      setTimeout(() => setMessage(null), 5000);
+      return;
+    }
   };
 
   const handleSeleccionarTarjeta = (tarjeta: TarjetaPendiente) => {

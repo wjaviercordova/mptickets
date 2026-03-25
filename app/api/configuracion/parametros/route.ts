@@ -1,7 +1,82 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { validarAgregarParametro } from "@/lib/planes-limites-db";
+
+/**
+ * GET: Obtener parámetros con filtros opcionales
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const cookieStore = await cookies();
+    const negocioId = cookieStore.get("mp_negocio_id")?.value;
+
+    if (!negocioId) {
+      return NextResponse.json(
+        { message: "No autenticado" },
+        { status: 401 }
+      );
+    }
+
+    const supabase = createServerClient();
+    const searchParams = request.nextUrl.searchParams;
+    
+    // Filtros opcionales
+    const id = searchParams.get("id");
+    const tipo_vehiculo = searchParams.get("tipo_vehiculo");
+    const estado = searchParams.get("estado");
+
+    console.log("🔍 [API PARAMETROS GET] Filtros recibidos:", { 
+      id, 
+      tipo_vehiculo, 
+      estado, 
+      negocioId 
+    });
+
+    let query = supabase
+      .from("parametros")
+      .select("*")
+      .eq("negocio_id", negocioId)
+      .order("prioridad", { ascending: true });
+
+    // Aplicar filtros
+    if (id) {
+      console.log("🔧 [API PARAMETROS GET] Aplicando filtro por ID:", id);
+      query = query.eq("id", id);
+    }
+    if (tipo_vehiculo) {
+      console.log("🔧 [API PARAMETROS GET] Aplicando filtro por tipo_vehiculo:", tipo_vehiculo);
+      query = query.eq("tipo_vehiculo", tipo_vehiculo);
+    }
+    if (estado) {
+      console.log("🔧 [API PARAMETROS GET] Aplicando filtro por estado:", estado);
+      query = query.eq("estado", estado);
+    }
+
+    const { data, error } = await query;
+    
+    console.log("✅ [API PARAMETROS GET] Resultado de query:", {
+      count: data?.length,
+      data: data?.map(p => ({ id: p.id, nombre: p.nombre, tipo_vehiculo: p.tipo_vehiculo }))
+    });
+
+    if (error) {
+      console.error("Error al obtener parámetros:", error);
+      return NextResponse.json(
+        { message: "Error al obtener parámetros" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(data || []);
+  } catch (error) {
+    console.error("Error en API parametros (GET):", error);
+    return NextResponse.json(
+      { message: "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -45,33 +120,31 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verificar si ya existe una tarifa para este tipo de vehículo
-    const { data: existing } = await supabase
-      .from("parametros")
-      .select("id")
-      .eq("negocio_id", negocioId)
-      .eq("tipo_vehiculo", data.tipo_vehiculo)
-      .single();
+    // Nota: Se permite crear múltiples tarifas para el mismo tipo de vehículo
+    // con diferentes nombres (ej: varios "SERVICIOS" para lavados de distintos tamaños)
 
-    if (existing) {
-      return NextResponse.json(
-        { message: "Ya existe una tarifa para este tipo de vehículo" },
-        { status: 400 }
-      );
-    }
+    // Limpiar campos que la base de datos maneja automáticamente
+    const { fecha_creacion: _fc, fecha_actualizacion: _fa, ...cleanData } = data;
 
     // Insertar nuevo parámetro
     const { error: insertError } = await supabase
       .from("parametros")
       .insert({
         negocio_id: negocioId,
-        ...data,
+        ...cleanData,
+        configuracion_avanzada: cleanData.configuracion_avanzada || {},
+        horarios_especiales: cleanData.horarios_especiales || {},
       });
 
     if (insertError) {
       console.error("Error al crear parámetro:", insertError);
+      console.error("Datos enviados:", { negocio_id: negocioId, ...cleanData });
       return NextResponse.json(
-        { message: "Error al crear tarifa" },
+        { 
+          message: "Error al crear tarifa",
+          error: insertError.message,
+          details: insertError.details || insertError.hint,
+        },
         { status: 500 }
       );
     }
@@ -82,8 +155,8 @@ export async function POST(request: Request) {
       usuario_id: userId,
       accion: "CREAR",
       tabla_afectada: "parametros",
-      descripcion: `Creación de tarifa para ${data.tipo_vehiculo}`,
-      datos_nuevos: data,
+      descripcion: `Creación de tarifa para ${cleanData.tipo_vehiculo}`,
+      datos_nuevos: cleanData,
     });
 
     return NextResponse.json({
@@ -138,11 +211,14 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Limpiar campos que la base de datos maneja automáticamente
+    const { fecha_creacion: _fc2, fecha_actualizacion: _fa2, ...cleanData } = data;
+
     // Actualizar parámetro
     const { error: updateError } = await supabase
       .from("parametros")
       .update({
-        ...data,
+        ...cleanData,
         fecha_actualizacion: new Date().toISOString(),
       })
       .eq("id", parametroId)
@@ -162,9 +238,9 @@ export async function PUT(request: Request) {
       usuario_id: userId,
       accion: "ACTUALIZAR",
       tabla_afectada: "parametros",
-      descripcion: `Actualización de tarifa para ${data.tipo_vehiculo}`,
+      descripcion: `Actualización de tarifa para ${cleanData.tipo_vehiculo}`,
       datos_anteriores: oldData,
-      datos_nuevos: data,
+      datos_nuevos: cleanData,
     });
 
     return NextResponse.json({

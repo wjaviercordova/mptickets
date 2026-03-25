@@ -54,11 +54,12 @@ export async function GET(request: NextRequest) {
     
     const { data: ingresos, error: errorIngresos } = await supabase
       .from("codigos")
-      .select("id, hora_entrada, tipo_vehiculo, placa, color, marca, modelo, estado")
+      .select("id, hora_entrada, tipo_vehiculo, parametro_id, placa, color, marca, modelo, estado")
       .eq("tarjeta_id", tarjetaExistente.id)
       .order("hora_entrada", { ascending: false });
 
     console.log("📋 [BUSCAR PENDIENTE] Ingresos encontrados:", ingresos);
+    console.log("🔍 [BUSCAR PENDIENTE] parametro_id del primer ingreso:", ingresos?.[0]?.parametro_id);
 
     if (errorIngresos) {
       console.error("❌ [BUSCAR PENDIENTE] Error al buscar ingresos:", errorIngresos);
@@ -105,6 +106,7 @@ export async function GET(request: NextRequest) {
 
     // PASO 3: Tarjeta encontrada con ingreso pendiente - caso exitoso
     console.log("✅ [BUSCAR PENDIENTE] Tarjeta con ingreso pendiente encontrada");
+    console.log("📋 [BUSCAR PENDIENTE] parametro_id a devolver:", ingresoPendiente.parametro_id);
 
     const tarjeta = {
       id: tarjetaExistente.id,
@@ -115,12 +117,14 @@ export async function GET(request: NextRequest) {
       ingreso_id: ingresoPendiente.id,
       hora_entrada: ingresoPendiente.hora_entrada,
       tipo_vehiculo: ingresoPendiente.tipo_vehiculo,
+      parametro_id: ingresoPendiente.parametro_id,
       placa: ingresoPendiente.placa,
       color: ingresoPendiente.color,
       marca: ingresoPendiente.marca,
       modelo: ingresoPendiente.modelo,
     };
 
+    console.log("📤 [BUSCAR PENDIENTE] Tarjeta a devolver:", tarjeta);
     return NextResponse.json({ tarjeta });
   } catch (error) {
     console.error("Error al buscar tarjeta pendiente:", error);

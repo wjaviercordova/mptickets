@@ -14,6 +14,7 @@ import {
   Truck,
   AlertCircle,
   CheckCircle2,
+  HelpCircle,
 } from "lucide-react";
 import { useLimites } from "@/hooks/useLimites";
 import {
@@ -24,6 +25,7 @@ import {
 
 interface Parametro {
   id: string;
+  negocio_id: string;
   tipo_vehiculo: string;
   nombre: string;
   descripcion: string | null;
@@ -46,6 +48,10 @@ interface Parametro {
   tarifa_auxiliar: number;
   tarifa_nocturna: number;
   tarifa_fin_semana: number;
+  configuracion_avanzada: Record<string, unknown>;
+  horarios_especiales: Record<string, unknown>;
+  fecha_creacion: string;
+  fecha_actualizacion: string;
   estado: string;
 }
 
@@ -60,9 +66,11 @@ const vehicleIcons: Record<string, typeof Car> = {
   AUTO: Car,
   CAMIONETA: Truck,
   PESADO: Truck,
+  SERVICIOS: DollarSign,
+  OTROS: HelpCircle,
 };
 
-const emptyParametro: Omit<Parametro, "id"> = {
+const emptyParametro: Omit<Parametro, "id" | "negocio_id" | "fecha_creacion" | "fecha_actualizacion"> = {
   tipo_vehiculo: "",
   nombre: "",
   descripcion: "",
@@ -85,13 +93,15 @@ const emptyParametro: Omit<Parametro, "id"> = {
   tarifa_auxiliar: 0,
   tarifa_nocturna: 0,
   tarifa_fin_semana: 0,
+  configuracion_avanzada: {},
+  horarios_especiales: {},
   estado: "activo",
 };
 
 export function TarifasTab({ negocioId, parametros, onUpdate }: TarifasTabProps) {
   const [showModal, setShowModal] = useState(false);
   const [editingParam, setEditingParam] = useState<Parametro | null>(null);
-  const [formData, setFormData] = useState<Omit<Parametro, "id">>(emptyParametro);
+  const [formData, setFormData] = useState<Omit<Parametro, "id" | "negocio_id" | "fecha_creacion" | "fecha_actualizacion">>(emptyParametro);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -116,12 +126,15 @@ export function TarifasTab({ negocioId, parametros, onUpdate }: TarifasTabProps)
     }
     setEditingParam(null);
     setFormData(emptyParametro);
+    setMessage(null); // Limpiar mensajes previos
     setShowModal(true);
   };
 
   const handleEdit = (param: Parametro) => {
     setEditingParam(param);
-    setFormData({ ...param });
+    const { id: _id, negocio_id: _negocio_id, fecha_creacion: _fecha_creacion, fecha_actualizacion: _fecha_actualizacion, ...editableData } = param;
+    setFormData(editableData);
+    setMessage(null); // Limpiar mensajes previos
     setShowModal(true);
   };
 
@@ -242,22 +255,14 @@ export function TarifasTab({ negocioId, parametros, onUpdate }: TarifasTabProps)
         />
       )}
 
-      {/* Mensaje de estado */}
-      {message && (
+      {/* Mensaje de estado (solo mensajes de éxito, los errores aparecen en el modal) */}
+      {message && message.type === "success" && !showModal && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-3 rounded-2xl border p-4 backdrop-blur-xl ${
-            message.type === "success"
-              ? "border-emerald-400/40 bg-emerald-500/20 text-emerald-200"
-              : "border-red-400/40 bg-red-500/20 text-red-200"
-          }`}
+          className="flex items-center gap-3 rounded-2xl border border-emerald-400/40 bg-emerald-500/20 p-4 text-emerald-200 backdrop-blur-xl"
         >
-          {message.type === "success" ? (
-            <CheckCircle2 className="h-5 w-5" />
-          ) : (
-            <AlertCircle className="h-5 w-5" />
-          )}
+          <CheckCircle2 className="h-5 w-5" />
           <span className="font-medium">{message.text}</span>
         </motion.div>
       )}
@@ -436,6 +441,18 @@ export function TarifasTab({ negocioId, parametros, onUpdate }: TarifasTabProps)
 
                 {/* Modal Body */}
                 <div className="space-y-6 p-6">
+                  {/* Mensaje de error dentro del modal */}
+                  {message && message.type === "error" && showModal && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-3 rounded-2xl border border-red-400/40 bg-red-500/20 p-4 text-red-200"
+                    >
+                      <AlertCircle className="h-5 w-5" />
+                      <span className="font-medium">{message.text}</span>
+                    </motion.div>
+                  )}
+
                 {/* Información básica */}
                 <div className="space-y-4 rounded-2xl border border-blue-500/20 bg-[#0a0e27]/40 p-5">
                   <h4 className="font-heading text-lg text-white">
@@ -459,6 +476,8 @@ export function TarifasTab({ negocioId, parametros, onUpdate }: TarifasTabProps)
                         <option value="AUTO">AUTO</option>
                         <option value="CAMIONETA">CAMIONETA</option>
                         <option value="PESADO">PESADO</option>
+                        <option value="SERVICIOS">SERVICIOS</option>
+                        <option value="OTROS">OTROS</option>
                       </select>
                     </div>
 
@@ -695,7 +714,7 @@ export function TarifasTab({ negocioId, parametros, onUpdate }: TarifasTabProps)
         open={showLimiteModal}
         onClose={() => setShowLimiteModal(false)}
         tipoRecurso="tarifas"
-        planActual={planConfig?.plan_tipo || "demo"}
+        planActual={(planConfig?.plan_tipo === "demo" || planConfig?.plan_tipo === "basica" || planConfig?.plan_tipo === "premium" ? planConfig.plan_tipo : "demo") as "demo" | "premium" | "basica"}
         limiteActual={planConfig?.parametros_maximo || 0}
         onContactar={() => {
           window.open(

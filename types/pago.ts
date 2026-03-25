@@ -7,6 +7,7 @@ export interface TarjetaPendiente {
   ingreso_id: string;
   hora_entrada: string;
   tipo_vehiculo: string;
+  parametro_id: string | null; // Puede ser null en ingresos antiguos
   placa: string;
   color: string;
   marca: string;

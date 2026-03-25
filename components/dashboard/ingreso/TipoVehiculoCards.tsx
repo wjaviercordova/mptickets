@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Car, Bike, Truck, Bus, CircleDot } from "lucide-react";
+import { Car, Bike, Truck, Bus, CircleDot, DollarSign, HelpCircle } from "lucide-react";
 import type { Parametro } from "@/types/ingreso";
 
 interface TipoVehiculoCardsProps {
@@ -24,6 +24,12 @@ const getIcono = (tipoVehiculo: string) => {
   }
   if (tipo.includes("bus")) {
     return Bus;
+  }
+  if (tipo.includes("servicio")) {
+    return DollarSign;
+  }
+  if (tipo.includes("otro")) {
+    return HelpCircle;
   }
   return CircleDot;
 };

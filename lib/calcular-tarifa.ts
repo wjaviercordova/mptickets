@@ -64,15 +64,17 @@ export function calcularTiempoTranscurrido(
  * Calcula el total a pagar según las tarifas del parámetro
  * 
  * Lógica:
- * 1. Si el tiempo es < 60 minutos (primera hora):
- *    - Usar tarifa_1 o tarifa_2 según el rango
- *    - "1-9" significa: desde el segundo 1 hasta el minuto 9:59
- *    - "10-59" significa: desde el minuto 10:00 hasta el minuto 59:59
+ * 1. Primera hora (0-59 minutos):
+ *    - Usar tarifa_1_valor si minutos están en rango tarifa_1_nombre (ej: "0-9" o "1-9")
+ *    - Usar tarifa_2_valor si minutos están en rango tarifa_2_nombre (ej: "10-59")
  * 
- * 2. Si el tiempo es >= 60 minutos (más de una hora):
- *    - Usar tarifa_3 y tarifa_4 para calcular por horas
- *    - Cada hora completa (60 min) se cobra según tarifa_3 o tarifa_4
- *    - Los minutos sobrantes también se cobran según tarifa_3 o tarifa_4
+ * 2. Segunda hora en adelante (60+ minutos):
+ *    - Usar tarifa_3_valor si minutos de cada hora están en rango tarifa_3_nombre
+ *    - Usar tarifa_4_valor si minutos de cada hora están en rango tarifa_4_nombre
+ * 
+ * 3. Siempre agregar:
+ *    - tarifa_extra
+ *    - tarifa_auxiliar
  */
 export function calcularTarifa(
   horaEntrada: string,
@@ -83,102 +85,156 @@ export function calcularTarifa(
   const desglose: DesgloseTarifa[] = [];
   let totalAPagar = 0;
 
-  // Si el tiempo total es menor a 60 minutos (primera hora)
-  // Usamos totalMinutosCobro que redondea hacia arriba desde 1 segundo
-  if (tiempo.totalMinutosCobro < 60) {
-    // Usar tarifa_1 o tarifa_2
+  // Calcular minutos totales para el cobro
+  const totalMinutos = tiempo.totalMinutosCobro;
+
+  if (totalMinutos === 0) {
+    // Sin tiempo = sin cargo (excepto extras)
+    totalAPagar = (parametro.tarifa_extra || 0) + (parametro.tarifa_auxiliar || 0);
+    return {
+      tiempoTotal: tiempo,
+      desglose,
+      totalAPagar,
+    };
+  }
+
+  // PRIMERA HORA (minutos 0-59)
+  if (totalMinutos <= 60) {
+    // Toda la estancia está dentro de la primera hora
+    const minutosEnPrimeraHora = totalMinutos;
     let tarifaAplicada = 0;
     let rangoAplicado = "";
     
-    // Verificar en qué rango cae (usando totalMinutosCobro)
-    if (estaEnRango(tiempo.totalMinutosCobro, parametro.tarifa_1_nombre)) {
+    // Verificar en qué rango cae usando tarifa_1 o tarifa_2
+    if (estaEnRango(minutosEnPrimeraHora, parametro.tarifa_1_nombre)) {
       tarifaAplicada = parametro.tarifa_1_valor;
       rangoAplicado = parametro.tarifa_1_nombre;
-    } else if (estaEnRango(tiempo.totalMinutosCobro, parametro.tarifa_2_nombre)) {
+    } else if (estaEnRango(minutosEnPrimeraHora, parametro.tarifa_2_nombre)) {
       tarifaAplicada = parametro.tarifa_2_valor;
       rangoAplicado = parametro.tarifa_2_nombre;
     }
     
-    totalAPagar = tarifaAplicada;
+    totalAPagar += tarifaAplicada;
     
     desglose.push({
       descripcion: `Primera hora (${rangoAplicado} minutos)`,
-      minutos: tiempo.totalMinutos,
+      minutos: minutosEnPrimeraHora,
       tarifa: tarifaAplicada,
       subtotal: tarifaAplicada,
     });
-  } 
-  // Si el tiempo es >= 60 minutos (más de una hora)
-  else {
-    // Calcular horas completas y minutos sobrantes
-    const horasCompletas = Math.floor(tiempo.totalMinutos / 60);
-    const minutosRestantes = tiempo.totalMinutos % 60;
+  } else {
+    // La estancia excede la primera hora (60+ minutos)
     
-    // Cobrar por cada hora completa
-    for (let i = 0; i < horasCompletas; i++) {
+    // 1. Cobrar la primera hora completa (60 minutos) con tarifa_1/tarifa_2
+    let tarifaPrimeraHora = 0;
+    let rangoPrimeraHora = "";
+    
+    // Para una hora completa (60 minutos), verificar cuál tarifa aplica
+    // Generalmente 60 minutos cae en el rango superior (tarifa_2_nombre: "10-59")
+    if (estaEnRango(60, parametro.tarifa_2_nombre)) {
+      tarifaPrimeraHora = parametro.tarifa_2_valor;
+      rangoPrimeraHora = parametro.tarifa_2_nombre;
+    } else if (estaEnRango(60, parametro.tarifa_1_nombre)) {
+      tarifaPrimeraHora = parametro.tarifa_1_valor;
+      rangoPrimeraHora = parametro.tarifa_1_nombre;
+    } else {
+      // Si 60 no cae en ningún rango definido, usar la tarifa más alta
+      tarifaPrimeraHora = parametro.tarifa_2_valor;
+      rangoPrimeraHora = parametro.tarifa_2_nombre;
+    }
+    
+    totalAPagar += tarifaPrimeraHora;
+    
+    desglose.push({
+      descripcion: `Primera hora (${rangoPrimeraHora})`,
+      minutos: 60,
+      tarifa: tarifaPrimeraHora,
+      subtotal: tarifaPrimeraHora,
+    });
+    
+    // 2. Procesar minutos restantes (después del minuto 60) usando tarifa_3/tarifa_4
+    const minutosRestantes = totalMinutos - 60;
+    
+    // Dividir los minutos restantes en horas completas y minutos adicionales
+    const horasAdicionales = Math.floor(minutosRestantes / 60);
+    const minutosFinales = minutosRestantes % 60;
+    
+    // Cobrar cada hora adicional completa con tarifa_3/tarifa_4
+    for (let i = 0; i < horasAdicionales; i++) {
       let tarifaPorHora = 0;
+      let rangoHora = "";
       
-      // Para cada hora, consideramos 60 minutos
-      // Verificamos en qué rango de tarifa_3/tarifa_4 cae
-      // Como 60 minutos típicamente excede el rango máximo (ej: "10-59"),
-      // usamos la tarifa del rango más alto que contenga minutos válidos
-      
-      // Intentamos con tarifa_4 primero (rango superior)
-      try {
-        const [min4] = parsearRangoTiempo(parametro.tarifa_4_nombre);
-        // Si 60 está en el rango o es mayor que el mínimo del rango superior
-        if (60 >= min4) {
-          tarifaPorHora = parametro.tarifa_4_valor;
-        }
-      } catch {
-        // Si no hay tarifa_4, intentar con tarifa_3
-      }
-      
-      // Si no se asignó tarifa_4, intentar con tarifa_3
-      if (tarifaPorHora === 0) {
-        try {
-          const [min3, max3] = parsearRangoTiempo(parametro.tarifa_3_nombre);
-          if (60 >= min3 && 60 <= max3) {
-            tarifaPorHora = parametro.tarifa_3_valor;
-          } else {
-            // Si 60 excede el rango, usar la tarifa más alta disponible
-            tarifaPorHora = parametro.tarifa_4_valor || parametro.tarifa_3_valor;
-          }
-        } catch {
-          tarifaPorHora = parametro.tarifa_3_valor;
-        }
+      // Para una hora completa (60 minutos), usar tarifa_3 o tarifa_4
+      if (estaEnRango(60, parametro.tarifa_4_nombre)) {
+        tarifaPorHora = parametro.tarifa_4_valor;
+        rangoHora = parametro.tarifa_4_nombre;
+      } else if (estaEnRango(60, parametro.tarifa_3_nombre)) {
+        tarifaPorHora = parametro.tarifa_3_valor;
+        rangoHora = parametro.tarifa_3_nombre;
+      } else {
+        // Si 60 no cae en ningún rango, usar la tarifa más alta
+        tarifaPorHora = parametro.tarifa_4_valor;
+        rangoHora = parametro.tarifa_4_nombre;
       }
       
       totalAPagar += tarifaPorHora;
       
       desglose.push({
-        descripcion: `Hora ${i + 1} (60 minutos)`,
+        descripcion: `Hora ${i + 2} (${rangoHora})`,
         minutos: 60,
         tarifa: tarifaPorHora,
         subtotal: tarifaPorHora,
       });
     }
     
-    // Cobrar minutos restantes si los hay
-    if (minutosRestantes > 0) {
-      let tarifaRestante = 0;
+    // Cobrar minutos finales si los hay (con tarifa_3/tarifa_4)
+    if (minutosFinales > 0) {
+      let tarifaFinal = 0;
+      let rangoFinal = "";
       
-      // Verificar en qué rango de tarifa_3/tarifa_4 caen los minutos restantes
-      if (estaEnRango(minutosRestantes, parametro.tarifa_3_nombre)) {
-        tarifaRestante = parametro.tarifa_3_valor;
-      } else if (estaEnRango(minutosRestantes, parametro.tarifa_4_nombre)) {
-        tarifaRestante = parametro.tarifa_4_valor;
+      // Verificar en qué rango de tarifa_3/tarifa_4 caen los minutos finales
+      if (estaEnRango(minutosFinales, parametro.tarifa_3_nombre)) {
+        tarifaFinal = parametro.tarifa_3_valor;
+        rangoFinal = parametro.tarifa_3_nombre;
+      } else if (estaEnRango(minutosFinales, parametro.tarifa_4_nombre)) {
+        tarifaFinal = parametro.tarifa_4_valor;
+        rangoFinal = parametro.tarifa_4_nombre;
       }
       
-      totalAPagar += tarifaRestante;
+      totalAPagar += tarifaFinal;
       
       desglose.push({
-        descripcion: `Minutos adicionales`,
-        minutos: minutosRestantes,
-        tarifa: tarifaRestante,
-        subtotal: tarifaRestante,
+        descripcion: `Minutos adicionales (${rangoFinal})`,
+        minutos: minutosFinales,
+        tarifa: tarifaFinal,
+        subtotal: tarifaFinal,
       });
     }
+  }
+
+  // AGREGAR TARIFA EXTRA Y AUXILIAR (siempre se suman al total)
+  const tarifaExtra = parametro.tarifa_extra || 0;
+  const tarifaAuxiliar = parametro.tarifa_auxiliar || 0;
+  
+  totalAPagar += tarifaExtra + tarifaAuxiliar;
+  
+  // Agregar al desglose solo si tienen valor
+  if (tarifaExtra > 0) {
+    desglose.push({
+      descripcion: "Tarifa extra",
+      minutos: 0,
+      tarifa: tarifaExtra,
+      subtotal: tarifaExtra,
+    });
+  }
+  
+  if (tarifaAuxiliar > 0) {
+    desglose.push({
+      descripcion: "Tarifa auxiliar",
+      minutos: 0,
+      tarifa: tarifaAuxiliar,
+      subtotal: tarifaAuxiliar,
+    });
   }
 
   return {

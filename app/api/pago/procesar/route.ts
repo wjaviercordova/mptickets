@@ -9,7 +9,8 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log("📥 [API PAGO] Body recibido:", JSON.stringify(body, null, 2));
+    console.log("� [API PAGO] =============== INICIO PROCESO PAGO ===============");
+    console.log("�📥 [API PAGO] Body recibido:", JSON.stringify(body, null, 2));
     
     const {
       ingresoId,
@@ -64,23 +65,67 @@ export async function POST(request: NextRequest) {
     console.log("✅ [API PAGO] Ingreso encontrado:", {
       id: ingreso.id,
       tipo_vehiculo: ingreso.tipo_vehiculo,
+      parametro_id: ingreso.parametro_id,
       estado: ingreso.estado,
       hora_entrada: ingreso.hora_entrada
     });
 
-    // Obtener parámetro por tipo de vehículo
-    console.log("🔍 [API PAGO] Buscando parámetro:", {
-      negocioId,
-      tipo_vehiculo: ingreso.tipo_vehiculo
-    });
+    // Obtener parámetro por ID (guardado al momento del ingreso)
+    console.log("🔍 [API PAGO] Buscando parámetro por ID:", ingreso.parametro_id);
     
-    const { data: parametro, error: parametroError } = await supabase
-      .from("parametros")
-      .select("*")
-      .eq("negocio_id", negocioId)
-      .eq("tipo_vehiculo", ingreso.tipo_vehiculo)
-      .eq("estado", "activo")
-      .single();
+    let parametro;
+    let parametroError;
+
+    if (!ingreso.parametro_id) {
+      // Fallback: buscar por tipo_vehiculo (ingresos antiguos sin parametro_id)
+      // IMPORTANTE: Usar prioridad (menor número = mayor prioridad) para consistencia
+      console.log("⚠️ [API PAGO] parametro_id es null, buscando por tipo_vehiculo:", ingreso.tipo_vehiculo);
+      
+      const result = await supabase
+        .from("parametros")
+        .select("*")
+        .eq("tipo_vehiculo", ingreso.tipo_vehiculo)
+        .eq("negocio_id", negocioId)
+        .eq("estado", "activo")
+        .order("prioridad", { ascending: true })
+        .limit(1);
+
+      console.log("🔍 [API PAGO] Query result para fallback:", {
+        error: result.error,
+        count: result.data?.length,
+        parametro: result.data?.[0] ? {
+          id: result.data[0].id,
+          nombre: result.data[0].nombre,
+          prioridad: result.data[0].prioridad,
+          tarifa_1_valor: result.data[0].tarifa_1_valor,
+          tarifa_2_valor: result.data[0].tarifa_2_valor
+        } : null
+      });
+
+      parametroError = result.error;
+      parametro = result.data?.[0];
+
+      // Actualizar el ingreso con el parametro_id encontrado
+      if (parametro) {
+        await supabase
+          .from("codigos")
+          .update({ parametro_id: parametro.id })
+          .eq("id", ingresoId);
+        console.log("✅ [API PAGO] Ingreso actualizado con parametro_id:", parametro.id);
+      }
+    } else {
+      // Buscar por ID directo
+      const result = await supabase
+        .from("parametros")
+        .select("*")
+        .eq("id", ingreso.parametro_id)
+        .eq("negocio_id", negocioId)
+        .eq("estado", "activo")
+        .single();
+
+      parametroError = result.error;
+      parametro = result.data;
+    }
 
     if (parametroError || !parametro) {
       console.error("❌ [API PAGO] Error al obtener parámetro:", parametroError);
@@ -123,6 +168,16 @@ export async function POST(request: NextRequest) {
       hora_entrada: ingreso.hora_entrada,
       hora_salida: horaSalida
     });
+    console.log("🔧 [API PAGO] Parámetro usado para calcular:", {
+      id: parametro.id,
+      nombre: parametro.nombre,
+      tarifa_1_valor: parametro.tarifa_1_valor,
+      tarifa_2_valor: parametro.tarifa_2_valor,
+      tarifa_3_valor: parametro.tarifa_3_valor,
+      tarifa_4_valor: parametro.tarifa_4_valor,
+      tarifa_extra: parametro.tarifa_extra,
+      tarifa_auxiliar: parametro.tarifa_auxiliar
+    });
 
     // Recalcular tarifa en el servidor para validar
     let calculoServidor;
@@ -134,8 +189,10 @@ export async function POST(request: NextRequest) {
       );
       console.log("✅ [API PAGO] Cálculo completado:", {
         totalAPagar: calculoServidor.totalAPagar,
-        tiempoTotal: calculoServidor.tiempoTotal
+        tiempoTotal: calculoServidor.tiempoTotal,
+        desglose: calculoServidor.desglose
       });
+      console.log("📥 [API PAGO] Total recibido del frontend:", totalAPagar);
     } catch (error) {
       console.error("❌ [API PAGO] Error en calcularTarifa:", error);
       throw error;

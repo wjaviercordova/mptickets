@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         id,
         hora_entrada,
         tipo_vehiculo,
+        parametro_id,
         placa,
         color,
         marca,
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
       id: string;
       hora_entrada: string;
       tipo_vehiculo: string;
+      parametro_id: string | null;
       placa: string;
       color: string;
       marca: string;
@@ -91,6 +93,7 @@ export async function GET(request: NextRequest) {
         ingreso_id: item.id,
         hora_entrada: item.hora_entrada,
         tipo_vehiculo: item.tipo_vehiculo,
+        parametro_id: item.parametro_id,
         placa: item.placa,
         color: item.color,
         marca: item.marca,

@@ -8,6 +8,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log("� [API INGRESO] =============== INICIO INGRESO ===============");
     console.log("📥 [API INGRESO] Body recibido:", JSON.stringify(body, null, 2));
     
     const {
@@ -18,6 +19,15 @@ export async function POST(request: NextRequest) {
       negocioId,
       usuarioId,
     } = body;
+
+    console.log("🔍 [API INGRESO] Valores extraídos:", {
+      codigoBarras,
+      parametroId,
+      tipoVehiculo,
+      tarjetaId,
+      negocioId,
+      usuarioId
+    });
 
     // Validaciones
     if (!codigoBarras || !parametroId || !tipoVehiculo || !tarjetaId || !negocioId || !usuarioId) {
@@ -163,7 +173,10 @@ export async function POST(request: NextRequest) {
       datos_adicionales: {},
     };
     
-    console.log("📝 [API INGRESO] Datos del ingreso:", nuevoIngreso);
+    console.log("📝 [API INGRESO] Datos del ingreso a guardar:", {
+      ...nuevoIngreso,
+      parametro_id: parametroId // Verificar que no sea undefined
+    });
 
     let ingreso;
     try {
@@ -172,6 +185,12 @@ export async function POST(request: NextRequest) {
         .insert(nuevoIngreso)
         .select()
         .single();
+
+      console.log("📥 [API INGRESO] Respuesta de insert:", {
+        data,
+        error: ingresoError,
+        parametro_id_guardado: data?.parametro_id
+      });
 
       if (ingresoError) {
         console.error("❌ [API INGRESO] Error al crear ingreso:", ingresoError);
