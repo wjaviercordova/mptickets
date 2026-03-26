@@ -459,43 +459,67 @@ export default function NegociosPage() {
                   </div>
                 </div>
 
-                {/* Acciones */}
-                <div className="flex items-center gap-2 lg:flex-col lg:w-32">
-                  <button
-                    onClick={() => handleVerDetalles(negocio)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/25 to-cyan-600/15 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:from-blue-500/35 hover:to-cyan-600/25"
-                    title="Ver detalles"
-                  >
-                    <Eye className="h-4 w-4" />
-                    <span>Ver</span>
-                  </button>
+                {/* Acciones - Compactas con tooltips */}
+                <div className="flex items-center gap-2">
+                  {/* Ver detalles */}
+                  <div className="group relative">
+                    <button
+                      onClick={() => handleVerDetalles(negocio)}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-400/30 bg-gradient-to-br from-blue-500/20 to-cyan-600/10 text-blue-300 backdrop-blur-sm transition hover:scale-110 hover:border-blue-400/50 hover:from-blue-500/30 hover:to-cyan-600/20 hover:shadow-lg hover:shadow-blue-500/20"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-blue-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-blue-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100 pointer-events-none">
+                      Ver detalles
+                      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-blue-400/30"></div>
+                    </div>
+                  </div>
 
-                  <button
-                    onClick={() => handleEditarNegocio(negocio)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/40 bg-gradient-to-r from-amber-500/25 to-orange-600/15 px-4 py-2 text-sm font-medium text-amber-200 backdrop-blur-sm transition hover:from-amber-500/35 hover:to-orange-600/25"
-                    title="Editar negocio"
-                  >
-                    <Edit className="h-4 w-4" />
-                    <span>Editar</span>
-                  </button>
+                  {/* Editar */}
+                  <div className="group relative">
+                    <button
+                      onClick={() => handleEditarNegocio(negocio)}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-400/30 bg-gradient-to-br from-amber-500/20 to-orange-600/10 text-amber-300 backdrop-blur-sm transition hover:scale-110 hover:border-amber-400/50 hover:from-amber-500/30 hover:to-orange-600/20 hover:shadow-lg hover:shadow-amber-500/20"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-amber-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-amber-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100 pointer-events-none">
+                      Editar negocio
+                      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-amber-400/30"></div>
+                    </div>
+                  </div>
 
-                  <button
-                    onClick={() => handleEditarLicencia(negocio)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-purple-400/40 bg-gradient-to-r from-purple-500/25 to-pink-600/15 px-4 py-2 text-sm font-medium text-purple-200 backdrop-blur-sm transition hover:from-purple-500/35 hover:to-pink-600/25"
-                    title="Editar plan y licencia"
-                  >
-                    <Calendar className="h-4 w-4" />
-                    <span>Licencia</span>
-                  </button>
+                  {/* Licencia */}
+                  <div className="group relative">
+                    <button
+                      onClick={() => handleEditarLicencia(negocio)}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-purple-500/20 to-pink-600/10 text-purple-300 backdrop-blur-sm transition hover:scale-110 hover:border-purple-400/50 hover:from-purple-500/30 hover:to-pink-600/20 hover:shadow-lg hover:shadow-purple-500/20"
+                    >
+                      <Calendar className="h-4 w-4" />
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-purple-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-purple-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100 pointer-events-none">
+                      Editar licencia y plan
+                      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-purple-400/30"></div>
+                    </div>
+                  </div>
 
-                  <button
-                    onClick={() => handleDelete(negocio)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-400/40 bg-gradient-to-r from-red-500/25 to-rose-600/15 px-4 py-2 text-sm font-medium text-red-200 backdrop-blur-sm transition hover:from-red-500/35 hover:to-rose-600/25"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span>Eliminar</span>
-                  </button>
+                  {/* Eliminar */}
+                  <div className="group relative">
+                    <button
+                      onClick={() => handleDelete(negocio)}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-400/30 bg-gradient-to-br from-red-500/20 to-rose-600/10 text-red-300 backdrop-blur-sm transition hover:scale-110 hover:border-red-400/50 hover:from-red-500/30 hover:to-rose-600/20 hover:shadow-lg hover:shadow-red-500/20"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-red-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-red-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100 pointer-events-none">
+                      Eliminar negocio
+                      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-red-400/30"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
