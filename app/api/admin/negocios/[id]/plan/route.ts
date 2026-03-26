@@ -19,7 +19,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params;
     const body = await request.json();
-    const { plan } = body;
+    const { plan, numero_voucher, fecha_pago } = body;
 
     // Validar que el nuevo plan sea válido
     if (plan !== 'premium' && plan !== 'anual') {
@@ -32,7 +32,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // Obtener negocio actual
     const { data: negocio, error: getNegocioError } = await supabaseAdmin
       .from('negocios')
-      .select('plan')
+      .select('plan, metadata')
       .eq('id', id)
       .single();
 
@@ -68,6 +68,31 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         { status: 400 }
       );
     }
+
+    // Validar numero_voucher para cambios de plan
+    if (from !== to && !numero_voucher) {
+      return NextResponse.json(
+        { success: false, error: 'El número de voucher es requerido para cambios de plan' },
+        { status: 400 }
+      );
+    }
+
+    // Preparar metadata con historial de pagos
+    const metadata = negocio.metadata || {};
+    if (!metadata.pagos) {
+      metadata.pagos = [];
+    }
+
+    // Agregar registro de pago
+    const registroPago = {
+      fecha_pago: fecha_pago || new Date().toISOString().split('T')[0],
+      numero_voucher,
+      plan_anterior: from,
+      plan_nuevo: to,
+      timestamp: new Date().toISOString(),
+    };
+
+    metadata.pagos.push(registroPago);
 
     // Calcular fecha de expiración según el plan
     let fecha_expiracion: string | null = null;
@@ -105,6 +130,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         limite_tarjetas,
         capacidad_maxima,
         estado: 'activo',
+        metadata,
       })
       .eq('id', id)
       .select()

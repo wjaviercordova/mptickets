@@ -35,6 +35,10 @@ export function ModalEditarLicencia({
   const [error, setError] = useState<string | null>(null);
   const [mostrarResumen, setMostrarResumen] = useState(false);
   const [resumenPlan, setResumenPlan] = useState<ResumenPlan | null>(null);
+  
+  // Estados para tracking de pago
+  const [numeroVoucher, setNumeroVoucher] = useState("");
+  const [fechaPago, setFechaPago] = useState(new Date().toISOString().split('T')[0]);
 
   if (!negocio) return null;
 
@@ -67,6 +71,12 @@ export function ModalEditarLicencia({
       return;
     }
 
+    // Validar numero_voucher para upgrades
+    if (selectedPlan !== negocio.plan && !numeroVoucher.trim()) {
+      setError("El número de voucher es requerido para cambios de plan");
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -74,7 +84,11 @@ export function ModalEditarLicencia({
       const response = await fetch(`/api/admin/negocios/${negocio.id}/plan`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: selectedPlan }),
+        body: JSON.stringify({
+          plan: selectedPlan,
+          numero_voucher: numeroVoucher.trim(),
+          fecha_pago: fechaPago,
+        }),
       });
 
       const data = await response.json();
@@ -251,6 +265,43 @@ export function ModalEditarLicencia({
                 </button>
               </div>
             </div>
+
+            {/* Campos de pago (solo para upgrades) */}
+            {puedeActualizar && selectedPlan !== negocio.plan && (
+              <div className="mb-6 space-y-4 rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-pink-600/5 p-5 backdrop-blur-sm">
+                <div className="mb-4 flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-purple-400" />
+                  <h4 className="font-semibold text-purple-200">Información de Pago</h4>
+                </div>
+
+                {/* Número de Voucher */}
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-purple-200">
+                    Número de Voucher <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={numeroVoucher}
+                    onChange={(e) => setNumeroVoucher(e.target.value)}
+                    placeholder="Ej: VOUCHER-12345"
+                    className="w-full rounded-xl border border-purple-400/30 bg-[#0f172a]/60 px-4 py-3 text-white placeholder:text-blue-200/40 focus:border-purple-400/60 focus:outline-none focus:ring-2 focus:ring-purple-400/20"
+                  />
+                </div>
+
+                {/* Fecha de Pago */}
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-purple-200">
+                    Fecha de Pago
+                  </label>
+                  <input
+                    type="date"
+                    value={fechaPago}
+                    onChange={(e) => setFechaPago(e.target.value)}
+                    className="w-full rounded-xl border border-purple-400/30 bg-[#0f172a]/60 px-4 py-3 text-white focus:border-purple-400/60 focus:outline-none focus:ring-2 focus:ring-purple-400/20"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Advertencias según la transición */}
             {puedeActualizar && selectedPlan === "anual" && negocio.plan === "demo" && (
