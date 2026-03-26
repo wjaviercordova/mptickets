@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import type { NegocioExtended, PlanType } from "@/types/admin";
 import { ModalVerDetalles } from "@/components/admin/negocios/ModalVerDetalles";
+import { ModalEditarNegocio } from "@/components/admin/negocios/ModalEditarNegocio";
 import { ModalEditarLicencia } from "@/components/admin/negocios/ModalEditarLicencia";
 import { ModalConfirmacion } from "@/components/admin/negocios/ModalConfirmacion";
 
@@ -37,7 +38,8 @@ export default function NegociosPage() {
 
   // Estados para modales
   const [modalVerOpen, setModalVerOpen] = useState(false);
-  const [modalEditarOpen, setModalEditarOpen] = useState(false);
+  const [modalEditarNegocioOpen, setModalEditarNegocioOpen] = useState(false);
+  const [modalEditarLicenciaOpen, setModalEditarLicenciaOpen] = useState(false);
   const [selectedNegocio, setSelectedNegocio] = useState<NegocioExtended | null>(null);
 
   // Estados para modal de confirmación/alerta
@@ -92,9 +94,14 @@ export default function NegociosPage() {
     setModalVerOpen(true);
   };
 
+  const handleEditarNegocio = (negocio: NegocioExtended) => {
+    setSelectedNegocio(negocio);
+    setModalEditarNegocioOpen(true);
+  };
+
   const handleEditarLicencia = (negocio: NegocioExtended) => {
     setSelectedNegocio(negocio);
-    setModalEditarOpen(true);
+    setModalEditarLicenciaOpen(true);
   };
 
   const handleDelete = async (negocio: NegocioExtended) => {
@@ -464,17 +471,26 @@ export default function NegociosPage() {
                   </button>
 
                   <button
-                    onClick={() => handleEditarLicencia(negocio)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/25 to-cyan-600/15 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:from-blue-500/35 hover:to-cyan-600/25"
-                    title="Editar licencia"
+                    onClick={() => handleEditarNegocio(negocio)}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/40 bg-gradient-to-r from-amber-500/25 to-orange-600/15 px-4 py-2 text-sm font-medium text-amber-200 backdrop-blur-sm transition hover:from-amber-500/35 hover:to-orange-600/25"
+                    title="Editar negocio"
                   >
                     <Edit className="h-4 w-4" />
                     <span>Editar</span>
                   </button>
 
                   <button
+                    onClick={() => handleEditarLicencia(negocio)}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-purple-400/40 bg-gradient-to-r from-purple-500/25 to-pink-600/15 px-4 py-2 text-sm font-medium text-purple-200 backdrop-blur-sm transition hover:from-purple-500/35 hover:to-pink-600/25"
+                    title="Editar plan y licencia"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span>Licencia</span>
+                  </button>
+
+                  <button
                     onClick={() => handleDelete(negocio)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-gradient-to-r from-blue-500/25 to-cyan-600/15 px-4 py-2 text-sm font-medium text-blue-200 backdrop-blur-sm transition hover:from-blue-500/35 hover:to-cyan-600/25"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-400/40 bg-gradient-to-r from-red-500/25 to-rose-600/15 px-4 py-2 text-sm font-medium text-red-200 backdrop-blur-sm transition hover:from-red-500/35 hover:to-rose-600/25"
                     title="Eliminar"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -497,11 +513,25 @@ export default function NegociosPage() {
         }}
       />
 
+      {selectedNegocio && (
+        <ModalEditarNegocio
+          negocio={selectedNegocio}
+          isOpen={modalEditarNegocioOpen}
+          onClose={() => {
+            setModalEditarNegocioOpen(false);
+            setSelectedNegocio(null);
+          }}
+          onSuccess={() => {
+            fetchNegocios(); // Recargar lista después de actualizar
+          }}
+        />
+      )}
+
       <ModalEditarLicencia
         negocio={selectedNegocio}
-        isOpen={modalEditarOpen}
+        isOpen={modalEditarLicenciaOpen}
         onClose={() => {
-          setModalEditarOpen(false);
+          setModalEditarLicenciaOpen(false);
           setSelectedNegocio(null);
         }}
         onSuccess={() => {
