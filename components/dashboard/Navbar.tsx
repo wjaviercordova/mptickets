@@ -7,10 +7,33 @@ import { usePageHeader } from "@/contexts/PageHeaderContext";
 
 interface NavbarProps {
   onToggleSidebar: () => void;
+  negocioPlan: "demo" | "anual" | "premium";
 }
 
-export function Navbar({ onToggleSidebar }: NavbarProps) {
+export function Navbar({ onToggleSidebar, negocioPlan }: NavbarProps) {
   const { headerInfo } = usePageHeader();
+  
+  // Configuración de colores por plan
+  const planConfig = {
+    demo: {
+      color: "border-emerald-500/40 bg-emerald-950/40 shadow-emerald-500/20",
+      textColor: "text-emerald-300",
+      label: "DEMO",
+    },
+    anual: {
+      color: "border-cyan-500/40 bg-cyan-950/40 shadow-cyan-500/20",
+      textColor: "text-cyan-300",
+      label: "ANUAL",
+    },
+    premium: {
+      color: "border-amber-500/40 bg-amber-950/40 shadow-amber-500/20",
+      textColor: "text-amber-300",
+      label: "PREMIUM",
+    },
+  };
+
+  const currentPlan = planConfig[negocioPlan];
+
   return (
     <div className="sticky top-0 z-30 border-b border-blue-500/20 bg-[#0f172a]/80 backdrop-blur-xl shadow-lg shadow-blue-500/5">
       <div className="flex items-center justify-between px-6 py-4">
@@ -63,10 +86,10 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                     </p>
                     <h1 className="font-heading text-white">Dashboard</h1>
                   </div>
-                  <div className="flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-950/40 px-2 py-1 backdrop-blur-sm shadow-lg shadow-emerald-500/20">
-                    <Star className="h-3 w-3 text-emerald-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">
-                      DEMO
+                  <div className={`flex items-center gap-1 rounded-full border px-2 py-1 backdrop-blur-sm shadow-lg ${currentPlan.color}`}>
+                    <Star className={`h-3 w-3 ${currentPlan.textColor}`} />
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${currentPlan.textColor}`}>
+                      {currentPlan.label}
                     </span>
                   </div>
                 </div>

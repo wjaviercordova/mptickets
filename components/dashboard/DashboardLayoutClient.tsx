@@ -8,11 +8,13 @@ import { PageHeaderProvider } from "@/contexts/PageHeaderContext";
 interface DashboardLayoutClientProps {
   children: React.ReactNode;
   negocioNombre: string;
+  negocioPlan: "demo" | "anual" | "premium";
 }
 
 export function DashboardLayoutClient({
   children,
   negocioNombre,
+  negocioPlan,
 }: DashboardLayoutClientProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -36,7 +38,10 @@ export function DashboardLayoutClient({
             marginLeft: isSidebarOpen ? '288px' : '0px'
           }}
         >
-          <Navbar onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />
+          <Navbar 
+            onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)} 
+            negocioPlan={negocioPlan}
+          />
           <div className="px-6 py-8">{children}</div>
         </div>
       </div>

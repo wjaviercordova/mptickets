@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { CreditCard, Car, PlusCircle, Scan, CheckCircle2, AlertCircle } from "lucide-react";
+import { CreditCard, Car, PlusCircle, Scan, CheckCircle2, AlertCircle, DollarSign } from "lucide-react";
 import type { Parametro, UltimoIngreso } from "@/types/ingreso";
 import { motionButtonProps } from "@/lib/button-styles";
 import { usePageHeader } from "@/contexts/PageHeaderContext";
@@ -10,6 +10,7 @@ import { useImpresionConfig } from "@/contexts/ImpresionConfigContext";
 import { TarjetaSelector } from "./TarjetaSelector";
 import { TipoVehiculoCards } from "./TipoVehiculoCards";
 import { IngresoResumen } from "./IngresoResumen";
+import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
 import {
   imprimirTicketEntrada,
   formatearFechaHora,
@@ -406,6 +407,14 @@ export function IngresoVehiculo({
           onCerrar={() => setMostrarSelectorTarjetas(false)}
         />
       )}
+
+      {/* Botón Flotante de Acceso Rápido a Pago y Salida */}
+      <FloatingActionButton
+        href="/dashboard/pago"
+        icon={DollarSign}
+        label="Ir a Pago y Salida"
+        variant="pago"
+      />
     </div>
   );
 }

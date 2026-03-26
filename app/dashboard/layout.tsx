@@ -15,6 +15,7 @@ export default async function DashboardLayout({
   const negocioId = cookieStore.get("mp_negocio_id")?.value;
 
   let negocioNombre = "Parking Premium";
+  let negocioPlan: "demo" | "anual" | "premium" = "demo";
   let themeConfig: ThemeConfig = defaultThemeConfig;
   let negocioDatos = null;
   let configImpresionInicial: ConfigImpresion | null = null;
@@ -25,14 +26,15 @@ export default async function DashboardLayout({
     try {
       const supabase = createServerClient();
       
-      // Obtener datos completos del negocio (nombre, dirección, teléfono)
+      // Obtener datos completos del negocio (nombre, dirección, teléfono, plan)
       const { data: negocioData } = await supabase
         .from("negocios")
-        .select("nombre, direccion, telefono")
+        .select("nombre, direccion, telefono, plan")
         .eq("id", negocioId)
         .single();
 
       negocioNombre = negocioData?.nombre ?? "Parking Premium";
+      negocioPlan = (negocioData?.plan as "demo" | "anual" | "premium") ?? "demo";
       negocioDatos = negocioData ? {
         nombre: negocioData.nombre,
         direccion: negocioData.direccion || "",
@@ -145,7 +147,7 @@ export default async function DashboardLayout({
         initialDiasAtencion={diasAtencion}
         initialHorariosAtencion={horariosAtencion}
       >
-        <DashboardLayoutClient negocioNombre={negocioNombre}>
+        <DashboardLayoutClient negocioNombre={negocioNombre} negocioPlan={negocioPlan}>
           {children}
         </DashboardLayoutClient>
       </ImpresionConfigProvider>

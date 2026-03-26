@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { CreditCard, Scan, CheckCircle2, AlertCircle, Search, DollarSign, FileText } from "lucide-react";
+import { CreditCard, Scan, CheckCircle2, AlertCircle, Search, DollarSign, FileText, Car } from "lucide-react";
 import { Calculator } from "lucide-react";
 import type { Parametro } from "@/types/ingreso";
 import type { TarjetaPendiente, InformacionVehicular, DatosRecibo } from "@/types/pago";
@@ -13,6 +13,7 @@ import { TarjetaPendienteSelector } from "./TarjetaPendienteSelector";
 import { InformacionVehicularCard } from "./InformacionVehicularCard";
 import { TotalAPagarCard } from "./TotalAPagarCard";
 import { ReciboModal } from "./ReciboModal";
+import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
 import { calcularTarifa, formatearTiempoTranscurrido } from "@/lib/calcular-tarifa";
 import { supabaseClient } from "@/lib/supabase/client";
 import {
@@ -840,6 +841,14 @@ export function PagoSalida({
           onCerrar={() => setMostrarRecibo(false)}
         />
       )}
+
+      {/* Botón Flotante de Acceso Rápido a Ingreso Vehicular */}
+      <FloatingActionButton
+        href="/dashboard/ingreso"
+        icon={Car}
+        label="Ir a Ingreso Vehicular"
+        variant="ingreso"
+      />
     </div>
   );
 }
