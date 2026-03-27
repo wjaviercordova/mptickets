@@ -394,131 +394,125 @@ export default function NegociosPage() {
               animate={{ opacity: 1, y: 0 }}
               className="glass-card group border-purple-400/20 p-6 transition-all hover:border-purple-400/40 hover:shadow-lg hover:shadow-purple-500/10"
             >
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                {/* Info principal */}
+              {/* Header: Badges arriba a la derecha */}
+              <div className="mb-4 flex items-start justify-end gap-2">
+                {getEstadoBadge(negocio.estado)}
+                {getPlanBadge(negocio.plan)}
+              </div>
+
+              {/* Contenido principal */}
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-purple-500/20 to-pink-600/10">
+                  <Building2 className="h-6 w-6 text-purple-300" />
+                </div>
+
                 <div className="flex-1">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-purple-500/20 to-pink-600/10">
-                      <Building2 className="h-6 w-6 text-purple-300" />
+                  <h3 className="font-display text-lg font-bold text-white">
+                    {negocio.nombre}
+                  </h3>
+                  <p className="mt-1 font-caption text-xs text-purple-300/60">
+                    Código: {negocio.codigo}
+                  </p>
+
+                  {/* Información de contacto */}
+                  <div className="mt-3 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="flex items-center gap-2 font-caption text-xs text-blue-200/60">
+                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                      {negocio.ciudad || "N/A"}
                     </div>
-
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="font-display text-lg font-bold text-white">
-                            {negocio.nombre}
-                          </h3>
-                          <p className="mt-1 font-caption text-xs text-purple-300/60">
-                            Código: {negocio.codigo}
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {getEstadoBadge(negocio.estado)}
-                          {getPlanBadge(negocio.plan)}
-                        </div>
+                    <div className="flex items-center gap-2 font-caption text-xs text-blue-200/60">
+                      <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+                      {negocio.email}
+                    </div>
+                    {negocio.telefono && (
+                      <div className="flex items-center gap-2 font-caption text-xs text-blue-200/60">
+                        <Phone className="h-3.5 w-3.5 flex-shrink-0" />
+                        {negocio.telefono}
                       </div>
+                    )}
+                  </div>
 
-                      {/* Información de contacto */}
-                      <div className="mt-3 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                        <div className="flex items-center gap-2 font-caption text-xs text-blue-200/60">
-                          <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                          {negocio.ciudad || "N/A"}
-                        </div>
-                        <div className="flex items-center gap-2 font-caption text-xs text-blue-200/60">
-                          <Mail className="h-3.5 w-3.5 flex-shrink-0" />
-                          {negocio.email}
-                        </div>
-                        {negocio.telefono && (
-                          <div className="flex items-center gap-2 font-caption text-xs text-blue-200/60">
-                            <Phone className="h-3.5 w-3.5 flex-shrink-0" />
-                            {negocio.telefono}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Estadísticas */}
-                      <div className="mt-3 flex flex-wrap gap-4 font-caption text-xs text-blue-200/60">
-                        <div>
-                          <span className="font-semibold text-white">{negocio.usuarios_activos}</span> /{" "}
-                          {negocio.limite_usuarios} usuarios
-                        </div>
-                        <div>
-                          <span className="font-semibold text-white">{negocio.tarjetas_usadas}</span> /{" "}
-                          {negocio.limite_tarjetas} tarjetas
-                        </div>
-                        <div>
-                          <span className="font-semibold text-white">{negocio.vehiculos_activos}</span>{" "}
-                          vehículos
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {getLicenciaStatus(negocio)}
-                        </div>
-                      </div>
+                  {/* Estadísticas */}
+                  <div className="mt-3 flex flex-wrap gap-4 font-caption text-xs text-blue-200/60">
+                    <div>
+                      <span className="font-semibold text-white">{negocio.usuarios_activos}</span> /{" "}
+                      {negocio.limite_usuarios} usuarios
+                    </div>
+                    <div>
+                      <span className="font-semibold text-white">{negocio.tarjetas_usadas}</span> /{" "}
+                      {negocio.limite_tarjetas} tarjetas
+                    </div>
+                    <div>
+                      <span className="font-semibold text-white">{negocio.vehiculos_activos}</span>{" "}
+                      vehículos
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      {getLicenciaStatus(negocio)}
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Acciones - Compactas con tooltips */}
-                <div className="flex items-center gap-2">
-                  {/* Ver detalles */}
-                  <div className="group relative">
-                    <button
-                      onClick={() => handleVerDetalles(negocio)}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-400/30 bg-gradient-to-br from-blue-500/20 to-cyan-600/10 text-blue-300 backdrop-blur-sm transition hover:scale-110 hover:border-blue-400/50 hover:from-blue-500/30 hover:to-cyan-600/20 hover:shadow-lg hover:shadow-blue-500/20"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-blue-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-blue-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100 pointer-events-none">
-                      Ver detalles
-                      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-blue-400/30"></div>
-                    </div>
+              {/* Footer: Acciones abajo a la derecha */}
+              <div className="mt-4 flex items-center justify-end gap-2">
+                {/* Ver detalles */}
+                <div className="group relative">
+                  <button
+                    onClick={() => handleVerDetalles(negocio)}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-400/30 bg-gradient-to-br from-blue-500/20 to-cyan-600/10 text-blue-300 backdrop-blur-sm transition hover:scale-110 hover:border-blue-400/50 hover:from-blue-500/30 hover:to-cyan-600/20 hover:shadow-lg hover:shadow-blue-500/20"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </button>
+                  {/* Tooltip */}
+                  <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-blue-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-blue-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100">
+                    Ver detalles
+                    <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-blue-400/30"></div>
                   </div>
+                </div>
 
-                  {/* Editar */}
-                  <div className="group relative">
-                    <button
-                      onClick={() => handleEditarNegocio(negocio)}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-400/30 bg-gradient-to-br from-amber-500/20 to-orange-600/10 text-amber-300 backdrop-blur-sm transition hover:scale-110 hover:border-amber-400/50 hover:from-amber-500/30 hover:to-orange-600/20 hover:shadow-lg hover:shadow-amber-500/20"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-amber-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-amber-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100 pointer-events-none">
-                      Editar negocio
-                      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-amber-400/30"></div>
-                    </div>
+                {/* Editar */}
+                <div className="group relative">
+                  <button
+                    onClick={() => handleEditarNegocio(negocio)}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-400/30 bg-gradient-to-br from-amber-500/20 to-orange-600/10 text-amber-300 backdrop-blur-sm transition hover:scale-110 hover:border-amber-400/50 hover:from-amber-500/30 hover:to-orange-600/20 hover:shadow-lg hover:shadow-amber-500/20"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  {/* Tooltip */}
+                  <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-amber-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-amber-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100">
+                    Editar negocio
+                    <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-amber-400/30"></div>
                   </div>
+                </div>
 
-                  {/* Licencia */}
-                  <div className="group relative">
-                    <button
-                      onClick={() => handleEditarLicencia(negocio)}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-purple-500/20 to-pink-600/10 text-purple-300 backdrop-blur-sm transition hover:scale-110 hover:border-purple-400/50 hover:from-purple-500/30 hover:to-pink-600/20 hover:shadow-lg hover:shadow-purple-500/20"
-                    >
-                      <Calendar className="h-4 w-4" />
-                    </button>
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-purple-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-purple-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100 pointer-events-none">
-                      Editar licencia y plan
-                      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-purple-400/30"></div>
-                    </div>
+                {/* Licencia */}
+                <div className="group relative">
+                  <button
+                    onClick={() => handleEditarLicencia(negocio)}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-purple-400/30 bg-gradient-to-br from-purple-500/20 to-pink-600/10 text-purple-300 backdrop-blur-sm transition hover:scale-110 hover:border-purple-400/50 hover:from-purple-500/30 hover:to-pink-600/20 hover:shadow-lg hover:shadow-purple-500/20"
+                  >
+                    <Calendar className="h-4 w-4" />
+                  </button>
+                  {/* Tooltip */}
+                  <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-purple-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-purple-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100">
+                    Editar licencia y plan
+                    <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-purple-400/30"></div>
                   </div>
+                </div>
 
-                  {/* Eliminar */}
-                  <div className="group relative">
-                    <button
-                      onClick={() => handleDelete(negocio)}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-400/30 bg-gradient-to-br from-red-500/20 to-rose-600/10 text-red-300 backdrop-blur-sm transition hover:scale-110 hover:border-red-400/50 hover:from-red-500/30 hover:to-rose-600/20 hover:shadow-lg hover:shadow-red-500/20"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-red-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-red-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100 pointer-events-none">
-                      Eliminar negocio
-                      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-red-400/30"></div>
-                    </div>
+                {/* Eliminar */}
+                <div className="group relative">
+                  <button
+                    onClick={() => handleDelete(negocio)}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-400/30 bg-gradient-to-br from-red-500/20 to-rose-600/10 text-red-300 backdrop-blur-sm transition hover:scale-110 hover:border-red-400/50 hover:from-red-500/30 hover:to-rose-600/20 hover:shadow-lg hover:shadow-red-500/20"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  {/* Tooltip */}
+                  <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-red-400/30 bg-[#0f172a]/95 px-3 py-1.5 text-xs font-medium text-red-200 opacity-0 backdrop-blur-xl transition-opacity group-hover:opacity-100">
+                    Eliminar negocio
+                    <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-red-400/30"></div>
                   </div>
                 </div>
               </div>
